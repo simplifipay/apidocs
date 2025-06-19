@@ -13,7 +13,7 @@ externalDocs:
   description: Find out more about SimpliFi
   url: https://simplifipay.com/
 servers:
-  - url: https://uat-lb.simplifipay.com/
+  - url: https://{env}-lb.simplifipay.com/
 tags:
   - name: auth
     description: |-
@@ -93,6 +93,8 @@ paths:
     post:
       tags:
         - card-program
+      security:
+        - bearerAuth: [ ]
       summary: Create Card Program
       description: |-
         The Create Card Program endpoint allows API users to create a new card program
@@ -104,16 +106,20 @@ paths:
             schema:
               $ref: '#/components/schemas/CardProgramRequestModel'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardProgramRequestModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
   /v1/card-program/{uuid}:
     get:
       tags:
         - card-program
+      security:
+        - bearerAuth: [ ]
       summary: Get Card Program
       description: |-
         The Get Card Program endpoint retrieves details about a card program.
@@ -127,17 +133,23 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardProgramResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
   /v2/card-program/{uuid}/funding-source:
     post:
       tags:
         - card-program
         - funding-source
+      security:
+        - bearerAuth: [ ]
       summary: Link Funding Source to Card Program
       description: |-
         The Link Funding Source to Card Program endpoint links a funding source to a card program.
@@ -158,17 +170,21 @@ paths:
             schema:
               $ref: '#/components/schemas/FundingSourceRequestModel'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FundingSourceResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
   /v1/card-program/{uuid}/funding-source-balance:
     get:
       tags:
         - card-program
         - funding-source
+      security:
+        - bearerAuth: [ ]
       summary: Get Balance of Funding Source
       description: |-
         The Get Balance of Funding Source endpoint retrieves the remaining balance of a funding source.
@@ -182,16 +198,20 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FundingSourceBalanceModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
   /v1/card-program/{uuid}/status:
     patch:
       tags:
         - card-program
+      security:
+        - bearerAuth: [ ]
       summary: Change Card Program Status
       description: |-
         The Change Card Program Status endpoint changes the status of a card program. This endpoint is helpful
@@ -212,13 +232,17 @@ paths:
             schema:
               $ref: '#/components/schemas/CardProgramStatusChangeRequestModel'
       responses:
-        200:
+        '200':
           description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
 
   /v1/card-program/transfer-fund:
     post:
       tags:
         - card-program
+      security:
+        - bearerAuth: [ ]
       summary: Transfer funds from one Card Program to other
       description: |-
         The 'transfer fund' endpoint allows API users to transfer funds from a one
@@ -230,13 +254,17 @@ paths:
             schema:
               $ref: '#/components/schemas/CardProgramTransferFundsModel'
       responses:
-        200:
+        '200':
           description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
   /v1/card-program/raise-funding:
     post:
       tags:
         - card-program
         - funding-source
+      security:
+        - bearerAuth: [ ]
       summary: Raise Funding
       description: |-
         The Raise Funding endpoint helps in adding or removing funds from a funding source. This API doesn't
@@ -250,13 +278,17 @@ paths:
             schema:
               $ref: '#/components/schemas/RaiseFundingRequestModel'
       responses:
-        200:
+        '200':
           description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
   /v1/statement:
     get:
       tags:
         - card-program
         - funding-source
+      security:
+        - bearerAuth: [ ]
       summary: Funding Source Statement
       description: Get funding source statement based on date range.
       parameters:
@@ -287,18 +319,22 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/StatementResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
 
   /v1/document/upload:
     post:
       tags:
         - card-program
         - document
+      security:
+        - bearerAuth: [ ]
       summary: Raise Funding Document Upload
       description: |-
         This API should be called before calling Raise Funding API to attach `Proof of funds / Confirmation of
@@ -313,6 +349,9 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/DocumentUploadModel'
+      responses:
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
 
 components:
   securitySchemes:
@@ -320,6 +359,24 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+    EntityNotFoundError:
+      description: Entity not found with the specified UUID
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errorCode:
+                type: integer
+                description: A 5-7 digit number defining the error
+                example: 99997
+              message:
+                type: string
+                description: A brief message defining the error
+                example: General Error
 
   schemas:
     AuthRequestModel:
