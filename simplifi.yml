@@ -1,0 +1,392 @@
+openapi: 3.1.0
+info:
+  title: SimpliFi
+  description: |-
+    Welcome to SimpliFi platform! We are excited that you have taken the time to understand
+    how the SimpliFi platform works, so let's start by going through some of the basic
+    concepts of data types, API and Webhook structure and default parameters, etc.
+  termsOfService: https://simplifipay.com/terms-and-conditions/
+  contact:
+    email: support@simplifipay.com
+  version: 5.0.0
+externalDocs:
+  description: Find out more about SimpliFi
+  url: https://simplifipay.com/
+servers:
+  - url: https://uat-lb.simplifipay.com/
+tags:
+  - name: auth
+    description: |-
+      The Auth API Group is designed to authorize you to start using the SimpliFi platform.
+      This group has the Login endpoint that allows you to enter into our system. Moreover,
+      the endpoint’s response provides you with the access token, which would be used in
+      making further API calls.
+  - name: card-program
+    description: |-
+      The Card Program API Group is designed to manage common features among cards, by
+      grouping them under a card program. The SimpliFi platform would create a bespoke
+      card program template based on your requirements such as the scheme, validity of
+      the cards, form factor of the cards, authorization controls, velocity controls etc.
+      You would be able to create a card program using this template. 
+
+      Every card issued under a card program inherits the characteristics of that card
+      program. Card program templates are shared separately and if you don’t have them
+      already, click on [this link](https://simplifipay.com/).
+  - name: cards
+    description: |-
+      The Cards API Group is designed to manage all the activities related to the cards
+      life cycle. Cards can either be issued in physical or virtual form, or both. Cards
+      would inherit the default characteristics of the card program under which they have
+      been issued, however, some of these can be changed at the card level. Cards could
+      be issued only to a registered user (card holder) within a card program.
+paths:
+  /v1/auth/login/{companyName}:
+    post:
+      tags:
+       - auth
+      summary: Login to generate JWT token
+      description: |-
+        The Login endpoint allows you to login to the SimpliFi platform using the provided
+        credentials. If you don't have the credentials already, you can request them through
+        [this link](https://simplifipay.com/). The endpoint returns an access token to be
+        used in making further API calls. Following are the properties of this endpoint.
+      parameters:
+        - name: companyName
+          in: path
+          description: |-
+            This is an internal identifier of your company in the SimpliFi platform. We will
+            generate the company name for you and share it. If you don't have it already,
+            you can request it through [this link](https://simplifipay.com/).
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AuthRequestModel'
+      responses:
+        200:
+          description: On successful operation JWT token is returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponseModel'
+
+  /v1/card-program:
+    post:
+      tags:
+        - card-program
+      summary: Create Card Program
+      description: |-
+        The Create Card Program endpoint allows API users to create a new card program
+        to be associated with cards of the SimpliFi platform.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardProgramRequestModel'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardProgramRequestModel'
+  /v1/card-program/{uuid}:
+    get:
+      tags:
+        - card-program
+      summary: Get Card Program
+      description: |-
+        The Get Card Program endpoint retrieves details about a card program.
+        Following are the properties of this endpoint.
+      parameters:
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the program that was created using the Create Card Program API.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardProgramResponseModel'
+
+components:
+  schemas:
+    AuthRequestModel:
+      type: object
+      required:
+        - client_id
+        - client_secret
+        - grant_type
+      properties:
+        client_id:
+          type: string
+          description: |-
+            The values of this enumeration identify your channel for calling the endpoint.
+            Example: If you want to generate the access token to call subsequent APIs from
+            your back-end system then use the value simplifi-api-client. Allowed values
+            are: `simplifi-ios-client`, `simplifi-android-client`, and `simplifi-api-client`.
+        client_secret:
+          type: string
+          description: |-
+            This is a secret identification pattern assigned to you by the SimpliFi platform.
+            For each allowed value of “client_id” there is a respective client secret value
+            shared with you before the start of the integration. Pass the respective value here.
+            If you don't have it already, you can request it through [this link](https://simplifipay.com/).
+        grant_type:
+          type: string
+          description: |-
+            You need to pass this value to log in through the Client Secret shared by SimpliFi.
+            Allowed value is `client_credentials`. If you don't already have these credentials,
+            you can request them through [this link](https://simplifipay.com/).
+    AuthResponseModel:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: |-
+            This is the system-generated access token to be used for subsequent calls of the
+            same session. It is to be sent as an authorization header along with the
+            system-generated token type.
+        expires_in:
+          type: string
+          description: |-
+            This is the expiry date/time that defines the validity of the access token.
+            Note (one needs to re-login before this expiration time).
+        token_type:
+          type: string
+          description: |-
+            This field contains the token type which is coupled with access token to form
+            an authorization header. Accepted value is `bearer`.
+
+
+    CardProgramRequestModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: |-
+            This is a system-generated unique identifier for the card program that was created by this endpoint.
+          example: 68de4d4a-20ed-48c6-8594-dc74e1730cb7
+        name:
+          type: string
+          description: |-
+            This is a custom name for the card program. We recommend choosing a unique name to identify the
+            card programs that are created under your company.
+          example: Marketing Budget
+        cardProgramTemplateUuid:
+          type: string
+          description: |-
+            This is a unique identifier that represents a specific card program template. A Card Program
+            Template contains all the features applicable on a card that would be issued under a card program.
+            This information is shared by SimpliFi separately. If you don’t have them already, click
+            on [this link](https://simplifipay.com/).
+          example: 36fad307-416e-4333-920a-b07fba57a658
+        feesOperationEnabled:
+          type: boolean
+          example: true
+          default: false
+          description: This field checks if fee operation is enabled or not.
+        config:
+          $ref: '#/components/schemas/CardConfigModel'
+    CardConfigModel:
+      type: object
+      description: |-
+        This object is a collection of configuration fields including both Point of Interest and Velocity
+        Control fields. It contains sub-fields explained in the rows below.
+      properties:
+        poi:
+          $ref: '#/components/schemas/CardPoi'
+        velocityControls:
+          $ref: '#/components/schemas/VelocityControlConfigModel'
+        merchantControls:
+          $ref: '#/components/schemas/MerchantDetailModel'
+    CardPoi:
+      type: object
+      description: |-
+        This object is a collection of Point of Interest configuration fields showing where the card
+        issued under this card program can be used. It contains sub-fields explained in the rows below.
+      properties:
+        ecommerce:
+          type: boolean
+          example: "true"
+          description: |-
+            This field, if enabled, allows online transactions.
+            The allowed values are `true` and `false`.
+        atm:
+          type: boolean
+          example: "true"
+          description: |-
+            This field, if enabled, allows Automated Teller Machine (ATM) transactions.
+            The allowed values are `true` and `false`.
+        pos:
+          type: boolean
+          example: "true"
+          description: |-
+            This field, if enabled, allows Point of Sale (POS) transactions.
+            The allowed values are `true` and `false`.
+        international:
+          type: boolean
+          example: "true"
+          description: |-
+            This field, if enabled, allows International transactions.
+            The allowed values are `true` and `false`.
+        contactless:
+          type: boolean
+          example: "true"
+          description: |-
+            This field, if enabled, allows contactless (RFID, Bluetooth, NFC, etc) transactions.
+            The allowed values are `true` and `false`.
+        dcc:
+          type: boolean
+          example: "true"
+          description: |-
+            This field, if enabled, allows Dynamic Currency Conversion (DCC) transactions.
+            The allowed values are `true` and `false`.
+    VelocityControlConfigModel:
+      type: object
+      description: |-
+        This object is a collection of velocity control fields that defines the frequency of card's usage,
+        issued under this card program. It contains sub-fields explained in the rows below.
+      properties:
+        activeVelocityAdapterKey:
+          type: string
+          example: "SPF-VL-002"
+          description: |-
+            This is a key for a velocity control group that you want to activate for your card program.
+            A velocity control group contains multiple combinations of card's usage frequency (For example,
+            your daily withdrawal limits at the ATMs). A velocity control key is mapped to each velocity
+            control group that is configured at SimpliFi's backend. Note (this value gets set as the default
+            key for the cards issued once this Card Program is created). The applicable values are shared by
+            SimpliFi separately. If you don’t have them already, click on [this link](https://simplifipay.com/).
+        velocityControlList:
+          type: array
+          items:
+            $ref: '#/components/schemas/VelocityControlDetailConfigModel'
+    VelocityControlDetailConfigModel:
+      type: object
+      description: |-
+        This array of objects lists the available velocity adapter keys, from which the active velocity
+        adapter key is chosen. It contains the subfields explained in the rows below. Velocity control
+        key list are shared by SimpliFi separately. If you don’t have them already, click
+        on [this link](https://simplifipay.com/).
+      properties:
+        velocityAdapterKey:
+          type: string
+          example: "1000"
+          description: |-
+            This field contains the key to identify velocity control at the processor. A velocity control
+            group contains multiple combinations of card’s usage frequency (For example, your daily
+            withdrawal limits at the ATMs). A velocity control key is mapped to each velocity control group
+            that is configured at SimpliFi’s backend. Note (this value gets set as the default key for the
+            cards issued once this Card Program is created). The applicable values will be shared by SimpliFi
+            separately. If you don’t have them already, click on [this link](https://simplifipay.com/).
+        name:
+          type: string
+          example: "Velocity 1000"
+          description: |-
+            This is the name of the velocity control group. We recommend using unique and identifiable names.
+    MerchantDetailModel:
+      type: object
+      description: |-
+        This object is a collection of merchant control fields. These are customizable controls over the
+        top of pre-configured ones. For example, restriction over certain types of merchants such as drugs 
+        nd gambling merchants etc. It contains sub-fields explained in the rows below.
+      properties:
+        whiteList:
+          $ref: '#/components/schemas/MerchantListModel'
+        blackList:
+          $ref: '#/components/schemas/MerchantListModel'
+    MerchantListModel:
+      type: object
+      description: |-
+        This object lists the merchant IDs (MIDs) and MCCs that are to be whitelisted/blacklisted. Any card
+        issued under this card program will work at all the merchants whitelisted and will not work at all
+        the merchants blacklisted.
+      properties:
+        name:
+          type: string
+          example: whitelist
+          description: |-
+            The name that is to be assigned to identify the group of merchant IDs (MIDs)
+            and MCCs to be whitelisted/blacklisted.
+        merchants:
+          type: array
+          description: |-
+            This array of objects is a collection of merchant IDs (MIDs) and MCCs that are to be
+            whitelisted/blacklisted. It contains sub-fields explained in the rows below.
+          items:
+            $ref: '#/components/schemas/MerchantModel'
+    MerchantModel:
+      type: object
+      properties:
+        mid:
+          type: string
+          description: |-
+            This field contains the list of merchant IDs (MIDs) and MCCs to be whitelisted/blacklisted.
+          example: "1234"
+
+    CardProgramResponseModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: This is the unique identifier for the card program to which the card program belongs.
+          example: 2143c065-a8af-4fd7-a839-17371f760e03
+        name:
+          type: string
+          description: This is the name of the card program.
+          example: Marketing Budget
+        companyUuid:
+          type: string
+          description: This is the unique identifier for the company to which the card program belongs.
+          example: 306182e4-c3e9-41d6-9184-de5bfec1fad1
+        parentAccountId:
+          type: string
+          description: Account ID associated with funding source
+          example: "1234567"
+        productId:
+          type: string
+          description: Product ID associated with processor mapping
+          example: "0031"
+        fundingSourceUuid:
+          type: string
+          description: This is a unique identifier of the funding source linked to this card program.
+          example: 86bada5e-d67f-4efb-975f-4a20b86a5b13
+        cardProgramStatus:
+          type: string
+          enum: [ CREATED, ACTIVE, INACTIVE, SUSPENDED, DEFAULT ]
+          description: This field specifies the status of the card program.
+        config:
+          $ref: '#/components/schemas/CardConfigModel'
+        cardProgramTemplateUuid:
+          type: string
+          description: This field contains the unique identifier of the card program template of this card program.
+          example: b13dc7ac-163b-49d1-b9e9-98ed7b73cccf
+        walletThreshold:
+          type: number
+          format: decimal
+          example: 100
+          description: load threshold
+        autoLoadAmount:
+          type: number
+          format: decimal
+          example: 100
+          description: auto load amount
+        currency:
+          type: string
+          description: This field contains the currency of the card program.
+          example: AED
+        feesOperationEnabled:
+          type: boolean
+          description: This field checks if fee operation is enabled or not.
+          example: true
+          default: false
