@@ -315,6 +315,12 @@ paths:
               $ref: '#/components/schemas/DocumentUploadModel'
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     AuthRequestModel:
       type: object
@@ -840,3 +846,6 @@ components:
         - cardProgramUuid
         - amount
         - fundRequestType
+
+security:
+  - bearerAuth: []
