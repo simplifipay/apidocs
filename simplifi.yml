@@ -32,7 +32,23 @@ tags:
       Every card issued under a card program inherits the characteristics of that card
       program. Card program templates are shared separately and if you don’t have them
       already, click on [this link](https://simplifipay.com/).
-  - name: cards
+  - name: funding-source
+    description: |-
+      The Funding Source API Group is designed to add and manage the funding sources
+      under a Company. Funding source is the equivalent of an unique account where all
+      the funds related to this funding source are pooled. Each card program should be
+      linked with a funding source so that funds from the funding source could be used
+      to load cards issued under this Card program. A Funding source will have funds
+      in one currency only and to hold funds in multiple currencies multiple funding
+      sources would have to be created and assigned to a Company.
+
+      Funding source information would be shared with SimpliFi's clients separately
+      and if you don't have them already, click on [this link](https://simplifipay.com/).
+  - name: document
+    description: |-
+      The Document API Group is designed to allow users to handle documents of the
+      SimpliFi system which are simply referred to as `Documents`.
+  - name: card
     description: |-
       The Cards API Group is designed to manage all the activities related to the cards
       life cycle. Cards can either be issued in physical or virtual form, or both. Cards
@@ -117,15 +133,191 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardProgramResponseModel'
+  /v2/card-program/{uuid}/funding-source:
+    post:
+      tags:
+        - card-program
+        - funding-source
+      summary: Link Funding Source to Card Program
+      description: |-
+        The Link Funding Source to Card Program endpoint links a funding source to a card program.
+        The funding source works as an account that would be used to fund all its cards under this
+        Card Program. Following are the properties of this endpoint.
+      parameters:
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the program that was created using the Create Card Program API.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FundingSourceRequestModel'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FundingSourceResponseModel'
+  /v1/card-program/{uuid}/funding-source-balance:
+    get:
+      tags:
+        - card-program
+        - funding-source
+      summary: Get Balance of Funding Source
+      description: |-
+        The Get Balance of Funding Source endpoint retrieves the remaining balance of a funding source.
+        Following are the properties of this endpoint.
+      parameters:
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the program that was created using the Create Card Program API.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FundingSourceBalanceModel'
+  /v1/card-program/{uuid}/status:
+    patch:
+      tags:
+        - card-program
+      summary: Change Card Program Status
+      description: |-
+        The Change Card Program Status endpoint changes the status of a card program. This endpoint is helpful
+        when a card program is to be suspended or activated as per the business needs. Following are the
+        properties of this endpoint.
+      parameters:
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the program that was created using the Create Card Program API.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardProgramStatusChangeRequestModel'
+      responses:
+        200:
+          description: OK
+
+  /v1/card-program/transfer-fund:
+    post:
+      tags:
+        - card-program
+      summary: Transfer funds from one Card Program to other
+      description: |-
+        The 'transfer fund' endpoint allows API users to transfer funds from a one
+        Card Program to other Card Program. Following are the properties of this endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardProgramTransferFundsModel'
+      responses:
+        200:
+          description: OK
+  /v1/card-program/raise-funding:
+    post:
+      tags:
+        - card-program
+        - funding-source
+      summary: Raise Funding
+      description: |-
+        The Raise Funding endpoint helps in adding or removing funds from a funding source. This API doesn't
+        actually move the money between accounts but should be used so that the proof of funds is shared with
+        the Issuer/Processor Bank. After the proof of funds attachment is verified by the Issuer/Processor
+        funds would reflect in the respective funding source. Following are the properties of this endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RaiseFundingRequestModel'
+      responses:
+        200:
+          description: OK
+  /v1/statement:
+    get:
+      tags:
+        - card-program
+        - funding-source
+      summary: Funding Source Statement
+      description: Get funding source statement based on date range.
+      parameters:
+        - name: accountId
+          in: query
+          description: The account ID of the processor mapping (wallet).
+          required: true
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          description: start date of date-range
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          description: end date date of date-range
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          description: sort statement column value
+          schema:
+            type: string
+        - name: sortDir
+          in: query
+          description: sort direction
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatementResponse'
+
+  /v1/document/upload:
+    post:
+      tags:
+        - card-program
+        - document
+      summary: Raise Funding Document Upload
+      description: |-
+        This API should be called before calling Raise Funding API to attach `Proof of funds / Confirmation of
+        funds transfer from the Bank` document (PNG, JPEG, PDF are allowed formats) and the string value returned
+        in the `fileUrl` field of the response should be used in Raise Funding API's attachment parameter.
+
+        Note: After the funds are transferred from the whitelisted Bank account to the Issuer/Processor Bank
+        account, the confirmation of transfer of funds screenshot/image/PDF should be used as an attachment.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DocumentUploadModel'
 
 components:
   schemas:
     AuthRequestModel:
       type: object
-      required:
-        - client_id
-        - client_secret
-        - grant_type
       properties:
         client_id:
           type: string
@@ -147,6 +339,10 @@ components:
             You need to pass this value to log in through the Client Secret shared by SimpliFi.
             Allowed value is `client_credentials`. If you don't already have these credentials,
             you can request them through [this link](https://simplifipay.com/).
+      required:
+        - client_id
+        - client_secret
+        - grant_type
     AuthResponseModel:
       type: object
       properties:
@@ -166,7 +362,6 @@ components:
           description: |-
             This field contains the token type which is coupled with access token to form
             an authorization header. Accepted value is `bearer`.
-
 
     CardProgramRequestModel:
       type: object
@@ -197,6 +392,10 @@ components:
           description: This field checks if fee operation is enabled or not.
         config:
           $ref: '#/components/schemas/CardConfigModel'
+      required:
+        - name
+        - cardProgramTemplateUuid
+        - config
     CardConfigModel:
       type: object
       description: |-
@@ -209,6 +408,10 @@ components:
           $ref: '#/components/schemas/VelocityControlConfigModel'
         merchantControls:
           $ref: '#/components/schemas/MerchantDetailModel'
+      required:
+        - poi
+        - velocityControls
+        - merchantControls
     CardPoi:
       type: object
       description: |-
@@ -333,7 +536,6 @@ components:
           description: |-
             This field contains the list of merchant IDs (MIDs) and MCCs to be whitelisted/blacklisted.
           example: "1234"
-
     CardProgramResponseModel:
       type: object
       properties:
@@ -390,3 +592,251 @@ components:
           description: This field checks if fee operation is enabled or not.
           example: true
           default: false
+    FundingSourceBalanceModel:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: decimal
+          description: Amount to be transferred.
+          example: 100.50
+        currency:
+          type: string
+          description: This field contains the balance amount of the funding source.
+          example: AED
+
+    CardProgramTransferFundsModel:
+      type: object
+      properties:
+        sourceCardProgramUuid:
+          type: string
+          description: |-
+            Source Card program UUID from where funds is being transferred from.
+          example: 381ad98a-16bd-4de1-9fe3-b30683ece550
+        destCardProgramUuid:
+          type: string
+          description: |-
+            Destination Card program UUID from where funds is being transferred to.
+          example: b9166cc8-cb84-4dd4-a728-56e2860ddf1a
+        amount:
+          type: number
+          format: decimal
+          description: Amount to be transferred.
+          example: 100.50
+
+    FundingSourceRequestModel:
+      type: object
+      properties:
+        fundingSource:
+          type: string
+          description: |-
+            This field contains a token that identifies the funding source that is to be linked with
+            the card program. This information will be shared separately. If you don’t have them
+            already, click on [this link](https://simplifipay.com/).
+          example: "1234567"
+      required:
+        - fundingSource
+    FundingSourceResponseModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: This is a system-generated unique identifier for the funding source that was created.
+          example: 84caba0c-275a-474c-b6f6-567a6a76b636
+        cardProgramUuid:
+          type: string
+          description: |-
+            This field contains the system generated unique identifier for the program
+            that was created using the Create Card Program API.
+          example: e283c96c-01e6-4afb-9b38-b4d2622e0a57
+        fundingSource:
+          type: string
+          description: |-
+            This field contains a token that identifies the funding source that is to be linked with the card program.
+          example: "1234567"
+        currency:
+          type: string
+          description: Currency of card program.
+          example: USD
+
+    CardProgramStatusChangeRequestModel:
+      type: object
+      properties:
+        cardProgramStatus:
+          type: string
+          description: This field specifies the status (ACTIVE, SUSPENDED, INACTIVE) of the Card Program.
+          example: SUSPENDED
+          enum:
+            - ACTIVE
+            - SUSPENDED
+            - INACTIVE
+
+    RaiseFundingRequestModel:
+      type: object
+      properties:
+        cardProgramUuid:
+          type: string
+          description: |-
+            This field contains the system generated unique identifier for the program
+            that was created using the Create Card Program API.
+          example: c83d26ed-f093-4e43-b81b-35884f068d4b
+        amount:
+          type: number
+          format: decimal
+          description: This field contains the amount that has been requested for fund transfer.
+          example: 10000.00
+        sourceFunds:
+          type: string
+          description: This field contains the source of funds. Allowed value `OTHER`.
+          example: OTHER
+          enum:
+            - OTHER
+            - TRADING_ACTIVITIES
+            - RETAINED_PROFITS
+            - INVESTMENT
+
+    StatementResponse:
+      type: object
+      properties:
+        companyName:
+          type: string
+          example: SimpliFi
+          description: Name of the company.
+        statementDate:
+          type: string
+          example: yyyy-MM-dd
+          description: The date on which the statement is created.
+        accountId:
+          type: string
+          example: 885180123
+          description: The account ID of wallet.
+        currency:
+          type: string
+          example: EUR
+          description: The currency in which the amounts are transacted.
+        startDate:
+          type: string
+          example: yyyy-MM-dd hh:mm:ss.nnn
+          description: The start date of the date range.
+        endDate:
+          type: string
+          example: yyyy-MM-dd hh:mm:ss.nnn
+          description: The end date of the date range.
+        openingBalance:
+          type: number
+          format: decimal
+          example: 6.95
+          description: The opening balance on the account from the start date of the date range.
+        closingBalance:
+          type: number
+          format: decimal
+          example: 6.95
+          description: The closing balance on the account till the end date of the date range.
+        transactions:
+          type: array
+          description: The array of transactions.
+          items:
+            $ref: '#/components/schemas/StatementResponseDetails'
+    StatementResponseDetails:
+      type: object
+      properties:
+        fundRequestUuid:
+          type: string
+          example: 11e082c2-993d-4026-82c4-1234ec464796
+          description: This is a unique identifier of the fund request.
+        transactionId:
+          type: string
+          example: 6615206
+          description: The transaction ID.
+        transactionDate:
+          type: string
+          example: yyyy-MM-dd hh:mm:ss.nnn
+          description: The date on which the transaction was carried out.
+        amount:
+          type: number
+          format: decimal
+          example: 6.95
+          description: The fund amount.
+        fundRequestType:
+          type: string
+          enum: [ LOAD, UNLOAD ]
+          example: LOAD
+          description: The type for fund request.
+        fundRequestCategory:
+          type: string
+          enum: [ RAISE_FUNDING, FUND_TRANSFER, CARD_LOAD, CARD_UNLOAD ]
+          example: RAISE_FUNDING
+          description: The category for fund request.
+        previousBalance:
+          type: number
+          format: decimal
+          example: 6.95
+          description: The balance on the account before this transaction.
+        currentBalance:
+          type: number
+          format: decimal
+          example: 6.95
+          description: The current balance on the account.
+        maskPan:
+          type: string
+          example: '************2737'
+          description: The mask pan of the transaction.
+        userName:
+          type: string
+          example: 'john.smith@simplifipay.com'
+          description: The username of the user of this transaction.
+        userFullName:
+          type: string
+          example: 'John Smith'
+          description: The full name of the user of this transaction.
+        userUuid:
+          type: string
+          example: '1b2dbfc7-3432-4eb8-9367-fb123dcf2ba0'
+          description: The UUID of the user of this transaction.
+        srcCurrency:
+          type: string
+          example: USD
+          description: Source currency
+        destCurrency:
+          type: string
+          example: USD
+          description: Destination currency
+
+    DocumentUploadModel:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+        fileUploadModel:
+          $ref: '#/components/schemas/FileUploadModel'
+      required:
+        - file
+        - fileUploadModel
+    FileUploadModel:
+      type: object
+      properties:
+        fileUrl:
+          type: string
+          description: Uploaded file name
+        cardProgramUuid:
+          type: string
+          description: |-
+            This field contains the system generated unique identifier for the program
+            that was created using the Create Card Program API.
+          example: 22b52244-fb76-4ae7-be85-ecafba89e5ca
+        amount:
+          type: number
+          description: This field contains the amount that has been requested for fund transfer.
+          example: 10000.00
+        fundRequestType:
+          type: string
+          description: This field contains the type for fund request.
+          enum:
+            - LOAD
+            - UNLOAD
+          example: LOAD
+      required:
+        - cardProgramUuid
+        - amount
+        - fundRequestType
