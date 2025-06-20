@@ -48,6 +48,21 @@ tags:
     description: |-
       The Document API Group is designed to allow users to handle documents of the
       SimpliFi system which are simply referred to as `Documents`.
+  - name: user
+    description: |-
+      The User API Group is designed to manage the users (card holders). It is mandatory
+      that the cardholders should only be created under a card program. Card holder
+      creation could be a one or two step process:
+
+      - Capture user (card holders) details
+      - Conduct user (card holders) KYC (if required by the regulators)
+
+      Requirements related to what user details need to be captured and the kind of KYC
+      required are defined during client onboarding as mandated by the issuing bank and
+      regulations, depending on the jurisdiction and the nature of the card program. 
+
+      Following endpoints cover all the aspects of creating and maintaining
+      users (card holders).
   - name: card
     description: |-
       The Cards API Group is designed to manage all the activities related to the cards
@@ -386,6 +401,142 @@ paths:
                 $ref: '#/components/schemas/StatementResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
+  /v1/user:
+    get:
+      tags:
+        - user
+      security:
+        - bearerAuth: [ ]
+      summary: List all Users
+      description: |-
+        The List all Users endpoint retrieves all the existing users, grouped under a company.
+        Following are the properties of this endpoint.
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+          description: |-
+            Represents the start date of the user's registration with the SimpliFi system. Note All the
+            dates in the SimpliFi system are stored and displayed in the following format `yyyy-mm-dd hh:mm:ss`
+          required: false
+        - name: endDate
+          in: query
+          schema:
+            type: string
+          description: |-
+            Represents the end date of the user's registration with the SimpliFi system. Note All the
+            dates in the SimpliFi system are stored and displayed in the following format `yyyy-mm-dd hh:mm:ss`
+          required: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      tags:
+        - user
+      security:
+        - bearerAuth: [ ]
+      summary: Create a User
+      description: |-
+        The Create a User endpoint creates a new user. In the SimpliFi platform, it is mandatory
+        for the user to be a part of a card program instead of being a standalone entity.
+        Following are the properties of this endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequestModel'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRequestModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /v1/user/{uuid}:
+    get:
+      tags:
+        - user
+      security:
+        - bearerAuth: [ ]
+      summary: Retrieve a User
+      description: |-
+        The Retrieve a User endpoint retrieves details about an existing user.
+        Following are the properties of this endpoint.
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the user.
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    put:
+      tags:
+        - user
+      security:
+        - bearerAuth: [ ]
+      summary: Update a User
+      description: |-
+        The Update a User endpoint updates the details of an existing user.
+        Following are the properties of this endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequestModel'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRequestModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - user
+      security:
+        - bearerAuth: [ ]
+      summary: Delete a User
+      description: |-
+        The Delete a User endpoint deletes an existing user. Deleting a user does not erase data from the
+        system but only deactivates the user and its associated cards.
+        Following are the properties of this endpoint.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
 
 components:
   securitySchemes:
@@ -981,6 +1132,190 @@ components:
         - userUuid
         - documentType
         - documentContext
+
+    UserRequestModel:
+      type: object
+      properties:
+        username:
+          type: string
+          description: |-
+            This is a unique identifier of the card holder in the system. We recommend providing a unique name here.
+          example: john.smith
+        firstName:
+          type: string
+          description: This is the first name of the card holder.
+          example: John
+        middleName:
+          type: string
+          description: This is the middle name of the card holder.
+          example: M
+        lastName:
+          type: string
+          description: This is the last name of the card holder.
+          example: Smith
+        gender:
+          type: string
+          example: MALE
+          enum:
+            - MALE
+            - FEMALE
+        userDetail:
+          $ref: '#/components/schemas/UserDetailModel'
+        address:
+          $ref: '#/components/schemas/AddressModel'
+        contacts:
+          type: array
+          description: |-
+            This array of objects is a collection of contact fields,
+            possessing sub-fields explained in the rows below.
+          items:
+            $ref: '#/components/schemas/ContactModel'
+      required:
+        - username
+        - firstName
+        - lastName
+        - userDetail
+        - contact
+    UserDetailModel:
+      type: object
+      properties:
+        cardProgramUuid:
+          type: string
+          example: a0f07d6c-d6e8-4bda-9dcc-f64fb3a720f6
+          description: This field contains a unique identifier of the card program.
+        dob:
+          type: string
+          example: '1983-08-15T19:00:00.000Z'
+          format: date-time
+          description: This field contains the Date of Birth of the card holder.
+        roleName:
+          type: string
+          example: 'CUSTOMER'
+          description: This field contains a unique identifier showing the role of the user such as `CUSTOMER`
+          enum:
+            - CUSTOMER
+            - CLIENT_ADMIN
+            - SUPPORT_SPECIALIST
+            - OPS_MANAGER
+        position:
+          type: string
+          example: Employee
+          description: This field contains the position (designation) of the user such as `Employee`
+      required:
+        - cardProgramUuid
+        - roleName
+    AddressModel:
+      type: object
+      properties:
+        addressType:
+          type: string
+          example: PRIMARY
+          description: |-
+            This field contains the address type. `PRIMARY` address is set during user creation.
+          enum:
+            - PRIMARY
+            - DELIVERY
+        streetAddress:
+          type: string
+          description: This field contains the street address of the card holder.
+        address2:
+          type: string
+          description: This field contains the second line of address of the card holder.
+        cityCode:
+          type: string
+          description: This field contains the city name of the card holder.
+        stateCode:
+          type: string
+          description: This field contains the state name of the card holder.
+        countryCode:
+          type: string
+          description: This field contains the country code of the card holder.
+        postalCode:
+          type: string
+          description: This field contains the postal code of the card holder.
+    ContactModel:
+      type: object
+      properties:
+        contactType:
+          type: string
+          example: EMAIL
+          description: This field contains the contact type
+          enum:
+            - PHONE
+            - WHATSAPP
+            - EMAIL
+        contactValue:
+          type: string
+          example: +971123456789, john.smit@simplifipay.com
+          description: This field contains the contact value of the card holder.
+    UserModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: f242acc1-bcbf-11eb-8529-c070bc3a2323
+          description: This is a system-generated unique identifier of the user (card holder).
+        username:
+          type: string
+          example: johnsmith
+          description: This is a unique identifier of the card holder in the system. We recommend providing a unique name here.
+        firstName:
+          type: string
+          example: John
+          description: This is the first name of the card holder.
+        middleName:
+          type: string
+          example: M
+          description: This is the middle name of the card holder.
+        lastName:
+          type: string
+          example: Smith
+          description: This is the last name of the card holder.
+        gender:
+          type: string
+          example: MALE
+          enum:
+            - MALE
+            - FEMALE
+        userStatus:
+          type: string
+          example: ACTIVE
+          description: This is the current status of the card holder within the SimpliFi system
+          enum:
+            - ACTIVE
+            - INACTIVE
+        kycStatus:
+          type: string
+          example: READY_FOR_KYC
+          description: This is the current status of the KYC of this card holder.
+          enum:
+            - NOT_SUBMITTED
+            - READY_FOR_KYC
+            - APPROVED
+            - REJECTED
+        createdAt:
+          type: string
+          example: '2021-05-15 18:00:00'
+          description: |-
+            This field contains the date and time when the user was created in the SimpliFi system.
+            Note All the dates in the SimpliFi system are stored and displayed in the following
+            format `yyyy-mm-dd hh:mm:ss`
+        createdBy:
+          type: string
+          example: a49d6f6e-c98b-47db-9d6f-6ec98b77dbf9
+          description: This field contains the UUID of the user who created this user in the SimpliFi system.
+        token:
+          type: string
+          example: 'abc'
+          description: This field contains an access token provided by the SimpliFi administrator.
+        userDetail:
+          $ref: '#/components/schemas/UserDetailModel'
+        address:
+          $ref: '#/components/schemas/AddressModel'
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactModel'
 
 security:
   - bearerAuth: []
