@@ -653,6 +653,135 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '400':
           $ref: '#/components/responses/EntityNotFoundError'
+  /v1/card/{uuid}/activate:
+    post:
+      tags:
+        - card
+      security:
+        - bearerAuth: [ ]
+      summary: Activate a Card
+      description: |-
+        The Activate a Card endpoint activates an issued/created card.
+        Following are the properties of this endpoint.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/card/{uuid}/status:
+    post:
+      tags:
+        - card
+      security:
+        - bearerAuth: [ ]
+      summary: Manage Card Status
+      description: |-
+        The Manage Card Status endpoint manages the status of a card. This endpoint is helpful as
+        cards can be locked (temporarily suspended), disabled, reissued depending upon the
+        business requirements. Following are the properties of this endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardStatusModel'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/card/{uuid}/load:
+    post:
+      tags:
+        - card
+      security:
+        - bearerAuth: [ ]
+      summary: Load a Card
+      description: |-
+        The Load a Card endpoint adds funds to an active card.
+        Following are the properties of this endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardAmountModel'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/card/{uuid}/unload:
+    post:
+      tags:
+        - card
+      security:
+        - bearerAuth: [ ]
+      summary: Unload a Card
+      description: |-
+        The Unload a Card endpoint removes funds from an active card and moves them back to the Funding
+        source (Virtual account that holds the funds in certain currency).
+        Following are the properties of this endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardAmountModel'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/card/{uuid}/renew:
+    post:
+      tags:
+        - card
+      security:
+        - bearerAuth: [ ]
+      summary: Renewal of the Card
+      description: |-
+        The Renewal of the Card endpoint renews an expired, lost, or stolen card. In this case, a new
+        Primary Account Number (PAN) would be issued from the prevalent settings of the relevant card program.
+        Following are the properties of this endpoint.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardRenewalModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/card/{uuid}/card-type:
+    post:
+      tags:
+        - card
+      security:
+        - bearerAuth: [ ]
+      summary: Request a Physical Card
+      description: |-
+        The Request a Physical Card endpoint issues a Physical card against the Card UUID of the activated
+        virtual card. Note (this endpoint is specific to physical cards and cannot be used for virtual cards.
+        Physical cards should be issued only for a virtual card in `ACTIVE` status).
+        Following are the properties of this endpoint.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
 
 components:
   securitySchemes:
@@ -1739,6 +1868,17 @@ components:
           type: string
           description: This is a system-generated unique identifier of the linked VIRTUAL card.
           example: '86d3111d-6d55-45e0-91c1-32c1397f39ab'
+    CardRenewalModel:
+      type: object
+      properties:
+        originalCardUuid:
+          type: string
+          description: This is a system-generated unique identifier of the card being renewed.
+        renewedCardUuid:
+          type: string
+          description: |-
+            This is a system-generated unique identifier of the renewed card
+            that is issued in place of the original card.
     InstrumentType:
       type: string
       description: This field specifies the type of card that is being issued.
@@ -1759,6 +1899,40 @@ components:
           type: string
           description: This field contains the currency of Card
           example: 'AED'
+    CardStatusModel:
+      type: object
+      properties:
+        status:
+          type: string
+          description: This field contains the status of the card.
+          example: 'LOCKED'
+          enum:
+            - LOCKED
+            - DISABLED
+            - ACTIVATED
+        reason:
+          type: string
+          description: This field specifies the reason for changing the card status.
+          example: 'STOLEN'
+          enum:
+            - ALL_GOOD
+            - STOLEN
+            - LOST
+            - FRAUDULENCE
+            - SECURITY_VIOLATION
+            - RESTRICTED
+            - VOIDED
+    CardAmountModel:
+      type: object
+      properties:
+        requestedAmount:
+          type: number
+          format: decimal
+          description: This field contains the amount that has been requested to be loaded onto a card.
+          example: '100.00'
+        comments:
+          type: string
+          description: Comments related to the load request
 
 security:
   - bearerAuth: []
