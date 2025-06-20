@@ -265,7 +265,7 @@ paths:
         - bearerAuth: [ ]
       summary: Transfer funds from one Card Program to other
       description: |-
-        The 'transfer fund' endpoint allows API users to transfer funds from a one
+        The Transfer Fund endpoint allows API users to transfer funds from a one
         Card Program to other Card Program. Following are the properties of this endpoint.
       requestBody:
         required: true
@@ -596,7 +596,6 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
-
 components:
   securitySchemes:
     bearerAuth:
@@ -611,20 +610,20 @@ components:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              errorCode:
-                type: integer
-                description: A 5-7 digit number defining the error
-                # noinspection YAMLSchemaValidation
-                example: 99997
-              message:
-                type: string
-                description: A brief message defining the error
-                # noinspection YAMLSchemaValidation
-                example: General Error
+            $ref: '#/components/schemas/ErrorModel'
 
   schemas:
+    ErrorModel:
+      type: object
+      properties:
+        errorCode:
+          type: integer
+          description: A 5-7 digit number defining the error
+          example: '99997'
+        message:
+          type: string
+          description: A brief message defining the error
+          example: 'General Error'
     AuthRequestModel:
       type: object
       properties:
@@ -679,13 +678,13 @@ components:
           type: string
           description: |-
             This is a system-generated unique identifier for the card program that was created by this endpoint.
-          example: 68de4d4a-20ed-48c6-8594-dc74e1730cb7
+          example: '68de4d4a-20ed-48c6-8594-dc74e1730cb7'
         name:
           type: string
           description: |-
             This is a custom name for the card program. We recommend choosing a unique name to identify the
             card programs that are created under your company.
-          example: Marketing Budget
+          example: 'Marketing Budget'
         cardProgramTemplateUuid:
           type: string
           description: |-
@@ -693,12 +692,12 @@ components:
             Template contains all the features applicable on a card that would be issued under a card program.
             This information is shared by SimpliFi separately. If you don’t have them already, click
             on [this link](https://simplifipay.com/).
-          example: 36fad307-416e-4333-920a-b07fba57a658
+          example: '36fad307-416e-4333-920a-b07fba57a658'
         feesOperationEnabled:
           type: boolean
-          example: true
           default: false
           description: This field checks if fee operation is enabled or not.
+          example: 'true'
         config:
           $ref: '#/components/schemas/CardConfigModel'
       required:
@@ -729,40 +728,40 @@ components:
       properties:
         ecommerce:
           type: boolean
-          example: "true"
           description: |-
             This field, if enabled, allows online transactions.
             The allowed values are `true` and `false`.
+          example: 'true'
         atm:
           type: boolean
-          example: "true"
           description: |-
             This field, if enabled, allows Automated Teller Machine (ATM) transactions.
             The allowed values are `true` and `false`.
+          example: 'true'
         pos:
           type: boolean
-          example: "true"
           description: |-
             This field, if enabled, allows Point of Sale (POS) transactions.
             The allowed values are `true` and `false`.
+          example: 'true'
         international:
           type: boolean
-          example: "true"
           description: |-
             This field, if enabled, allows International transactions.
             The allowed values are `true` and `false`.
+          example: 'true'
         contactless:
           type: boolean
-          example: "true"
           description: |-
             This field, if enabled, allows contactless (RFID, Bluetooth, NFC, etc) transactions.
             The allowed values are `true` and `false`.
+          example: 'true'
         dcc:
           type: boolean
-          example: "true"
           description: |-
             This field, if enabled, allows Dynamic Currency Conversion (DCC) transactions.
             The allowed values are `true` and `false`.
+          example: 'true'
     VelocityControlConfigModel:
       type: object
       description: |-
@@ -771,7 +770,6 @@ components:
       properties:
         activeVelocityAdapterKey:
           type: string
-          example: "SPF-VL-002"
           description: |-
             This is a key for a velocity control group that you want to activate for your card program.
             A velocity control group contains multiple combinations of card's usage frequency (For example,
@@ -779,6 +777,7 @@ components:
             control group that is configured at SimpliFi's backend. Note (this value gets set as the default
             key for the cards issued once this Card Program is created). The applicable values are shared by
             SimpliFi separately. If you don’t have them already, click on [this link](https://simplifipay.com/).
+          example: 'SPF-VL-002'
         velocityControlList:
           type: array
           items:
@@ -793,7 +792,6 @@ components:
       properties:
         velocityAdapterKey:
           type: string
-          example: "1000"
           description: |-
             This field contains the key to identify velocity control at the processor. A velocity control
             group contains multiple combinations of card’s usage frequency (For example, your daily
@@ -801,11 +799,12 @@ components:
             that is configured at SimpliFi’s backend. Note (this value gets set as the default key for the
             cards issued once this Card Program is created). The applicable values will be shared by SimpliFi
             separately. If you don’t have them already, click on [this link](https://simplifipay.com/).
+          example: '201'
         name:
           type: string
-          example: "Velocity 1000"
           description: |-
             This is the name of the velocity control group. We recommend using unique and identifiable names.
+          example: 'Velocity 201'
     MerchantDetailModel:
       type: object
       description: |-
@@ -826,10 +825,10 @@ components:
       properties:
         name:
           type: string
-          example: whitelist
           description: |-
             The name that is to be assigned to identify the group of merchant IDs (MIDs)
             and MCCs to be whitelisted/blacklisted.
+          example: 'whitelist'
         merchants:
           type: array
           description: |-
@@ -844,62 +843,68 @@ components:
           type: string
           description: |-
             This field contains the list of merchant IDs (MIDs) and MCCs to be whitelisted/blacklisted.
-          example: "1234"
+          example: '1234'
     CardProgramResponseModel:
       type: object
       properties:
         uuid:
           type: string
           description: This is the unique identifier for the card program to which the card program belongs.
-          example: 2143c065-a8af-4fd7-a839-17371f760e03
+          example: '2143c065-a8af-4fd7-a839-17371f760e03'
         name:
           type: string
           description: This is the name of the card program.
-          example: Marketing Budget
+          example: 'Marketing Budget'
         companyUuid:
           type: string
           description: This is the unique identifier for the company to which the card program belongs.
-          example: 306182e4-c3e9-41d6-9184-de5bfec1fad1
+          example: '306182e4-c3e9-41d6-9184-de5bfec1fad1'
         parentAccountId:
           type: string
           description: Account ID associated with funding source
-          example: "1234567"
+          example: '1234567'
         productId:
           type: string
           description: Product ID associated with processor mapping
-          example: "0031"
+          example: '0031'
         fundingSourceUuid:
           type: string
           description: This is a unique identifier of the funding source linked to this card program.
-          example: 86bada5e-d67f-4efb-975f-4a20b86a5b13
+          example: '86bada5e-d67f-4efb-975f-4a20b86a5b13'
         cardProgramStatus:
           type: string
-          enum: [ CREATED, ACTIVE, INACTIVE, SUSPENDED, DEFAULT ]
           description: This field specifies the status of the card program.
+          example: 'ACTIVE'
+          enum:
+            - CREATED
+            - ACTIVE
+            - INACTIVE
+            - SUSPENDED
+            - DEFAULT
         config:
           $ref: '#/components/schemas/CardConfigModel'
         cardProgramTemplateUuid:
           type: string
           description: This field contains the unique identifier of the card program template of this card program.
-          example: b13dc7ac-163b-49d1-b9e9-98ed7b73cccf
+          example: 'b13dc7ac-163b-49d1-b9e9-98ed7b73cccf'
         walletThreshold:
           type: number
           format: decimal
-          example: 100
           description: load threshold
+          example: '100'
         autoLoadAmount:
           type: number
           format: decimal
-          example: 100
           description: auto load amount
+          example: '100'
         currency:
           type: string
           description: This field contains the currency of the card program.
-          example: AED
+          example: 'AED'
         feesOperationEnabled:
           type: boolean
           description: This field checks if fee operation is enabled or not.
-          example: true
+          example: 'true'
           default: false
     FundingSourceBalanceModel:
       type: object
@@ -908,11 +913,11 @@ components:
           type: number
           format: decimal
           description: Amount to be transferred.
-          example: 100.50
+          example: '100.50'
         currency:
           type: string
           description: This field contains the balance amount of the funding source.
-          example: AED
+          example: 'AED'
 
     CardProgramTransferFundsModel:
       type: object
@@ -921,17 +926,17 @@ components:
           type: string
           description: |-
             Source Card program UUID from where funds is being transferred from.
-          example: 381ad98a-16bd-4de1-9fe3-b30683ece550
+          example: '381ad98a-16bd-4de1-9fe3-b30683ece550'
         destCardProgramUuid:
           type: string
           description: |-
             Destination Card program UUID from where funds is being transferred to.
-          example: b9166cc8-cb84-4dd4-a728-56e2860ddf1a
+          example: 'b9166cc8-cb84-4dd4-a728-56e2860ddf1a'
         amount:
           type: number
           format: decimal
           description: Amount to be transferred.
-          example: 100.50
+          example: '100.50'
 
     FundingSourceRequestModel:
       type: object
@@ -942,7 +947,7 @@ components:
             This field contains a token that identifies the funding source that is to be linked with
             the card program. This information will be shared separately. If you don’t have them
             already, click on [this link](https://simplifipay.com/).
-          example: "1234567"
+          example: '1234567'
       required:
         - fundingSource
     FundingSourceResponseModel:
@@ -951,22 +956,22 @@ components:
         uuid:
           type: string
           description: This is a system-generated unique identifier for the funding source that was created.
-          example: 84caba0c-275a-474c-b6f6-567a6a76b636
+          example: '84caba0c-275a-474c-b6f6-567a6a76b636'
         cardProgramUuid:
           type: string
           description: |-
             This field contains the system generated unique identifier for the program
             that was created using the Create Card Program API.
-          example: e283c96c-01e6-4afb-9b38-b4d2622e0a57
+          example: 'e283c96c-01e6-4afb-9b38-b4d2622e0a57'
         fundingSource:
           type: string
           description: |-
             This field contains a token that identifies the funding source that is to be linked with the card program.
-          example: "1234567"
+          example: '1234567'
         currency:
           type: string
           description: Currency of card program.
-          example: USD
+          example: 'USD'
 
     CardProgramStatusChangeRequestModel:
       type: object
@@ -974,7 +979,7 @@ components:
         cardProgramStatus:
           type: string
           description: This field specifies the status (ACTIVE, SUSPENDED, INACTIVE) of the Card Program.
-          example: SUSPENDED
+          example: 'SUSPENDED'
           enum:
             - ACTIVE
             - SUSPENDED
@@ -988,16 +993,16 @@ components:
           description: |-
             This field contains the system generated unique identifier for the program
             that was created using the Create Card Program API.
-          example: c83d26ed-f093-4e43-b81b-35884f068d4b
+          example: 'c83d26ed-f093-4e43-b81b-35884f068d4b'
         amount:
           type: number
           format: decimal
           description: This field contains the amount that has been requested for fund transfer.
-          example: 10000.00
+          example: '10000.00'
         sourceFunds:
           type: string
           description: This field contains the source of funds. Allowed value `OTHER`.
-          example: OTHER
+          example: 'OTHER'
           enum:
             - OTHER
             - TRADING_ACTIVITIES
@@ -1009,38 +1014,41 @@ components:
       properties:
         companyName:
           type: string
-          example: SimpliFi
           description: Name of the company.
+          example: 'SimpliFi'
         statementDate:
           type: string
-          example: yyyy-MM-dd
+          format: date
           description: The date on which the statement is created.
+          example: 'yyyy-MM-dd'
         accountId:
           type: string
-          example: 885180123
           description: The account ID of wallet.
+          example: '885180123'
         currency:
           type: string
-          example: EUR
           description: The currency in which the amounts are transacted.
+          example: 'USD'
         startDate:
           type: string
-          example: yyyy-MM-dd hh:mm:ss.nnn
+          format: date-time
           description: The start date of the date range.
+          example: 'yyyy-MM-dd HH:mm:ss'
         endDate:
           type: string
-          example: yyyy-MM-dd hh:mm:ss.nnn
+          format: date-time
           description: The end date of the date range.
+          example: 'yyyy-MM-dd HH:mm:ss'
         openingBalance:
           type: number
           format: decimal
-          example: 6.95
           description: The opening balance on the account from the start date of the date range.
+          example: '6.95'
         closingBalance:
           type: number
           format: decimal
-          example: 6.95
           description: The closing balance on the account till the end date of the date range.
+          example: '6.95'
         transactions:
           type: array
           description: The array of transactions.
@@ -1051,65 +1059,72 @@ components:
       properties:
         fundRequestUuid:
           type: string
-          example: 11e082c2-993d-4026-82c4-1234ec464796
           description: This is a unique identifier of the fund request.
+          example: '11e082c2-993d-4026-82c4-1234ec464796'
         transactionId:
           type: string
-          example: 6615206
           description: The transaction ID.
+          example: '6615206'
         transactionDate:
           type: string
-          example: yyyy-MM-dd hh:mm:ss.nnn
+          format: date-time
           description: The date on which the transaction was carried out.
+          example: 'yyyy-MM-dd HH:mm:ss'
         amount:
           type: number
           format: decimal
-          example: 6.95
           description: The fund amount.
+          example: '6.95'
         fundRequestType:
           type: string
-          enum: [ LOAD, UNLOAD ]
-          example: LOAD
           description: The type for fund request.
+          example: 'LOAD'
+          enum:
+            - LOAD
+            - UNLOAD
         fundRequestCategory:
           type: string
-          enum: [ RAISE_FUNDING, FUND_TRANSFER, CARD_LOAD, CARD_UNLOAD ]
-          example: RAISE_FUNDING
           description: The category for fund request.
+          example: 'RAISE_FUNDING'
+          enum:
+            - RAISE_FUNDING
+            - FUND_TRANSFER
+            - CARD_LOAD
+            - CARD_UNLOAD
         previousBalance:
           type: number
           format: decimal
-          example: 6.95
           description: The balance on the account before this transaction.
+          example: '6.95'
         currentBalance:
           type: number
           format: decimal
-          example: 6.95
           description: The current balance on the account.
+          example: '6.95'
         maskPan:
           type: string
-          example: '************2737'
           description: The mask pan of the transaction.
+          example: '************2737'
         userName:
           type: string
-          example: 'john.smith@simplifipay.com'
           description: The username of the user of this transaction.
+          example: 'john.smith@simplifipay.com'
         userFullName:
           type: string
-          example: 'John Smith'
           description: The full name of the user of this transaction.
+          example: 'John Smith'
         userUuid:
           type: string
-          example: '1b2dbfc7-3432-4eb8-9367-fb123dcf2ba0'
           description: The UUID of the user of this transaction.
+          example: '1b2dbfc7-3432-4eb8-9367-fb123dcf2ba0'
         srcCurrency:
           type: string
-          example: USD
           description: Source currency
+          example: 'USD'
         destCurrency:
           type: string
-          example: USD
           description: Destination currency
+          example: 'USD'
     TransactionRequestModel:
       type: object
       properties:
@@ -1194,7 +1209,7 @@ components:
         transactionUuid:
           type: string
           description: This is a unique identifier of the transaction.
-          example: f0888e10-43e3-4686-9c79-256633d79559
+          example: 'f0888e10-43e3-4686-9c79-256633d79559'
         transactionId:
           type: string
           description: This is an identifier of the transaction.
@@ -1202,7 +1217,7 @@ components:
         cardUuid:
           type: string
           description: This is a unique identifier of the card.
-          example: 95e8008f-c14b-4d4c-bc3b-6378be83618c
+          example: '95e8008f-c14b-4d4c-bc3b-6378be83618c'
         maskedPan:
           type: string
           description: Last 4 digits of the card.
@@ -1214,14 +1229,15 @@ components:
         userEmail:
           type: string
           description: email of card holder.
-          example: user@simplifipay.com
+          example: 'user@simplifipay.com'
         userFullName:
           type: string
           description: full name of card holder.
-          example: John Smith
+          example: 'John Smith'
         transactionType:
           type: string
           description: This is a transaction type
+          example: 'Auth'
           enum:
             - Auth
             - Reversal
@@ -1230,7 +1246,6 @@ components:
             - Load
             - Unload
             - Fees
-          example: 'Auth'
         statusCode:
           type: string
           description: This field contains the status code of the transaction code received from processor.
@@ -1261,38 +1276,38 @@ components:
           type: number
           format: decimal
           description: This field contains the total amount that was transacted.
-          example: 100.54
+          example: '100.54'
         transactionCurrency:
           type: string
           description: This field contains the currency in which the amount was transacted.
-          example: AED
+          example: 'AED'
         transactionDate:
           type: string
           format: date-time
           description: This field contains the date on which the transaction was carried out.
-          example: yyyy-MM-dd hh:mm:ss.nnn
+          example: 'yyyy-MM-dd HH:mm:ss'
         billAmount:
           type: number
           format: decimal
           description: This field contains the billed amount.
-          example: 6.95
+          example: '6.95'
         billCurrency:
           type: string
           description: This field contains the name of currency in which the amount is stored in the card
-          example: AED
+          example: 'AED'
         fxFee:
           type: number
           format: decimal
           description: This field contains the FX fee amount.
-          example: 0.31
+          example: '0.31'
         feeOperationType:
           type: string
           description: This field specifies the Fee Operation Type
-          example: PRIMARY_VIRTUAL_CARD_ISSUANCE
+          example: 'PRIMARY_VIRTUAL_CARD_ISSUANCE'
         feeOperationTypeDescription:
           type: string
           description: This field specifies the Fee Operation Type description
-          example: Virtual Card Issuance Fee
+          example: 'Virtual Card Issuance Fee'
         comments:
           type: string
           description: Any notes for this transaction
@@ -1319,18 +1334,18 @@ components:
           description: |-
             This field contains the system generated unique identifier for the program
             that was created using the Create Card Program API.
-          example: 22b52244-fb76-4ae7-be85-ecafba89e5ca
+          example: '22b52244-fb76-4ae7-be85-ecafba89e5ca'
         amount:
           type: number
           description: This field contains the amount that has been requested for fund transfer.
-          example: 10000.00
+          example: '10000.00'
         fundRequestType:
           type: string
           description: This field contains the type for fund request.
+          example: 'LOAD'
           enum:
             - LOAD
             - UNLOAD
-          example: LOAD
       required:
         - cardProgramUuid
         - amount
@@ -1351,24 +1366,25 @@ components:
       properties:
         uuid:
           type: string
-          example: e2a60b44-88ef-4102-a1ac-fb0f00a3fd3e
+          description: This is a system-generated unique identifier of the document
+          example: 'e2a60b44-88ef-4102-a1ac-fb0f00a3fd3e'
         userUuid:
           type: string
           description: |-
             This is a system-generated unique identifier of the card holder that was
             created using the Create User API.
-          example: 96f78ee1-9e0d-47b1-acc8-d4e65d711aaf
+          example: '96f78ee1-9e0d-47b1-acc8-d4e65d711aaf'
         documentType:
           type: string
           description: This field contains the type of the document attached by the cardholder.
-          example: PASSPORT
+          example: 'PASSPORT'
           enum:
             - ID_CARD
             - PASSPORT
         documentContext:
           type: string
           description: This field contains the orientation of the document to be uploaded.
-          example: DOCUMENT_FRONT
+          example: 'DOCUMENT_FRONT'
           enum:
             - DOCUMENT_FRONT
             - DOCUMENT_BACK
@@ -1384,23 +1400,24 @@ components:
         username:
           type: string
           description: |-
-            This is a unique identifier of the card holder in the system. We recommend providing a unique name here.
-          example: john.smith
+            This is a unique identifier of the user in the system. We recommend providing a unique name here.
+          example: 'john.smith'
         firstName:
           type: string
-          description: This is the first name of the card holder.
-          example: John
+          description: This is the first name of the user.
+          example: 'John'
         middleName:
           type: string
-          description: This is the middle name of the card holder.
-          example: M
+          description: This is the middle name of the user.
+          example: 'M'
         lastName:
           type: string
-          description: This is the last name of the card holder.
-          example: Smith
+          description: This is the last name of the user.
+          example: 'Smith'
         gender:
           type: string
-          example: MALE
+          description: This is the gender of the user.
+          example: 'MALE'
           enum:
             - MALE
             - FEMALE
@@ -1426,17 +1443,17 @@ components:
       properties:
         cardProgramUuid:
           type: string
-          example: a0f07d6c-d6e8-4bda-9dcc-f64fb3a720f6
           description: This field contains a unique identifier of the card program.
+          example: 'a0f07d6c-d6e8-4bda-9dcc-f64fb3a720f6'
         dob:
           type: string
-          example: '1983-08-15T19:00:00.000Z'
           format: date-time
           description: This field contains the Date of Birth of the card holder.
+          example: 'yyyy-MM-dd HH:mm:ss'
         roleName:
           type: string
-          example: 'CUSTOMER'
           description: This field contains a unique identifier showing the role of the user such as `CUSTOMER`
+          example: 'CUSTOMER'
           enum:
             - CUSTOMER
             - CLIENT_ADMIN
@@ -1444,8 +1461,8 @@ components:
             - OPS_MANAGER
         position:
           type: string
-          example: Employee
           description: This field contains the position (designation) of the user such as `Employee`
+          example: 'Employee'
       required:
         - cardProgramUuid
         - roleName
@@ -1454,9 +1471,9 @@ components:
       properties:
         addressType:
           type: string
-          example: PRIMARY
           description: |-
             This field contains the address type. `PRIMARY` address is set during user creation.
+          example: 'PRIMARY'
           enum:
             - PRIMARY
             - DELIVERY
@@ -1483,56 +1500,57 @@ components:
       properties:
         contactType:
           type: string
-          example: EMAIL
           description: This field contains the contact type
+          example: 'EMAIL'
           enum:
             - PHONE
             - WHATSAPP
             - EMAIL
         contactValue:
           type: string
-          example: +971123456789, john.smit@simplifipay.com
           description: This field contains the contact value of the card holder.
+          example: '+971123456789, john.smit@simplifipay.com'
     UserModel:
       type: object
       properties:
         uuid:
           type: string
-          example: f242acc1-bcbf-11eb-8529-c070bc3a2323
-          description: This is a system-generated unique identifier of the user (card holder).
+          description: This is a system-generated unique identifier of the user.
+          example: 'f242acc1-bcbf-11eb-8529-c070bc3a2323'
         username:
           type: string
-          example: johnsmith
-          description: This is a unique identifier of the card holder in the system. We recommend providing a unique name here.
+          description: This is a unique identifier of the user in the system.
+          example: 'johnsmith'
         firstName:
           type: string
-          example: John
-          description: This is the first name of the card holder.
+          description: This is the first name of the user.
+          example: 'John'
         middleName:
           type: string
-          example: M
-          description: This is the middle name of the card holder.
+          description: This is the middle name of the user.
+          example: 'M'
         lastName:
           type: string
-          example: Smith
-          description: This is the last name of the card holder.
+          description: This is the last name of the user.
+          example: 'Smith'
         gender:
           type: string
-          example: MALE
+          description: This is the gender of the user.
+          example: 'MALE'
           enum:
             - MALE
             - FEMALE
         userStatus:
           type: string
-          example: ACTIVE
           description: This is the current status of the card holder within the SimpliFi system
+          example: 'ACTIVE'
           enum:
             - ACTIVE
             - INACTIVE
         kycStatus:
           type: string
-          example: READY_FOR_KYC
           description: This is the current status of the KYC of this card holder.
+          example: 'READY_FOR_KYC'
           enum:
             - NOT_SUBMITTED
             - READY_FOR_KYC
@@ -1540,19 +1558,14 @@ components:
             - REJECTED
         createdAt:
           type: string
-          example: '2021-05-15 18:00:00'
+          format: date-time
           description: |-
             This field contains the date and time when the user was created in the SimpliFi system.
-            Note All the dates in the SimpliFi system are stored and displayed in the following
-            format `yyyy-mm-dd hh:mm:ss`
+          example: 'yyyy-MM-dd HH:mm:ss'
         createdBy:
           type: string
-          example: a49d6f6e-c98b-47db-9d6f-6ec98b77dbf9
           description: This field contains the UUID of the user who created this user in the SimpliFi system.
-        token:
-          type: string
-          example: 'abc'
-          description: This field contains an access token provided by the SimpliFi administrator.
+          example: 'a49d6f6e-c98b-47db-9d6f-6ec98b77dbf9'
         userDetail:
           $ref: '#/components/schemas/UserDetailModel'
         address:
@@ -1570,20 +1583,20 @@ components:
           description: |-
             This is a system-generated unique identifier of the user
             that was created using the Create User API.
-          example: f5ba1741-983f-4f51-8375-701461c5bacc
+          example: 'f5ba1741-983f-4f51-8375-701461c5bacc'
         cardProgramUuid:
           type: string
           description: |-
             This is a system-generated unique identifier of the card program
             that was created using the Create Card Program API.
-          example: 56db03b7-29ef-46e3-82ad-68b94abb051f
+          example: '56db03b7-29ef-46e3-82ad-68b94abb051f'
         customerTitle:
           type: string
           description: |-
             This is a specific name for the card holder to be displayed on the card in addition
             to the cardholder name. This field adds another layer of individuality and exclusivity
             for the card holder. Also known as 4th line embossing.
-          example: Founding Member
+          example: 'Founding Member'
         instrument:
           $ref: '#/components/schemas/InstrumentType'
       required:
@@ -1594,38 +1607,38 @@ components:
         uuid:
           type: string
           description: This is a system-generated unique identifier of the card issued.
-          example: 8105fb1b-852c-4d93-88eb-2fb2361d4b45
+          example: '8105fb1b-852c-4d93-88eb-2fb2361d4b45'
         userUuid:
           type: string
           description: |-
             This is a system-generated unique identifier of the user
             that was created using the Create User API.
-          example: 7ace3a56-3cb1-44db-a81d-2735e54c7c15
+          example: '7ace3a56-3cb1-44db-a81d-2735e54c7c15'
         traceUuid:
           type: string
           description: This field contains a unique identifier for the request.
-          example: 1a59bec7-8f64-4e11-a3d7-fc9f2ca01c87
+          example: '1a59bec7-8f64-4e11-a3d7-fc9f2ca01c87'
         companyUuid:
           type: string
           description: This field contains a unique identifier of the company for which the card has been configured.
-          example: 10cdeb1d-c3af-4288-b770-5d7620171f37
+          example: '10cdeb1d-c3af-4288-b770-5d7620171f37'
         cardProgramUuid:
           type: string
           description: |-
             This is a system-generated unique identifier for the card program
             that was created using the Create Card Program API.
-          example: dfb04381-3a10-4185-9ed3-5a97f43dd1a2
+          example: 'dfb04381-3a10-4185-9ed3-5a97f43dd1a2'
         instrument:
           $ref: '#/components/schemas/InstrumentType'
         creationDate:
           type: string
           format: date-time
           description: This field contains the date on which the card was created.
-          example: yyyy-MM-dd hh:mm:ss
+          example: 'yyyy-MM-dd HH:mm:ss'
         cardStatus:
           type: string
           description: This field contains the current status of the card.
-          example: ISSUED
+          example: 'ISSUED'
           enum:
             - PENDING
             - ISSUED
@@ -1638,7 +1651,7 @@ components:
         expiryDate:
           type: string
           description: This field contains the expiry date of the card.
-          example: MM/dd
+          example: 'MM/dd'
         maskedPan:
           type: string
           description: |-
@@ -1648,7 +1661,7 @@ components:
         cardMode:
           type: string
           description: This field contains the mode of the card.
-          example: PRIMARY
+          example: 'PRIMARY'
           enum:
             - PRIMARY
             - SECONDARY
@@ -1659,15 +1672,15 @@ components:
         customerTitle:
           type: string
           description: This field contains the fourth line embossing of the card.
-          example: Founding Member
+          example: 'Founding Member'
         physicalCardUuid:
           type: string
           description: This is a system-generated unique identifier of the PHYSICAL card issued.
-          example: a1f65835-be50-450c-a197-8676aa4565d0
+          example: 'a1f65835-be50-450c-a197-8676aa4565d0'
         linkedVirtualCardUuid:
           type: string
           description: This is a system-generated unique identifier of the linked VIRTUAL card.
-          example: 86d3111d-6d55-45e0-91c1-32c1397f39ab
+          example: '86d3111d-6d55-45e0-91c1-32c1397f39ab'
     InstrumentType:
       type: string
       description: This field specifies the type of card that is being issued.
