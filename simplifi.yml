@@ -569,6 +569,34 @@ paths:
         '400':
           $ref: '#/components/responses/EntityNotFoundError'
 
+  /v1/card:
+    post:
+      tags:
+        - card
+      security:
+        - bearerAuth: [ ]
+      summary: Create a Card
+      description: |-
+        The Create a Card endpoint creates/issues a card to a user under a Card Program. The card issued
+        using this endpoint would inherit the characteristics defined in its card program such as
+        authorization controls, velocity controls etc. Following are the properties of this endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardRequestModel'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1533,6 +1561,121 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ContactModel'
+
+    CardRequestModel:
+      type: object
+      properties:
+        userUuid:
+          type: string
+          description: |-
+            This is a system-generated unique identifier of the user
+            that was created using the Create User API.
+          example: f5ba1741-983f-4f51-8375-701461c5bacc
+        cardProgramUuid:
+          type: string
+          description: |-
+            This is a system-generated unique identifier of the card program
+            that was created using the Create Card Program API.
+          example: 56db03b7-29ef-46e3-82ad-68b94abb051f
+        customerTitle:
+          type: string
+          description: |-
+            This is a specific name for the card holder to be displayed on the card in addition
+            to the cardholder name. This field adds another layer of individuality and exclusivity
+            for the card holder. Also known as 4th line embossing.
+          example: Founding Member
+        instrument:
+          $ref: '#/components/schemas/InstrumentType'
+      required:
+        - userUuid
+    CardResponseModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: This is a system-generated unique identifier of the card issued.
+          example: 8105fb1b-852c-4d93-88eb-2fb2361d4b45
+        userUuid:
+          type: string
+          description: |-
+            This is a system-generated unique identifier of the user
+            that was created using the Create User API.
+          example: 7ace3a56-3cb1-44db-a81d-2735e54c7c15
+        traceUuid:
+          type: string
+          description: This field contains a unique identifier for the request.
+          example: 1a59bec7-8f64-4e11-a3d7-fc9f2ca01c87
+        companyUuid:
+          type: string
+          description: This field contains a unique identifier of the company for which the card has been configured.
+          example: 10cdeb1d-c3af-4288-b770-5d7620171f37
+        cardProgramUuid:
+          type: string
+          description: |-
+            This is a system-generated unique identifier for the card program
+            that was created using the Create Card Program API.
+          example: dfb04381-3a10-4185-9ed3-5a97f43dd1a2
+        instrument:
+          $ref: '#/components/schemas/InstrumentType'
+        creationDate:
+          type: string
+          format: date-time
+          description: This field contains the date on which the card was created.
+          example: yyyy-MM-dd hh:mm:ss
+        cardStatus:
+          type: string
+          description: This field contains the current status of the card.
+          example: ISSUED
+          enum:
+            - PENDING
+            - ISSUED
+            - ACTIVATED
+            - DISABLED
+            - LOCKED
+            - REPLACED
+            - REJECTED
+            - EXPIRED
+        expiryDate:
+          type: string
+          description: This field contains the expiry date of the card.
+          example: MM/dd
+        maskedPan:
+          type: string
+          description: |-
+            This field contains the partially hidden Primary Account Number
+            i.e. all digits are masked, except for the last four ones.
+          example: '**********1234'
+        cardMode:
+          type: string
+          description: This field contains the mode of the card.
+          example: PRIMARY
+          enum:
+            - PRIMARY
+            - SECONDARY
+        currency:
+          type: string
+          description: This field contains the Primary currency of Card
+          example: 'USD'
+        customerTitle:
+          type: string
+          description: This field contains the fourth line embossing of the card.
+          example: Founding Member
+        physicalCardUuid:
+          type: string
+          description: This is a system-generated unique identifier of the PHYSICAL card issued.
+          example: a1f65835-be50-450c-a197-8676aa4565d0
+        linkedVirtualCardUuid:
+          type: string
+          description: This is a system-generated unique identifier of the linked VIRTUAL card.
+          example: 86d3111d-6d55-45e0-91c1-32c1397f39ab
+    InstrumentType:
+      type: string
+      description: This field specifies the type of card that is being issued.
+      example: 'VIRTUAL'
+      enum:
+        - VIRTUAL
+        - PHYSICAL
+        - VIRTUAL_AND_PHYSICAL
 
 security:
   - bearerAuth: []
