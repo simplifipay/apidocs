@@ -70,6 +70,11 @@ tags:
       would inherit the default characteristics of the card program under which they have
       been issued, however, some of these can be changed at the card level. Cards could
       be issued only to a registered user (card holder) within a card program.
+  - name: transaction
+    description: |-
+      The Transactions API Group is designed to allow you to have control over the listing of transactions
+      that have been processed on a card. These endpoints enable you to get insights of different
+      transactions being carried upon certain cards.
 paths:
   /v1/auth/login/{companyName}:
     post:
@@ -399,6 +404,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/StatementResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /v1/transaction:
+    post:
+      tags:
+        - transaction
+      security:
+        - bearerAuth: [ ]
+      summary: List All Transactions
+      description: |-
+        The List All Transactions endpoint retrieves a paginated array of all the transactions carried
+        out in the last 90 days. The results are displayed with a default page size of 10 and the response
+        returns the transaction list with total no. of elements. Following are the properties of this endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionRequestModel'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
@@ -1051,6 +1082,192 @@ components:
           type: string
           example: USD
           description: Destination currency
+    TransactionRequestModel:
+      type: object
+      properties:
+        cardProgramUuids:
+          type: array
+          description: These are unique identifiers of the card programs.
+          items:
+            type: string
+        page:
+          description: This field contains the page number currently being displayed for transactions.
+          type: integer
+        size:
+          description: This field contains the number of the transaction records to be displayed on this page.
+          type: integer
+        startDate:
+          description: This is the start date of transactions.
+          type: string
+        endDate:
+          description: This is the end date of transactions.
+          type: string
+        cardUuid:
+          description: This is a unique identifier of the card.
+          type: string
+        userUuid:
+          description: This is a unique identifier of the card holder.
+          type: string
+        billAmount:
+          description: This field contains the billed amount.
+          type: number
+        billCurrency:
+          description: This field contains the currency in which the amount has been billed.
+          type: string
+        sortBy:
+          type: string
+          enum:
+            - transactionDate
+            - transactionAmount
+        sortDirection:
+          type: string
+          enum:
+            - ASC
+            - DESC
+        transactionType:
+          type: array
+          description: |-
+            This field defines the Transaction types. Allowed values are
+            `Auth` - for Authorized transactions
+            `Reversal` - for Reversed transactions
+            `Settlement` - for Settled transactions
+            `Refund` - for Refund transactions
+            `Load` - for Card Load transactions
+            `Unload` - for Card Unload transactions
+            `Fees` - for Fee transactions
+          enum:
+            - Auth
+            - Reversal
+            - Settlement
+            - Refund
+            - Load
+            - Unload
+            - Fees
+          items:
+            type: string
+    TransactionResponse:
+      type: object
+      properties:
+        transactions:
+          type: array
+          description: |-
+            This array of objects is a collection of transaction fields,
+            possessing sub-fields explained in the rows below.
+          items:
+            $ref: '#/components/schemas/TransactionResponseDetails'
+        totalElement:
+          type: integer
+          format: int64
+          description: |-
+            This field contains the total number of elements against the criteria.
+    TransactionResponseDetails:
+      type: object
+      properties:
+        transactionUuid:
+          type: string
+          description: This is a unique identifier of the transaction.
+          example: f0888e10-43e3-4686-9c79-256633d79559
+        transactionId:
+          type: string
+          description: This is an identifier of the transaction.
+          example: '6712309'
+        cardUuid:
+          type: string
+          description: This is a unique identifier of the card.
+          example: 95e8008f-c14b-4d4c-bc3b-6378be83618c
+        maskedPan:
+          type: string
+          description: Last 4 digits of the card.
+          example: '************9999'
+        userName:
+          type: string
+          description: username of card holder.
+          example: 'john.smith'
+        userEmail:
+          type: string
+          description: email of card holder.
+          example: user@simplifipay.com
+        userFullName:
+          type: string
+          description: full name of card holder.
+          example: John Smith
+        transactionType:
+          type: string
+          description: This is a transaction type
+          enum:
+            - Auth
+            - Reversal
+            - Settlement
+            - Refund
+            - Load
+            - Unload
+            - Fees
+          example: 'Auth'
+        statusCode:
+          type: string
+          description: This field contains the status code of the transaction code received from processor.
+          example: '00'
+        statusCodeDescription:
+          type: string
+          description: This field contains the status description of the transaction code received from processor.
+          example: 'Approved'
+        authResponse:
+          type: string
+          description: This field contains the auth response value of the transaction received from processor.
+          example: '51'
+        mccCode:
+          type: string
+          description: |-
+            This field contains the Merchant Category Code. These, MCCs are four-digit numbers that
+            describe a merchant's primary business activity.
+          example: '6011'
+        merchantId:
+          type: string
+          description: This field contains the registered merchant ID.
+          example: 'F09089372443345'
+        merchantName:
+          type: string
+          description: This field contains the registered merchant name.
+          example: 'GOOGLE *TEMPORARY HOLD'
+        transactionAmount:
+          type: number
+          format: decimal
+          description: This field contains the total amount that was transacted.
+          example: 100.54
+        transactionCurrency:
+          type: string
+          description: This field contains the currency in which the amount was transacted.
+          example: AED
+        transactionDate:
+          type: string
+          format: date-time
+          description: This field contains the date on which the transaction was carried out.
+          example: yyyy-MM-dd hh:mm:ss.nnn
+        billAmount:
+          type: number
+          format: decimal
+          description: This field contains the billed amount.
+          example: 6.95
+        billCurrency:
+          type: string
+          description: This field contains the name of currency in which the amount is stored in the card
+          example: AED
+        fxFee:
+          type: number
+          format: decimal
+          description: This field contains the FX fee amount.
+          example: 0.31
+        feeOperationType:
+          type: string
+          description: This field specifies the Fee Operation Type
+          example: PRIMARY_VIRTUAL_CARD_ISSUANCE
+        feeOperationTypeDescription:
+          type: string
+          description: This field specifies the Fee Operation Type description
+          example: Virtual Card Issuance Fee
+        comments:
+          type: string
+          description: Any notes for this transaction
 
     RaiseFundingDocumentModel:
       type: object
