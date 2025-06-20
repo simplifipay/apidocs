@@ -595,6 +595,64 @@ paths:
                 $ref: '#/components/schemas/CardResponseModel'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  /v1/card/{uuid}:
+    get:
+      tags:
+        - card
+      security:
+        - bearerAuth: [ ]
+      summary: Get Card Details
+      description: |-
+        The Get Card Details endpoint retrieves all the details of a specific card.
+        Following are the properties of this endpoint.
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/card/{uuid}/balance-inquiry:
+    get:
+      tags:
+        - card
+      security:
+        - bearerAuth: [ ]
+      summary: Retrieve Balance on the Card
+      description: |-
+        The Retrieve Balance on the Card endpoint retrieves the remaining balance of a card.
+        Following are the properties of this endpoint.
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AmountModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
 
 components:
   securitySchemes:
@@ -1689,6 +1747,18 @@ components:
         - VIRTUAL
         - PHYSICAL
         - VIRTUAL_AND_PHYSICAL
+    AmountModel:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: decimal
+          description: This field contains the balance amount available for the card.
+          example: '1234.56'
+        currency:
+          type: string
+          description: This field contains the currency of Card
+          example: 'AED'
 
 security:
   - bearerAuth: []
