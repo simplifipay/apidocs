@@ -366,6 +366,7 @@ paths:
       tags:
         - card-program
         - funding-source
+        - transaction
       security:
         - bearerAuth: [ ]
       summary: Funding Source Statement
@@ -406,6 +407,47 @@ paths:
                 $ref: '#/components/schemas/StatementResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  /v1/statement/card/{uuid}:
+    get:
+      tags:
+        - card
+        - transaction
+      security:
+        - bearerAuth: [ ]
+      summary: Get Card Statement
+      description: Get card statement based on date range.
+      parameters:
+        - name: startDate
+          in: query
+          description: start date of date-range
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          description: end date date of date-range
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          description: sort statement column value
+          schema:
+            type: string
+        - name: sortDir
+          in: query
+          description: sort direction
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardStatementResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
   /v1/transaction:
     post:
       tags:
@@ -1241,6 +1283,71 @@ components:
           description: The array of transactions.
           items:
             $ref: '#/components/schemas/StatementResponseDetails'
+    CardStatementResponse:
+      type: object
+      properties:
+        companyName:
+          type: string
+          description: Name of the company.
+          example: 'SimpliFi'
+        statementDate:
+          type: string
+          format: date
+          description: The date on which the statement is created.
+          example: 'yyyy-MM-dd'
+        maskPan:
+          type: string
+          description: The Masked PAN of card.
+          example: '************2737'
+        currency:
+          type: string
+          description: The currency of the card.
+          example: 'AED'
+        startDate:
+          type: string
+          format: date-time
+          description: The start date of the date range.
+          example: 'yyyy-MM-dd HH:mm:ss'
+        endDate:
+          type: string
+          format: date-time
+          description: The end date of the date range.
+          example: 'yyyy-MM-dd HH:mm:ss'
+        openingBalance:
+          type: number
+          format: decimal
+          description: The opening balance of the card from the start date of the date range.
+          example: '6.95'
+        currentBalance:
+          type: number
+          format: decimal
+          description: The current balance of the card
+          example: '6.95'
+        settledBalance:
+          type: number
+          format: decimal
+          description: The settled balance of the card
+          example: '6.95'
+        unsettledBalance:
+          type: number
+          format: decimal
+          description: The unsettled balance of the card
+          example: '6.95'
+        blockedAmount:
+          type: number
+          format: decimal
+          description: The blocked amount of the card
+          example: '6.95'
+        totals:
+          type: object
+          additionalProperties:
+            type: number
+            format: decimal
+        transactions:
+          type: array
+          description: The array of transactions.
+          items:
+            $ref: '#/components/schemas/TransactionResponseDetails'
     StatementResponseDetails:
       type: object
       properties:
