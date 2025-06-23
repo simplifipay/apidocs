@@ -50,26 +50,26 @@ tags:
       SimpliFi system which are simply referred to as `Documents`.
   - name: user
     description: |-
-      The User API Group is designed to manage the users (card holders). It is mandatory
-      that the cardholders should only be created under a card program. Card holder
+      The User API Group is designed to manage the users. It is mandatory
+      that the users should only be created under a card program. User
       creation could be a one or two step process:
 
-      - Capture user (card holders) details
-      - Conduct user (card holders) KYC (if required by the regulators)
+      - Capture user details
+      - Conduct user KYC (if required by the regulators)
 
       Requirements related to what user details need to be captured and the kind of KYC
       required are defined during client onboarding as mandated by the issuing bank and
       regulations, depending on the jurisdiction and the nature of the card program. 
 
       Following endpoints cover all the aspects of creating and maintaining
-      users (card holders).
+      users.
   - name: card
     description: |-
       The Cards API Group is designed to manage all the activities related to the cards
       life cycle. Cards can either be issued in physical or virtual form, or both. Cards
       would inherit the default characteristics of the card program under which they have
       been issued, however, some of these can be changed at the card level. Cards could
-      be issued only to a registered user (card holder) within a card program.
+      be issued only to a registered user within a card program.
   - name: transaction
     description: |-
       The Transactions API Group is designed to allow you to have control over the listing of transactions
@@ -1443,7 +1443,7 @@ components:
           description: This is a unique identifier of the card.
           type: string
         userUuid:
-          description: This is a unique identifier of the card holder.
+          description: This is a unique identifier of the user.
           type: string
         billAmount:
           description: This field contains the billed amount.
@@ -1518,15 +1518,15 @@ components:
           example: '************9999'
         userName:
           type: string
-          description: username of card holder.
+          description: username of user.
           example: 'john.smith'
         userEmail:
           type: string
-          description: email of card holder.
+          description: email of user.
           example: 'user@simplifipay.com'
         userFullName:
           type: string
-          description: full name of card holder.
+          description: full name of user.
           example: 'John Smith'
         transactionType:
           type: string
@@ -1665,7 +1665,7 @@ components:
         userUuid:
           type: string
           description: |-
-            This is a system-generated unique identifier of the card holder that was
+            This is a system-generated unique identifier of the user that was
             created using the Create User API.
           example: '96f78ee1-9e0d-47b1-acc8-d4e65d711aaf'
         documentType:
@@ -1742,7 +1742,7 @@ components:
         dob:
           type: string
           format: date-time
-          description: This field contains the Date of Birth of the card holder.
+          description: This field contains the Date of Birth of the user.
           example: 'yyyy-MM-dd HH:mm:ss'
         roleName:
           type: string
@@ -1773,22 +1773,22 @@ components:
             - DELIVERY
         streetAddress:
           type: string
-          description: This field contains the street address of the card holder.
+          description: This field contains the street address of the user.
         address2:
           type: string
-          description: This field contains the second line of address of the card holder.
+          description: This field contains the second line of address of the user.
         cityCode:
           type: string
-          description: This field contains the city name of the card holder.
+          description: This field contains the city name of the user.
         stateCode:
           type: string
-          description: This field contains the state name of the card holder.
+          description: This field contains the state name of the user.
         countryCode:
           type: string
-          description: This field contains the country code of the card holder.
+          description: This field contains the country code of the user.
         postalCode:
           type: string
-          description: This field contains the postal code of the card holder.
+          description: This field contains the postal code of the user.
     ContactModel:
       type: object
       properties:
@@ -1802,7 +1802,7 @@ components:
             - EMAIL
         contactValue:
           type: string
-          description: This field contains the contact value of the card holder.
+          description: This field contains the contact value of the user.
           example: '+971123456789, john.smit@simplifipay.com'
     UserModel:
       type: object
@@ -1836,14 +1836,14 @@ components:
             - FEMALE
         userStatus:
           type: string
-          description: This is the current status of the card holder within the SimpliFi system
+          description: This is the current status of the user within the SimpliFi system
           example: 'ACTIVE'
           enum:
             - ACTIVE
             - INACTIVE
         kycStatus:
           type: string
-          description: This is the current status of the KYC of this card holder.
+          description: This is the current status of the KYC of this user.
           example: 'READY_FOR_KYC'
           enum:
             - NOT_SUBMITTED
@@ -1887,9 +1887,9 @@ components:
         customerTitle:
           type: string
           description: |-
-            This is a specific name for the card holder to be displayed on the card in addition
+            This is a specific name for the user to be displayed on the card in addition
             to the cardholder name. This field adds another layer of individuality and exclusivity
-            for the card holder. Also known as 4th line embossing.
+            for the user. Also known as 4th line embossing.
           example: 'Founding Member'
         instrument:
           $ref: '#/components/schemas/InstrumentType'
