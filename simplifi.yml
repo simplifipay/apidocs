@@ -612,6 +612,43 @@ paths:
           $ref: '#/components/responses/EntityNotFoundError'
 
   /v1/card:
+    get:
+      tags:
+        - card
+      security:
+        - bearerAuth: [ ]
+      summary: List all Cards
+      description: |-
+        The List all Cards endpoint retrieves all the existing cards, grouped under a company.
+        Following are the properties of this endpoint.
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+          description: |-
+            Represents the start date of the user's registration with the SimpliFi system. Note All the
+            dates in the SimpliFi system are stored and displayed in the following format `yyyy-mm-dd hh:mm:ss`
+          required: false
+        - name: endDate
+          in: query
+          schema:
+            type: string
+          description: |-
+            Represents the end date of the user's registration with the SimpliFi system. Note All the
+            dates in the SimpliFi system are stored and displayed in the following format `yyyy-mm-dd hh:mm:ss`
+          required: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CardResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
     post:
       tags:
         - card
