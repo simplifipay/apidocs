@@ -8,7 +8,7 @@ info:
   termsOfService: https://simplifipay.com/terms-and-conditions/
   contact:
     email: support@simplifipay.com
-  version: 5.0.0
+  version: 5.x.x
 externalDocs:
   description: Find out more about SimpliFi
   url: https://simplifipay.com/
@@ -79,6 +79,17 @@ tags:
     description: |-
       The Fee API group is designed to allow clients to configure and apply transaction fee at various
       levels within their card programs using a simple, flexible API-driven approach.
+  - name: webhook
+    description: |-
+      All the asynchronous API calls that are made using the endpoints published by the SimpliFi platform,
+      return a webhook. The purpose of these webhooks is to inform the API user about the status of the
+      endpoint that was initiated.
+
+      The webhook structure remains the same in all the asynchronously running API calls with the only
+      difference in `eventType` field and `eventPayload` object. These two fields are unique for every
+      webhook response. `eventType` describes the event for which the webhook was generated and
+      `eventPayload` describes the payload for that event.
+
 paths:
   /v1/auth/login/{companyName}:
     post:
@@ -421,6 +432,12 @@ paths:
       summary: Get Card Statement
       description: Get card statement based on date range.
       parameters:
+        - name: uuid
+          in: path
+          description: This field contains a unique identifier of the card.
+          schema:
+            type: string
+          required: true
         - name: startDate
           in: query
           description: start date of date-range
@@ -580,6 +597,14 @@ paths:
       description: |-
         The Update a User endpoint updates the details of an existing user.
         Following are the properties of this endpoint.
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the user.
+          required: true
       requestBody:
         required: true
         content:
@@ -607,6 +632,14 @@ paths:
         The Delete a User endpoint deletes an existing user. Deleting a user does not erase data from the
         system but only deactivates the user and its associated cards.
         Following are the properties of this endpoint.
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the user.
+          required: true
       responses:
         '200':
           description: OK
@@ -746,6 +779,14 @@ paths:
       description: |-
         The Activate a Card endpoint activates an issued/created card.
         Following are the properties of this endpoint.
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
       responses:
         '200':
           description: OK
@@ -764,6 +805,14 @@ paths:
         The Manage Card Status endpoint manages the status of a card. This endpoint is helpful as
         cards can be locked (temporarily suspended), disabled, reissued depending upon the
         business requirements. Following are the properties of this endpoint.
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
       requestBody:
         required: true
         content:
@@ -787,6 +836,14 @@ paths:
       description: |-
         The Load a Card endpoint adds funds to an active card.
         Following are the properties of this endpoint.
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
       requestBody:
         required: true
         content:
@@ -811,6 +868,14 @@ paths:
         The Unload a Card endpoint removes funds from an active card and moves them back to the Funding
         source (Virtual account that holds the funds in certain currency).
         Following are the properties of this endpoint.
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
       requestBody:
         required: true
         content:
@@ -835,6 +900,14 @@ paths:
         The Renewal of the Card endpoint renews an expired, lost, or stolen card. In this case, a new
         Primary Account Number (PAN) would be issued from the prevalent settings of the relevant card program.
         Following are the properties of this endpoint.
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
       responses:
         '200':
           description: OK
@@ -858,6 +931,14 @@ paths:
         virtual card. Note (this endpoint is specific to physical cards and cannot be used for virtual cards.
         Physical cards should be issued only for a virtual card in `ACTIVE` status).
         Following are the properties of this endpoint.
+      parameters:
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
       responses:
         '200':
           description: OK
@@ -1006,6 +1087,21 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '400':
           $ref: '#/components/responses/EntityNotFoundError'
+
+webhooks:
+  cardProgram:
+    post:
+      tags:
+        - webhook
+      description: A card program is created in the SimpliFi system and a webhook is published.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardProgramCreationWebhook'
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
 
 components:
   securitySchemes:
@@ -2324,6 +2420,65 @@ components:
           description: This field contains the unique uuid of fee application event.
           items:
             type: string
+
+    Webhook:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: ''
+        requestUuid:
+          type: string
+          description: ''
+        requesterUuid:
+          type: string
+          description: ''
+        requestStatus:
+          type: string
+          description: ''
+          enum:
+            - SUCCESS
+            - FAILURE
+        errorCode:
+          type: string
+          description: ''
+        errorMessage:
+          type: string
+          description: ''
+        sourceErrorCode:
+          type: string
+          description: ''
+        sourceErrorMessage:
+          type: string
+          description: ''
+    CardProgramCreationWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: ''
+              example: 'CARD_PROGRAM_CREATION'
+            eventPayload:
+              type: object
+              properties:
+                cardProgramUuid:
+                  type: string
+                  description: ''
+                cardProgramName:
+                  type: string
+                  description: ''
+                currency:
+                  type: string
+                  description: ''
+                  example: 'AED'
+                companyUuid:
+                  type: string
+                  description: ''
+                requestUuid:
+                  type: string
+                  description: ''
 
 security:
   - bearerAuth: []
