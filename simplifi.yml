@@ -13,7 +13,7 @@ externalDocs:
   description: Find out more about SimpliFi
   url: https://simplifipay.com/
 servers:
-  - url: https://{env}-lb.simplifipay.com/
+  - url: https://{env}-lb.simplifipay.com
 tags:
   - name: auth
     description: |-
@@ -95,6 +95,7 @@ paths:
     post:
       tags:
        - auth
+      security: []
       summary: Login to generate JWT token
       description: |-
         The Login endpoint allows you to login to the SimpliFi platform using the provided
@@ -1135,6 +1136,8 @@ webhooks:
     post:
       tags:
         - webhook
+      security: []
+      summary: Card Program Creation webhook
       description: A card program is created in the SimpliFi system and a webhook is published.
       requestBody:
         content:
@@ -1805,16 +1808,16 @@ components:
             `Load` - for Card Load transactions
             `Unload` - for Card Unload transactions
             `Fees` - for Fee transactions
-          enum:
-            - Auth
-            - Reversal
-            - Settlement
-            - Refund
-            - Load
-            - Unload
-            - Fees
           items:
             type: string
+            enum:
+              - Auth
+              - Reversal
+              - Settlement
+              - Refund
+              - Load
+              - Unload
+              - Fees
     TransactionResponse:
       type: object
       properties:
@@ -2513,27 +2516,35 @@ components:
           properties:
             eventType:
               type: string
-              description: ''
+              description: 'CARD_PROGRAM_CREATION'
               example: 'CARD_PROGRAM_CREATION'
             eventPayload:
               type: object
               properties:
                 cardProgramUuid:
                   type: string
-                  description: ''
+                  description: |-
+                    This is a unique identifier for the program that was created using the Create Card Program API.
+                  example: '99c030eb-e46c-41be-8700-662ebde3536c'
                 cardProgramName:
                   type: string
-                  description: ''
+                  description: |-
+                    This is the name for the program that was created using the Create Card Program API.
+                  example: 'Marketing Budget'
                 currency:
                   type: string
-                  description: ''
+                  description: |-
+                    This is the currency for the program that was created using the Create Card Program API.
                   example: 'AED'
                 companyUuid:
                   type: string
-                  description: ''
+                  description: |-
+                    This is the unique identifier for the company to which the card program belongs.
                 requestUuid:
                   type: string
-                  description: ''
+                  description: |-
+                    This is a unique identifier for the request that was generated using the Card Program API.
+                  example: '4dbfa9cc-c0a8-4dae-9b0d-dccc6f743797'
 
 security:
   - bearerAuth: []
