@@ -891,6 +891,63 @@ paths:
                 $ref: '#/components/schemas/FeesSetupModel'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  /v1/fees/{uuid}:
+    get:
+      tags:
+        - fee
+      security:
+        - bearerAuth: [ ]
+      summary: Fetch fee config
+      description: This endpoint fetches the fee config
+      parameters:
+        - name: uuid
+          in: path
+          description: This is the unique identifier of the fee configuration.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeeConfigurationModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    patch:
+      tags:
+        - fee
+      security:
+        - bearerAuth: [ ]
+      summary: Change the status of fee config
+      description: This endpoint changes the status of the fee config
+      parameters:
+        - name: uuid
+          in: path
+          description: This is the unique identifier of the fee configuration.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeesStatusUpdateModel'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeeConfigurationModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
   /v1/fees/application/card/{cardUuid}:
     post:
       tags:
@@ -2206,7 +2263,7 @@ components:
             - DELIVERY_CHARGE
         feeStatusType:
           type: string
-          description: This field contains the operation type for which we want to setup fees
+          description: This field contains the status of the fee configuration
           example: 'ACTIVE'
           enum:
             - ACTIVE
@@ -2235,6 +2292,16 @@ components:
           type: string
           description: This is a system-generated unique identifier of the fee configuration.
           example: 'e00507d5-f5a0-4951-9037-2b15ab852c88'
+    FeesStatusUpdateModel:
+      type: object
+      properties:
+        status:
+          type: string
+          description: This field contains the status of the fee configuration
+          example: 'ACTIVE'
+          enum:
+            - ACTIVE
+            - INACTIVE
     FeesApplicationCardRequest:
       type: object
       properties:

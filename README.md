@@ -40,6 +40,9 @@ with the platform. Below is a summary of the key API groups included:
    - Manages documents used in KYC and compliance processes. Supports file uploads for proof of funds or
      verification purposes.
 
+8. **Fee API**
+   - Provides clients to configure and apply flexible transaction fees at various levels within their card programs.
+
 ---
 
 ## Key Features
@@ -52,7 +55,7 @@ with the platform. Below is a summary of the key API groups included:
 - **Transaction Tracking**: Retrieve historical transaction data on cards or funding sources.
 - **User-Based Operations**: Manage cardholders and their KYC information.
 - **Document Handling**: Attach and verify documents required for platform usage in compliance-focused workflows.
-
+- **Fee Operations**: Define fee configurations based on transaction types and associate them with specific card program templates.
 ---
 
 ## API Details
@@ -78,6 +81,10 @@ and request-response standards. The detailed list of endpoints is categorized by
 - **Documents**:
   - Upload files via `/v1/document/upload`
   - Link documents to user onboarding or funding workflows.
+- **Fee**:
+  - Set up transaction fee structures via `/v1/fees`
+  - Add fee events to a queue for specific cards via `/v1/fees/application/card/{cardUuid}`
+  - Fees queues for specific cards can be applied via `/v1/fees/application/card/{cardUuid}/apply`
 
 ---
 
@@ -96,13 +103,15 @@ and request-response standards. The detailed list of endpoints is categorized by
      the OpenAPI specification.
    - The provided schemas ensure compatibility for both JSON and form-data inputs.
 
+4. **Testing and Debugging**
+    - Validate request payloads and response data while testing on development or staging environments.
 ---
 
 ## External Resources
 
-- **Terms of Service**: [Read here](https://simplifipay.com/terms-and-conditions/)
+- **Terms and Conditions**: [Read here](https://simplifipay.com/terms-and-conditions/)
 - **Support Email**: [support@simplifipay.com](mailto:support@simplifipay.com)
-- **Documentation**: [Visit our website](https://simplifipay.com/)
+- **More Information**: [Visit our website](https://simplifipay.com/)
 
 ---
 
