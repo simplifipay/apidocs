@@ -130,8 +130,6 @@ paths:
     post:
       tags:
         - card-program
-      security:
-        - bearerAuth: [ ]
       summary: Create Card Program
       description: |-
         The Create Card Program endpoint allows API users to create a new card program
@@ -157,8 +155,6 @@ paths:
     get:
       tags:
         - card-program
-      security:
-        - bearerAuth: [ ]
       summary: Get Card Program
       description: |-
         The Get Card Program endpoint retrieves details about a card program.
@@ -187,8 +183,6 @@ paths:
     patch:
       tags:
         - card-program
-      security:
-        - bearerAuth: [ ]
       summary: Change Card Program Status
       description: |-
         The Change Card Program Status endpoint changes the status of a card program. This endpoint is helpful
@@ -219,8 +213,6 @@ paths:
       tags:
         - card-program
         - funding-source
-      security:
-        - bearerAuth: [ ]
       summary: Link Funding Source to Card Program
       description: |-
         The Link Funding Source to Card Program endpoint links a funding source to a card program.
@@ -255,8 +247,6 @@ paths:
       tags:
         - card-program
         - funding-source
-      security:
-        - bearerAuth: [ ]
       summary: Get Balance of Funding Source
       description: |-
         The Get Balance of Funding Source endpoint retrieves the remaining balance of a funding source.
@@ -284,8 +274,6 @@ paths:
     post:
       tags:
         - card-program
-      security:
-        - bearerAuth: [ ]
       summary: Transfer funds from one Card Program to other
       description: |-
         The Transfer Fund endpoint allows API users to transfer funds from a one
@@ -308,8 +296,6 @@ paths:
       tags:
         - card-program
         - funding-source
-      security:
-        - bearerAuth: [ ]
       summary: Raise Funding
       description: |-
         The Raise Funding endpoint helps in adding or removing funds from a funding source. This API doesn't
@@ -335,8 +321,6 @@ paths:
       tags:
         - card-program
         - document
-      security:
-        - bearerAuth: [ ]
       summary: Raise Funding Document Upload
       description: |-
         This API should be called before calling Raise Funding API to attach `Proof of funds / Confirmation of
@@ -367,8 +351,6 @@ paths:
       tags:
         - user
         - document
-      security:
-        - bearerAuth: [ ]
       summary: Upload Document
       description: |-
         The Upload Document endpoint uploads the user documents to the SimpliFi system which are required
@@ -398,8 +380,6 @@ paths:
         - card-program
         - funding-source
         - transaction
-      security:
-        - bearerAuth: [ ]
       summary: Funding Source Statement
       description: Get funding source statement based on date range.
       parameters:
@@ -444,8 +424,6 @@ paths:
       tags:
         - card
         - transaction
-      security:
-        - bearerAuth: [ ]
       summary: Get Card Statement
       description: Get card statement based on date range.
       parameters:
@@ -491,8 +469,6 @@ paths:
     post:
       tags:
         - transaction
-      security:
-        - bearerAuth: [ ]
       summary: List All Transactions
       description: |-
         The List All Transactions endpoint retrieves a paginated array of all the transactions carried
@@ -520,8 +496,6 @@ paths:
     get:
       tags:
         - user
-      security:
-        - bearerAuth: [ ]
       summary: List all Users
       description: |-
         The List all Users endpoint retrieves all the existing users, grouped under a company.
@@ -558,8 +532,6 @@ paths:
     post:
       tags:
         - user
-      security:
-        - bearerAuth: [ ]
       summary: Create a User
       description: |-
         The Create a User endpoint creates a new user. In the SimpliFi platform, it is mandatory
@@ -586,8 +558,6 @@ paths:
     get:
       tags:
         - user
-      security:
-        - bearerAuth: [ ]
       summary: Retrieve a User
       description: |-
         The Retrieve a User endpoint retrieves details about an existing user.
@@ -615,8 +585,6 @@ paths:
     put:
       tags:
         - user
-      security:
-        - bearerAuth: [ ]
       summary: Update a User
       description: |-
         The Update a User endpoint updates the details of an existing user.
@@ -650,8 +618,6 @@ paths:
     delete:
       tags:
         - user
-      security:
-        - bearerAuth: [ ]
       summary: Delete a User
       description: |-
         The Delete a User endpoint deletes an existing user. Deleting a user does not erase data from the
@@ -678,8 +644,6 @@ paths:
     get:
       tags:
         - card
-      security:
-        - bearerAuth: [ ]
       summary: List all Cards
       description: |-
         The List all Cards endpoint retrieves all the existing cards, grouped under a company.
@@ -716,8 +680,6 @@ paths:
     post:
       tags:
         - card
-      security:
-        - bearerAuth: [ ]
       summary: Create a Card
       description: |-
         The Create a Card endpoint creates/issues a card to a user under a Card Program. The card issued
@@ -744,8 +706,6 @@ paths:
     get:
       tags:
         - card
-      security:
-        - bearerAuth: [ ]
       summary: Get Card Details
       description: |-
         The Get Card Details endpoint retrieves all the details of a specific card.
@@ -774,8 +734,6 @@ paths:
     get:
       tags:
         - card
-      security:
-        - bearerAuth: [ ]
       summary: Retrieve Balance on the Card
       description: |-
         The Retrieve Balance on the Card endpoint retrieves the remaining balance of a card.
@@ -804,8 +762,6 @@ paths:
     post:
       tags:
         - card
-      security:
-        - bearerAuth: [ ]
       summary: Activate a Card
       description: |-
         The Activate a Card endpoint activates an issued/created card.
@@ -830,8 +786,6 @@ paths:
     post:
       tags:
         - card
-      security:
-        - bearerAuth: [ ]
       summary: Manage Card Status
       description: |-
         The Manage Card Status endpoint manages the status of a card. This endpoint is helpful as
@@ -863,8 +817,6 @@ paths:
     post:
       tags:
         - card
-      security:
-        - bearerAuth: [ ]
       summary: Load a Card
       description: |-
         The Load a Card endpoint adds funds to an active card.
@@ -895,8 +847,6 @@ paths:
     post:
       tags:
         - card
-      security:
-        - bearerAuth: [ ]
       summary: Unload a Card
       description: |-
         The Unload a Card endpoint removes funds from an active card and moves them back to the Funding
@@ -928,8 +878,6 @@ paths:
     post:
       tags:
         - card
-      security:
-        - bearerAuth: [ ]
       summary: Renewal of the Card
       description: |-
         The Renewal of the Card endpoint renews an expired, lost, or stolen card. In this case, a new
@@ -959,8 +907,6 @@ paths:
     post:
       tags:
         - card
-      security:
-        - bearerAuth: [ ]
       summary: Request a Physical Card
       description: |-
         The Request a Physical Card endpoint issues a Physical card against the Card UUID of the activated
@@ -988,8 +934,6 @@ paths:
     post:
       tags:
         - fee
-      security:
-        - bearerAuth: [ ]
       summary: Add fee configuration
       description: |-
         Configure fee based on transaction types and apply them to a card program template.
@@ -1015,8 +959,6 @@ paths:
     get:
       tags:
         - fee
-      security:
-        - bearerAuth: [ ]
       summary: Fetch fee config
       description: This endpoint fetches the fee config
       parameters:
@@ -1041,8 +983,6 @@ paths:
     patch:
       tags:
         - fee
-      security:
-        - bearerAuth: [ ]
       summary: Change the status of fee config
       description: This endpoint changes the status of the fee config
       parameters:
@@ -1074,8 +1014,6 @@ paths:
     post:
       tags:
         - fee
-      security:
-        - bearerAuth: [ ]
       summary: Add Fee event against card uuid in queue
       parameters:
         - $ref: '#/components/parameters/requestUuidParam'
@@ -1106,8 +1044,6 @@ paths:
     post:
       tags:
         - fee
-      security:
-        - bearerAuth: [ ]
       summary: Apply fee against card uuid present in queue
       parameters:
         - $ref: '#/components/parameters/requestUuidParam'
