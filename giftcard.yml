@@ -22,6 +22,23 @@ tags:
       This group has the Login endpoint that allows you to enter into our system. Moreover,
       the endpoint’s response provides you with the access token, which would be used in
       making further API calls.
+  - name: card
+    description: |-
+      The Cards API Group is designed to manage all the activities related to the cards
+      life cycle. Cards can either be issued in physical or virtual form, or both. Cards
+      would inherit the default characteristics of the card program under which they have
+      been issued, however, some of these can be changed at the card level. Cards could
+      be issued only to a registered user within a card program.
+  - name: webhook
+    description: |-
+      All the asynchronous API calls that are made using the endpoints published by the SimpliFi platform,
+      return a webhook. The purpose of these webhooks is to inform the API user about the status of the
+      endpoint that was initiated.
+
+      The webhook structure remains the same in all the asynchronously running API calls with the only
+      difference in `eventType` field and `eventPayload` object. These two fields are unique for every
+      webhook response. `eventType` describes the event for which the webhook was generated and
+      `eventPayload` describes the payload for that event.
 
 paths:
   /v1/auth/login/{companyName}:
@@ -58,6 +75,90 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponseModel'
+  /card/bulk/order:
+    post:
+      tags:
+        - card
+      summary: Add card bulk order
+      description: |-
+        This endpoint allows you to place a bulk order for gift cards in the specified currency. 
+        The number of cards must be provided in the request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardBulkOrderRequestModel'
+      responses:
+        202:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardBulkOrderResponseModel'
+  /card/order/link:
+    post:
+      tags:
+        - card
+      summary: Create a Card Order Link
+      description: |-
+        This endpoint allows you to create a card order link by assigning one or more cards to a specific order.
+        The link includes a load amount and relevant identifiers.
+      requestBody:
+        description: Card Order Link request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardOrderLinkRequest'
+      responses:
+        201:
+          description: Card Order Link created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardOrderLinkResponse'
+
+  /card/order/de-link:
+    post:
+      tags:
+        - card
+      summary: De-link a Card from Order
+      description: |-
+        This endpoint de-links one or more cards from a given card order, removing the association between them.
+      requestBody:
+        description: Card Order De-link request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardOrderDeLinkRequest'
+      responses:
+        201:
+          description: Card Order de-linked successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardOrderDeLinkResponse'
+
+
+webhooks:
+  cardProgram:
+    post:
+      tags:
+        - webhook
+      security: []
+      summary: Bulk Card Order webhook
+      description: A bulk order card is created in the SimpliFi system and a webhook is published.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardBulkOrderWebhookModel'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+
 
 components:
   securitySchemes:
@@ -145,6 +246,136 @@ components:
           description: |-
             This field contains the token type which is coupled with access token to form
             an authorization header. Accepted value is `bearer`.
+    CardBulkOrderRequestModel:
+      type: object
+      properties:
+        currency:
+          type: string
+          description: This field contains the currency in which the cards will be ordered.
+          example: USD
+        numberOfCards:
+          type: integer
+          format: int64
+          description: This field contains the total number of cards to be ordered.
+          example: 1000
+      required:
+        - currency
+        - numberOfCards
+
+    CardBulkOrderResponseModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: This field contains the unique identifier for the card bulk order.
+          example: 36db6b79-f081-48db-9895-8faf45a53045
+        currency:
+          type: string
+          description: This field contains the currency of the ordered cards.
+          example: USD
+        numberOfCards:
+          type: integer
+          format: int64
+          description: This field contains the total number of cards ordered.
+          example: 1000
+
+    CardOrderLinkRequest:
+      type: object
+      required:
+        - loadAmount
+        - email
+        - cardIdentifier
+      properties:
+        loadAmount:
+          type: number
+          format: decimal
+          description: This field contains the the amount to be loaded on the cards.
+          example: 100
+        email:
+          type: string
+          description: This field contains the email of the user to whom the order is assigned.
+        orderIdentifier:
+          type: string
+          description: This field contains the identifier of the order.
+        cardIdentifier:
+          type: array
+          description: This field contains the list of card identifiers to be included in the order.
+          items:
+            type: string
+
+    CardOrderLinkResponse:
+      type: object
+      properties:
+        orderStatus:
+          type: string
+          format: orderStatusEnum
+          description: This field contains the the status of the order.
+        loadAmount:
+          type: number
+          format: decimal
+          description: This field contains the the amount loaded on the cards.
+          example: 100
+        email:
+          type: string
+          description: This field contains the email of the user to whom the order is assigned.
+        orderIdentifier:
+          type: string
+          description: This field contains the identifier of the order.
+        cardIdentifier:
+          type: array
+          description: This field contains the list of card identifiers included in the order.
+          items:
+            type: string
+
+    CardOrderDeLinkRequest:
+      type: object
+      required:
+        - cardIdentifier
+      properties:
+        orderIdentifier:
+          type: string
+          description: This field contains the identifier of the order.
+        cardIdentifier:
+          type: array
+          description: This field contains the list of card identifiers to be de-linked from the order.
+          items:
+            type: string
+
+    CardOrderDeLinkResponse:
+      type: object
+      properties:
+        orderStatus:
+          type: string
+          format: orderStatusEnum
+          description: This field contains the status of the order after de-linking.
+        orderIdentifier:
+          type: string
+          description: This field contains the identifier of the order.
+        cardIdentifier:
+          type: array
+          description: This field contains the list of card identifiers that were de-linked.
+          items:
+            type: string
+
+    CardBulkOrderWebhookModel:
+      type: object
+      properties:
+        eventType:
+          type: string
+          description: 'BULK_CARD_ISSUANCE'
+          example: 'BULK_CARD_ISSUANCE'
+        eventPayload:
+          type: object
+          properties:
+            uuid:
+              type: string
+              description: This field contains a unique identifier of the card.
+            publicToken:
+              type: string
+              description: This field contains a unique identifier of the card to redeem card.
+            requestUuid:
+              type: string
+              description: This field contains a unique identifier of the request.
 
 security:
   - bearerAuth: []
