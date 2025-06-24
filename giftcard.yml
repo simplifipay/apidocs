@@ -75,6 +75,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponseModel'
+
   /card/bulk/order:
     post:
       tags:
@@ -96,6 +97,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardBulkOrderResponseModel'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+
   /card/order/link:
     post:
       tags:
@@ -118,7 +122,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardOrderLinkResponse'
-
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
   /card/order/de-link:
     post:
       tags:
@@ -140,10 +145,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CardOrderDeLinkResponse'
-
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
 
 webhooks:
-  cardProgram:
+  bulkCardWebhook:
     post:
       tags:
         - webhook
@@ -156,9 +162,8 @@ webhooks:
             schema:
               $ref: '#/components/schemas/CardBulkOrderWebhookModel'
       responses:
-        '200':
+        200:
           $ref: '#/components/responses/WebhookSuccessResponse'
-
 
 components:
   securitySchemes:
@@ -188,6 +193,7 @@ components:
       schema:
         type: string
         example: '00d366f2-a6e9-4714-b172-02c4e58c29d8'
+
   schemas:
     ErrorModel:
       type: object
@@ -246,13 +252,14 @@ components:
           description: |-
             This field contains the token type which is coupled with access token to form
             an authorization header. Accepted value is `bearer`.
+
     CardBulkOrderRequestModel:
       type: object
       properties:
         currency:
           type: string
           description: This field contains the currency in which the cards will be ordered.
-          example: USD
+          example: 'AED'
         numberOfCards:
           type: integer
           format: int64
@@ -261,18 +268,17 @@ components:
       required:
         - currency
         - numberOfCards
-
     CardBulkOrderResponseModel:
       type: object
       properties:
         uuid:
           type: string
           description: This field contains the unique identifier for the card bulk order.
-          example: 36db6b79-f081-48db-9895-8faf45a53045
+          example: '36db6b79-f081-48db-9895-8faf45a53045'
         currency:
           type: string
           description: This field contains the currency of the ordered cards.
-          example: USD
+          example: 'AED'
         numberOfCards:
           type: integer
           format: int64
@@ -281,46 +287,53 @@ components:
 
     CardOrderLinkRequest:
       type: object
-      required:
-        - loadAmount
-        - email
-        - cardIdentifier
       properties:
         loadAmount:
           type: number
           format: decimal
           description: This field contains the the amount to be loaded on the cards.
-          example: 100
+          example: 50.75
         email:
           type: string
           description: This field contains the email of the user to whom the order is assigned.
+          example: 'john.smith@simplifipay.com'
         orderIdentifier:
           type: string
           description: This field contains the identifier of the order.
+          example: 'PO-123456'
         cardIdentifier:
           type: array
           description: This field contains the list of card identifiers to be included in the order.
           items:
             type: string
-
+      required:
+        - loadAmount
+        - email
+        - cardIdentifier
     CardOrderLinkResponse:
       type: object
       properties:
         orderStatus:
           type: string
-          format: orderStatusEnum
           description: This field contains the the status of the order.
+          example: 'LINKED'
+          enum:
+            - LINKED
+            - DELINKED
+            - REDEEMED
         loadAmount:
           type: number
           format: decimal
           description: This field contains the the amount loaded on the cards.
-          example: 100
+          example: 50.75
         email:
           type: string
           description: This field contains the email of the user to whom the order is assigned.
+          example: 'john.smith@simplifipay.com'
         orderIdentifier:
           type: string
           description: This field contains the identifier of the order.
+          example: 'PO-123456'
         cardIdentifier:
           type: array
           description: This field contains the list of card identifiers included in the order.
@@ -329,53 +342,91 @@ components:
 
     CardOrderDeLinkRequest:
       type: object
-      required:
-        - cardIdentifier
       properties:
         orderIdentifier:
           type: string
           description: This field contains the identifier of the order.
+          example: 'PO-123456'
         cardIdentifier:
           type: array
           description: This field contains the list of card identifiers to be de-linked from the order.
           items:
             type: string
+      required:
+        - cardIdentifier
 
     CardOrderDeLinkResponse:
       type: object
       properties:
         orderStatus:
           type: string
-          format: orderStatusEnum
           description: This field contains the status of the order after de-linking.
+          example: 'DELINKED'
+          enum:
+            - LINKED
+            - DELINKED
+            - REDEEMED
         orderIdentifier:
           type: string
           description: This field contains the identifier of the order.
+          example: 'PO-123456'
         cardIdentifier:
           type: array
           description: This field contains the list of card identifiers that were de-linked.
           items:
             type: string
 
-    CardBulkOrderWebhookModel:
+    Webhook:
       type: object
       properties:
-        eventType:
+        uuid:
           type: string
-          description: 'BULK_CARD_ISSUANCE'
-          example: 'BULK_CARD_ISSUANCE'
-        eventPayload:
-          type: object
+          description: ''
+        requestUuid:
+          type: string
+          description: ''
+        requesterUuid:
+          type: string
+          description: ''
+        requestStatus:
+          type: string
+          description: ''
+          enum:
+            - SUCCESS
+            - FAILURE
+        errorCode:
+          type: string
+          description: ''
+        errorMessage:
+          type: string
+          description: ''
+        sourceErrorCode:
+          type: string
+          description: ''
+        sourceErrorMessage:
+          type: string
+          description: ''
+    CardBulkOrderWebhookModel:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
           properties:
-            uuid:
+            eventType:
               type: string
-              description: This field contains a unique identifier of the card.
-            publicToken:
-              type: string
-              description: This field contains a unique identifier of the card to redeem card.
-            requestUuid:
-              type: string
-              description: This field contains a unique identifier of the request.
+              description: 'BULK_CARD_ISSUANCE'
+              example: 'BULK_CARD_ISSUANCE'
+            eventPayload:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  description: This field contains a unique identifier of the card.
+                publicToken:
+                  type: string
+                  description: This field contains a unique identifier of the card to redeem card.
+                requestUuid:
+                  type: string
+                  description: This field contains a unique identifier of the request.
 
 security:
   - bearerAuth: []
