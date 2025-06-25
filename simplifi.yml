@@ -395,11 +395,15 @@ paths:
           description: start date of date-range
           schema:
             type: string
+            format: date
+            example: '2025-02-28'
         - name: endDate
           in: query
           description: end date date of date-range
           schema:
             type: string
+            format: date
+            example: '2025-02-28'
         - name: sortBy
           in: query
           description: sort statement column value
@@ -439,11 +443,15 @@ paths:
           description: start date of date-range
           schema:
             type: string
+            format: date
+            example: '2025-02-28'
         - name: endDate
           in: query
           description: end date date of date-range
           schema:
             type: string
+            format: date
+            example: '2025-02-28'
         - name: sortBy
           in: query
           description: sort statement column value
@@ -506,6 +514,8 @@ paths:
           in: query
           schema:
             type: string
+            format: date
+            example: '2025-02-28'
           description: |-
             Represents the start date of the user's registration with the SimpliFi system. Note All the
             dates in the SimpliFi system are stored and displayed in the following format `yyyy-mm-dd hh:mm:ss`
@@ -514,6 +524,8 @@ paths:
           in: query
           schema:
             type: string
+            format: date
+            example: '2025-02-28'
           description: |-
             Represents the end date of the user's registration with the SimpliFi system. Note All the
             dates in the SimpliFi system are stored and displayed in the following format `yyyy-mm-dd hh:mm:ss`
@@ -654,6 +666,8 @@ paths:
           in: query
           schema:
             type: string
+            format: date
+            example: '2025-02-28'
           description: |-
             Represents the start date of the user's registration with the SimpliFi system. Note All the
             dates in the SimpliFi system are stored and displayed in the following format `yyyy-mm-dd hh:mm:ss`
@@ -662,6 +676,8 @@ paths:
           in: query
           schema:
             type: string
+            format: date
+            example: '2025-02-28'
           description: |-
             Represents the end date of the user's registration with the SimpliFi system. Note All the
             dates in the SimpliFi system are stored and displayed in the following format `yyyy-mm-dd hh:mm:ss`
@@ -1067,19 +1083,383 @@ paths:
         '400':
           $ref: '#/components/responses/EntityNotFoundError'
 
+  /v1/webhook/events:
+    get:
+      tags:
+        - webhook
+      summary: Get all events
+      description: This endpoint fetches all available events for webhooks
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookEventModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /v1/webhook:
+    post:
+      tags:
+        - webhook
+      summary: Create a webhook
+      description: This endpoint allows you to create a webhook, where events will be posted
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookRequestModel'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /webhook/{uuid}:
+    put:
+      tags:
+        - webhook
+      summary: Update a Webhook
+      description: This endpoint allows you to update an existing webhook
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: This is the unique identifier of the webhook.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookRequestModel'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - webhook
+      summary: Delete a Webhook
+      description: This endpoint allows you to delete an existing webhook
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: This is the unique identifier of the webhook.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Webhook Deleted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /webhook/{uuid}/status:
+    put:
+      tags:
+        - webhook
+      summary: Updates the status of Webhook
+      description: This endpoint allows you to update the status of an existing webhook
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: This is the unique identifier of the webhook.
+          required: true
+          schema:
+            type: string
+        - name: enable
+          in: query
+          description: Webhook Status
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+
 webhooks:
-  cardProgram:
+  cardActivation:
+    post:
+      tags:
+        - webhook
+      security: [ ]
+      summary: Card Activation webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardActivationWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  cardIssuance:
+    post:
+      tags:
+        - webhook
+      security: [ ]
+      summary: Card Issuance webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardIssuanceWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  cardPinSetup:
+    post:
+      tags:
+        - webhook
+      security: [ ]
+      summary: Card PIN Setup webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardPinSetupWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  cardRenewed:
+    post:
+      tags:
+        - webhook
+      security: [ ]
+      summary: Card Renewed webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardRenewedWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  cardStatusChange:
+    post:
+      tags:
+        - webhook
+      security: [ ]
+      summary: Card Status Change webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardStatusChangeWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  cardTypeChange:
+    post:
+      tags:
+        - webhook
+      security: [ ]
+      summary: Card Type Change webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardTypeChangeWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+
+  cardLoad:
+    post:
+      tags:
+        - webhook
+      security: [ ]
+      summary: Card Load webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardLoadWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  cardUnload:
+    post:
+      tags:
+        - webhook
+      security: [ ]
+      summary: Card Unload webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardUnloadWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  cardToCardTransfer:
+    post:
+      tags:
+        - webhook
+      security: [ ]
+      summary: Card Unload webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardToCardTransferWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+
+  cardToHolderCreation:
+    post:
+      tags:
+        - webhook
+      security: [ ]
+      summary: User creation webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardToHolderCreationWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  cardToHolderUpdation:
+    post:
+      tags:
+        - webhook
+      security: [ ]
+      summary: User updation webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardToHolderUpdationWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  CardToHolderDeletion:
+    post:
+      tags:
+        - webhook
+      security: [ ]
+      summary: User deletion webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardToHolderDeletionWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+
+  cardProgramCreation:
     post:
       tags:
         - webhook
       security: []
       summary: Card Program Creation webhook
-      description: A card program is created in the SimpliFi system and a webhook is published.
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CardProgramCreationWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  fundTransfer:
+    post:
+      tags:
+        - webhook
+      security: []
+      summary: Funds transfer webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FundTransferWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  raiseFunding:
+    post:
+      tags:
+        - webhook
+      security: []
+      summary: Raise funding webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RaiseFundingWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+
+  transaction:
+    post:
+      tags:
+        - webhook
+      security: []
+      summary: Transaction webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  transactionEnrichment:
+    post:
+      tags:
+        - webhook
+      security: []
+      summary: Transaction Enrichment webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionEnrichmentWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  FeesApply:
+    post:
+      tags:
+        - webhook
+      security: []
+      summary: Fees apply webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeesApplyWebhook'
       responses:
         '200':
           $ref: '#/components/responses/WebhookSuccessResponse'
@@ -1521,7 +1901,7 @@ components:
           type: string
           format: date
           description: The date on which the statement is created.
-          example: 'yyyy-MM-dd'
+          example: '2025-02-28'
         accountId:
           type: string
           description: The account ID of wallet.
@@ -1534,12 +1914,12 @@ components:
           type: string
           format: date-time
           description: The start date of the date range.
-          example: 'yyyy-MM-dd HH:mm:ss'
+          example: '2025-02-28 13:31:00'
         endDate:
           type: string
           format: date-time
           description: The end date of the date range.
-          example: 'yyyy-MM-dd HH:mm:ss'
+          example: '2025-02-28 13:31:00'
         openingBalance:
           type: number
           format: decimal
@@ -1566,7 +1946,7 @@ components:
           type: string
           format: date
           description: The date on which the statement is created.
-          example: 'yyyy-MM-dd'
+          example: '2025-02-28'
         maskPan:
           type: string
           description: The Masked PAN of card.
@@ -1579,12 +1959,12 @@ components:
           type: string
           format: date-time
           description: The start date of the date range.
-          example: 'yyyy-MM-dd HH:mm:ss'
+          example: '2025-02-28 13:31:00'
         endDate:
           type: string
           format: date-time
           description: The end date of the date range.
-          example: 'yyyy-MM-dd HH:mm:ss'
+          example: '2025-02-28 13:31:00'
         openingBalance:
           type: number
           format: decimal
@@ -1635,7 +2015,7 @@ components:
           type: string
           format: date-time
           description: The date on which the transaction was carried out.
-          example: 'yyyy-MM-dd HH:mm:ss'
+          example: '2025-02-28 13:31:00'
         amount:
           type: number
           format: decimal
@@ -1708,9 +2088,13 @@ components:
         startDate:
           description: This is the start date of transactions.
           type: string
+          format: date-time
+          example: '2025-02-28 13:31:00'
         endDate:
           description: This is the end date of transactions.
           type: string
+          format: date-time
+          example: '2025-02-28 13:31:00'
         cardUuid:
           description: This is a unique identifier of the card.
           type: string
@@ -1851,7 +2235,7 @@ components:
           type: string
           format: date-time
           description: This field contains the date on which the transaction was carried out.
-          example: 'yyyy-MM-dd HH:mm:ss'
+          example: '2025-02-28 13:31:00'
         billAmount:
           type: number
           format: decimal
@@ -2015,7 +2399,7 @@ components:
           type: string
           format: date-time
           description: This field contains the Date of Birth of the user.
-          example: 'yyyy-MM-dd HH:mm:ss'
+          example: '2025-02-28 13:31:00'
         roleName:
           type: string
           description: This field contains a unique identifier showing the role of the user such as `CUSTOMER`
@@ -2127,7 +2511,7 @@ components:
           format: date-time
           description: |-
             This field contains the date and time when the user was created in the SimpliFi system.
-          example: 'yyyy-MM-dd HH:mm:ss'
+          example: '2025-02-28 13:31:00'
         createdBy:
           type: string
           description: This field contains the UUID of the user who created this user in the SimpliFi system.
@@ -2200,7 +2584,7 @@ components:
           type: string
           format: date-time
           description: This field contains the date on which the card was created.
-          example: 'yyyy-MM-dd HH:mm:ss'
+          example: '2025-02-28 13:31:00'
         cardStatus:
           type: string
           description: This field contains the current status of the card.
@@ -2216,8 +2600,10 @@ components:
             - EXPIRED
         expiryDate:
           type: string
-          description: This field contains the expiry date of the card.
-          example: 'MM/dd'
+          description: |-
+            This field contains the expiry date of the card.
+            The format is `MM/yy`
+          example: '12/31'
         maskedPan:
           type: string
           description: |-
@@ -2415,6 +2801,89 @@ components:
           items:
             type: string
 
+    WebhookEventType:
+      type: string
+      enum: [
+        CARD_ACTIVATION,
+        CARD_ISSUANCE,
+        CARD_PIN_SETUP,
+        CARD_RENEWED,
+        CARD_STATUS_CHANGE,
+        CARD_TYPE_CHANGE,
+
+        CARD_LOAD,
+        CARD_UNLOAD,
+        CARD_TO_CARD_TRANSFER,
+
+        CARD_HOLDER_CREATION,
+        CARD_HOLDER_UPDATION,
+        CARD_HOLDER_DELETION,
+
+        CARD_PROGRAM_CREATION,
+
+        FUNDS_TRANSFER,
+        RAISE_FUNDING_SOURCE,
+
+        TRANSACTION,
+        TRANSACTION_ENRICHMENT,
+        FEES_APPLY
+      ]
+    WebhookEventModel:
+      type: object
+      properties:
+        eventType:
+          $ref: '#/components/schemas/WebhookEventType'
+    WebhookRequestModel:
+      type: object
+      properties:
+        name:
+          type: string
+          description: A name to uniquely identify the webhook.
+          example: 'Card Status Change'
+        eventType:
+          $ref: '#/components/schemas/WebhookEventType'
+        endpointUrl:
+          type: string
+          description: The endpoint URL hosted by you where webhooks will be sent.
+          example: 'https://webhook.simplifipay.com'
+        extra:
+          type: object
+          description: A key-value pair of any extra header to be sent when calling the `endpoitnUrl`.
+          additionalProperties:
+            type: string
+    WebhookResponseModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Unique identifier of the webhook.
+          example: '84503d40-93b1-4f1d-b265-41553528a028'
+        name:
+          type: string
+          description: A name to uniquely identify the webhook.
+          example: 'Card Status Change'
+        eventType:
+          $ref: '#/components/schemas/WebhookEventType'
+        status:
+          type: string
+          description: Current status of the webhook
+          example: 'ENABLED'
+          enum:
+            - ENABLED
+            - DISABLED
+        endpointUrl:
+          type: string
+          description: The endpoint URL hosted by you where webhooks will be sent.
+          example: 'https://webhook.simplifipay.com'
+        creationDate:
+          type: string
+          format: date-time
+          example: '2025-02-28 13:31:00'
+        lastModified:
+          type: string
+          format: date-time
+          example: '2025-02-28 13:31:00'
+
     Webhook:
       type: object
       properties:
@@ -2463,6 +2932,216 @@ components:
             This field contains the error message, passed down from the processor,
             when the `requestStatus` is a `FAILURE`.
             It is a brief message defining the error.
+      required:
+        - uuid
+        - requestUuid
+        - requesterUuid
+        - companyUuid
+        - requestStatus
+    CardActivationWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_ACTIVATION'
+              example: 'CARD_ACTIVATION'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
+    CardIssuanceWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_ISSUANCE'
+              example: 'CARD_ISSUANCE'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
+    CardPinSetupWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_PIN_SETUP'
+              example: 'CARD_PIN_SETUP'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
+    CardRenewedWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_RENEWED'
+              example: 'CARD_RENEWED'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
+    CardStatusChangeWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_STATUS_CHANGE'
+              example: 'CARD_STATUS_CHANGE'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+    CardTypeChangeWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_TYPE_CHANGE'
+              example: 'CARD_TYPE_CHANGE'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
+
+    CardLoadWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_LOAD'
+              example: 'CARD_LOAD'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
+    CardUnloadWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_UNLOAD'
+              example: 'CARD_UNLOAD'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
+    CardToCardTransferWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_TO_CARD_TRANSFER'
+              example: 'CARD_TO_CARD_TRANSFER'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
+
+    CardToHolderCreationWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_HOLDER_CREATION'
+              example: 'CARD_HOLDER_CREATION'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
+    CardToHolderUpdationWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_HOLDER_UPDATION'
+              example: 'CARD_HOLDER_UPDATION'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
+    CardToHolderDeletionWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_HOLDER_DELETION'
+              example: 'CARD_HOLDER_DELETION'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
+
     CardProgramCreationWebhook:
       allOf:
         - $ref: '#/components/schemas/Webhook'
@@ -2499,6 +3178,100 @@ components:
                   description: |-
                     This is a unique identifier for the request that was generated using the Card Program API.
                   example: '4dbfa9cc-c0a8-4dae-9b0d-dccc6f743797'
+              required:
+                - cardProgramUuid
+                - cardProgramName
+                - currency
+          required:
+            - eventType
+            - eventPayload
+
+    FundTransferWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'FUNDS_TRANSFER'
+              example: 'FUNDS_TRANSFER'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
+    RaiseFundingWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'RAISE_FUNDING_SOURCE'
+              example: 'RAISE_FUNDING_SOURCE'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
+
+    TransactionWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'TRANSACTION'
+              example: 'TRANSACTION'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
+    TransactionEnrichmentWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'TRANSACTION_ENRICHMENT'
+              example: 'TRANSACTION_ENRICHMENT'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
+    FeesApplyWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'FEES_APPLY'
+              example: 'FEES_APPLY'
+            eventPayload:
+              type: object
+              properties:
+                temp:
+                  type: string
+          required:
+            - eventType
+            - eventPayload
 
 security:
   - bearerAuth: []
