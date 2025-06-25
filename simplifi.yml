@@ -2169,9 +2169,7 @@ components:
           description: This is a unique identifier of the card.
           example: '95e8008f-c14b-4d4c-bc3b-6378be83618c'
         maskedPan:
-          type: string
-          description: Last 4 digits of the card.
-          example: '************9999'
+          $ref: '#/components/schemas/MaskedPanParameter'
         userName:
           type: string
           description: username of user.
@@ -2586,18 +2584,7 @@ components:
           description: This field contains the date on which the card was created.
           example: '2025-02-28 13:31:00'
         cardStatus:
-          type: string
-          description: This field contains the current status of the card.
-          example: 'ISSUED'
-          enum:
-            - PENDING
-            - ISSUED
-            - ACTIVATED
-            - DISABLED
-            - LOCKED
-            - REPLACED
-            - REJECTED
-            - EXPIRED
+          $ref: '#/components/schemas/CardStatusParameter'
         expiryDate:
           type: string
           description: |-
@@ -2605,11 +2592,7 @@ components:
             The format is `MM/yy`
           example: '12/31'
         maskedPan:
-          type: string
-          description: |-
-            This field contains the partially hidden Primary Account Number
-            i.e. all digits are masked, except for the last four ones.
-          example: '**********1234'
+          $ref: '#/components/schemas/MaskedPanParameter'
         cardMode:
           type: string
           description: This field contains the mode of the card.
@@ -2892,13 +2875,9 @@ components:
           description: This field contains the unique uuid of the entity of the event.
           example: '929506e0-0b8f-4572-b492-5d3276c62bc5'
         requestUuid:
-          type: string
-          description: This field contains the unique uuid of the request that generated the event.
-          example: '19c96ca8-cd68-4a4f-bb43-cd225502cbde'
+          $ref: '#/components/schemas/RequestUuidParameter'
         companyUuid:
-          type: string
-          description: This field contains the unique uuid of the company.
-          example: 'a58cd30e-955a-4905-87e1-4d70a62624f5'
+          $ref: '#/components/schemas/CompanyUuidParameter'
         requesterUuid:
           type: string
           description: This field contains the unique uuid of the user who generated the request.
@@ -2938,6 +2917,43 @@ components:
         - requesterUuid
         - companyUuid
         - requestStatus
+
+    CompanyUuidParameter:
+      type: string
+      description: This field contains the unique uuid of the company.
+      example: 'a58cd30e-955a-4905-87e1-4d70a62624f5'
+    RequestUuidParameter:
+      type: string
+      description: This field contains the unique uuid of the request that generated the event.
+      example: '19c96ca8-cd68-4a4f-bb43-cd225502cbde'
+    UserUuidParameter:
+      type: string
+      description: This field contains the unique identifier for the user.
+      example: '7fe36866-b2fb-42ca-82ee-75d9dd6e0cdd'
+    CardUuidParameter:
+      type: string
+      description: This field contains the unique identifier for the card.
+      example: 'b55cda10-b930-4314-b32a-57b9cdbf6427'
+    MaskedPanParameter:
+      type: string
+      description: |-
+        This field contains the partially hidden Primary Account Number
+        i.e. all digits are masked, except for the last four ones.
+      example: '**********1234'
+    CardStatusParameter:
+      type: string
+      description: This field contains the current status of the card.
+      example: 'ISSUED'
+      enum:
+        - PENDING
+        - ISSUED
+        - ACTIVATED
+        - DISABLED
+        - LOCKED
+        - REPLACED
+        - REJECTED
+        - EXPIRED
+
     CardActivationWebhook:
       allOf:
         - $ref: '#/components/schemas/Webhook'
@@ -2950,8 +2966,18 @@ components:
             eventPayload:
               type: object
               properties:
-                temp:
-                  type: string
+                status:
+                  $ref: '#/components/schemas/CardStatusParameter'
+                requestUuid:
+                  $ref: '#/components/schemas/RequestUuidParameter'
+                userUuid:
+                  $ref: '#/components/schemas/UserUuidParameter'
+                cardUuid:
+                  $ref: '#/components/schemas/CardUuidParameter'
+              required:
+                - status
+                - userUuid
+                - cardUuid
           required:
             - eventType
             - eventPayload
@@ -2967,8 +2993,41 @@ components:
             eventPayload:
               type: object
               properties:
-                temp:
+                requestUuid:
+                  $ref: '#/components/schemas/RequestUuidParameter'
+                cardUuid:
+                  $ref: '#/components/schemas/CardUuidParameter'
+                expiryDate:
                   type: string
+                  description: |-
+                    This field contains the expiry date of the card.
+                    The format is `MM/yy`
+                  example: '12/31'
+                maskedPan:
+                  $ref: '#/components/schemas/MaskedPanParameter'
+                cardStatus:
+                  $ref: '#/components/schemas/CardStatusParameter'
+                userUuid:
+                  $ref: '#/components/schemas/UserUuidParameter'
+                cardMode:
+                  type: string
+                  description: This field contains the mode of the card.
+                  example: 'PRIMARY'
+                  enum:
+                    - PRIMARY
+                    - SECONDARY
+                physical:
+                  type: string
+                  description: |-
+                    If `VIRTUAL` and `PHYSICAL` card were created at the same time, then
+                    this field will contain the JSON equal to `cardResponse`.
+              required:
+                - cardUuid
+                - expiryDate
+                - maskedPan
+                - cardStatus
+                - userUuid
+                - cardMode
           required:
             - eventType
             - eventPayload
@@ -2984,8 +3043,10 @@ components:
             eventPayload:
               type: object
               properties:
-                temp:
-                  type: string
+                cardUuid:
+                  $ref: '#/components/schemas/CardUuidParameter'
+              required:
+                - cardUuid
           required:
             - eventType
             - eventPayload
@@ -3001,8 +3062,21 @@ components:
             eventPayload:
               type: object
               properties:
-                temp:
-                  type: string
+                cardStatus:
+                  $ref: '#/components/schemas/CardStatusParameter'
+                requestUuid:
+                  $ref: '#/components/schemas/RequestUuidParameter'
+                maskedPan:
+                  $ref: '#/components/schemas/MaskedPanParameter'
+                cardUuid:
+                  $ref: '#/components/schemas/CardUuidParameter'
+                requesterUuid:
+                  description: This field contains the unique uuid of the user who generated the request.
+                  example: 'd0678a88-4be4-4683-810f-466fd2c01c37'
+              required:
+                - cardStatus
+                - maskedPan
+                - cardUuid
           required:
             - eventType
             - eventPayload
@@ -3018,8 +3092,19 @@ components:
             eventPayload:
               type: object
               properties:
-                temp:
+                requestUuid:
+                  $ref: '#/components/schemas/RequestUuidParameter'
+                status:
+                  $ref: '#/components/schemas/CardStatusParameter'
+                reason:
                   type: string
+                  description: This field specifies the reason for changing the card status.
+                  example: 'STOLEN'
+                userUuid:
+                  $ref: '#/components/schemas/UserUuidParameter'
+                cardUuid:
+                  $ref: '#/components/schemas/CardUuidParameter'
+              required:
     CardTypeChangeWebhook:
       allOf:
         - $ref: '#/components/schemas/Webhook'
