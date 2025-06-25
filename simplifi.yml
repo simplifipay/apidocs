@@ -3204,48 +3204,53 @@ components:
       allOf:
         - $ref: '#/components/schemas/Webhook'
         - type: object
-          eventPayload:
-            type: object
-            properties:
-              unLoadStatus:
-                type: string
-                description: This field indicates if the unload was Successfull or not
-                example: 'SUCCESSFUL'
-                enum:
-                  - SUCCESSFUL
-                  - FAILURE
-              requestUuid:
-                $ref: '#/components/schemas/RequestUuidParameter'
-              userUuid:
-                $ref: '#/components/schemas/UserUuidParameter'
-              cardUuid:
-                $ref: '#/components/schemas/CardUuidParameter'
-              cardProgramName:
-                type: string
-                description: This field contains the name of the card program to which the card belongs to
-              transactionAmount:
-                type: number
-                format: decimal
-                description: Amount Unloaded from the card
-                example: 100.45
-              transactionCurrency:
-                type: string
-                description: This field contains the currency of the unload (usually the currency of the card)
-                example: 'AED'
-              transactionUuid:
-                $ref: '#/components/schemas/TransactionUuidParameter'
-              transactionId:
-                $ref: '#/components/schemas/TransactionIdParameter'
-              comments:
-                type: string
-                description: This field contains any comments associated with the unload transaction
-            required:
-              - loadStatus
-              - userUuid
-              - cardUuid
-              - transactionAmount
-              - transactionId
-              - transactionUuid
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_UNLOAD'
+              example: 'CARD_UNLOAD'
+            eventPayload:
+              type: object
+              properties:
+                unloadStatus:
+                  type: string
+                  description: This field indicates if the unload was Successfull or not
+                  example: 'SUCCESSFUL'
+                  enum:
+                    - SUCCESSFUL
+                    - FAILURE
+                requestUuid:
+                  $ref: '#/components/schemas/RequestUuidParameter'
+                userUuid:
+                  $ref: '#/components/schemas/UserUuidParameter'
+                cardUuid:
+                  $ref: '#/components/schemas/CardUuidParameter'
+                cardProgramName:
+                  type: string
+                  description: This field contains the name of the card program to which the card belongs to
+                transactionAmount:
+                  type: number
+                  format: decimal
+                  description: Amount Unloaded from the card
+                  example: 100.45
+                transactionCurrency:
+                  type: string
+                  description: This field contains the currency of the unload (usually the currency of the card)
+                  example: 'AED'
+                transactionUuid:
+                  $ref: '#/components/schemas/TransactionUuidParameter'
+                transactionId:
+                  $ref: '#/components/schemas/TransactionIdParameter'
+                comments:
+                  type: string
+                  description: This field contains any comments associated with the unload transaction
+              required:
+                - unloadStatus
+                - userUuid
+                - cardUuid
+                - transactionAmount
+                - transactionId
+                - transactionUuid
           required:
             - eventType
             - eventPayload
