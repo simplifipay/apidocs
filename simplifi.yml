@@ -2008,9 +2008,7 @@ components:
           description: This is a unique identifier of the fund request.
           example: '11e082c2-993d-4026-82c4-1234ec464796'
         transactionId:
-          type: string
-          description: The transaction ID.
-          example: '6615206'
+          $ref: '#/components/schemas/TransactionIdParameter'
         transactionDate:
           type: string
           format: date-time
@@ -2118,26 +2116,7 @@ components:
             - ASC
             - DESC
         transactionType:
-          type: array
-          description: |-
-            This field defines the Transaction types. Allowed values are
-            `Auth` - for Authorized transactions
-            `Reversal` - for Reversed transactions
-            `Settlement` - for Settled transactions
-            `Refund` - for Refund transactions
-            `Load` - for Card Load transactions
-            `Unload` - for Card Unload transactions
-            `Fees` - for Fee transactions
-          items:
-            type: string
-            enum:
-              - Auth
-              - Reversal
-              - Settlement
-              - Refund
-              - Load
-              - Unload
-              - Fees
+          $ref: '#/components/schemas/TransactionTypeParameter'
     TransactionResponse:
       type: object
       properties:
@@ -2157,13 +2136,9 @@ components:
       type: object
       properties:
         transactionUuid:
-          type: string
-          description: This is a unique identifier of the transaction.
-          example: 'f0888e10-43e3-4686-9c79-256633d79559'
+          $ref: '#/components/schemas/TransactionUuidParameter'
         transactionId:
-          type: string
-          description: This is an identifier of the transaction.
-          example: '6712309'
+          $ref: '#/components/schemas/TransactionIdParameter'
         cardUuid:
           type: string
           description: This is a unique identifier of the card.
@@ -2953,6 +2928,35 @@ components:
         - REPLACED
         - REJECTED
         - EXPIRED
+    TransactionIdParameter:
+      type: string
+      description: This is an identifier of the transaction.
+      example: '6712309'
+    TransactionUuidParameter:
+      type: string
+      description: This is a unique identifier of the transaction.
+      example: 'f0888e10-43e3-4686-9c79-256633d79559'
+    TransactionTypeParameter:
+      type: array
+      description: |-
+        This field defines the Transaction types. Allowed values are
+        `Auth` - for Authorized transactions
+        `Reversal` - for Reversed transactions
+        `Settlement` - for Settled transactions
+        `Refund` - for Refund transactions
+        `Load` - for Card Load transactions
+        `Unload` - for Card Unload transactions
+        `Fees` - for Fee transactions
+      items:
+        type: string
+        enum:
+          - Auth
+          - Reversal
+          - Settlement
+          - Refund
+          - Load
+          - Unload
+          - Fees
 
     CardActivationWebhook:
       allOf:
@@ -3180,13 +3184,9 @@ components:
                   description: This field contains the currency of the load (usually the currency of the card)
                   example: 'AED'
                 transactionUuid:
-                  type: string
-                  description: This is a unique identifier of the load transaction
-                  example: 'b5bdd913-9d40-42f4-9be8-cf7677ceed04'
+                  $ref: '#/components/schemas/TransactionUuidParameter'
                 transactionId:
-                  type: string
-                  description: This is a non-unique identifier of the load transaction
-                  example: '123456'
+                  $ref: '#/components/schemas/TransactionIdParameter'
                 comments:
                   type: string
                   description: This field contains any comments associated with the load transaction
@@ -3233,13 +3233,9 @@ components:
                 description: This field contains the currency of the unload (usually the currency of the card)
                 example: 'AED'
               transactionUuid:
-                type: string
-                description: This is a unique identifier of the unload transaction
-                example: '5c620986-772c-4261-8e74-7537e67a2efa'
+                $ref: '#/components/schemas/TransactionUuidParameter'
               transactionId:
-                type: string
-                description: This is a non-unique identifier of the unload transaction
-                example: '123456'
+                $ref: '#/components/schemas/TransactionIdParameter'
               comments:
                 type: string
                 description: This field contains any comments associated with the unload transaction
@@ -3285,13 +3281,9 @@ components:
                   description: This field contains the currency of the transfer
                   example: 'AED'
                 transactionUuid:
-                  type: string
-                  description: This is a unique identifier of the transfer transaction
-                  example: '5c620986-772c-4261-8e74-7537e67a2efa'
+                  $ref: '#/components/schemas/TransactionUuidParameter'
                 transactionId:
-                  type: string
-                  description: This is a non-unique identifier of the transfer transaction
-                  example: '123456'
+                  $ref: '#/components/schemas/TransactionIdParameter'
                 comments:
                   type: string
                   description: This field contains any comments associated with the transfer transaction
@@ -3307,6 +3299,39 @@ components:
             - eventType
             - eventPayload
 
+    UserWebhook:
+      type: object
+      properties:
+        requestUuid:
+          $ref: '#/components/schemas/RequestUuidParameter'
+        userName:
+          type: string
+          description: This field contains the username of the user created.
+          example: 'john.smith'
+        email:
+          type: string
+          description: This field contains the email address of the user created.
+          example: 'john.smith@simplifipay.com'
+        userUuid:
+          $ref: '#/components/schemas/UserUuidParameter'
+        phoneNumber:
+          type: string
+          description: This field contains the phone number of the user created.
+          example: '+971123456789'
+        role:
+          type: string
+          description: This field contains the type of user created.
+          example: 'CUSTOMER'
+          enum:
+            - CUSTOMER
+            - CLIENT_ADMIN
+            - OPS_MANAGER
+            - SUPPORT_SPECIALIST
+      required:
+        - userName
+        - email
+        - userUuid
+        - role
     CardHolderCreationWebhook:
       allOf:
         - $ref: '#/components/schemas/Webhook'
@@ -3317,10 +3342,7 @@ components:
               description: 'CARD_HOLDER_CREATION'
               example: 'CARD_HOLDER_CREATION'
             eventPayload:
-              type: object
-              properties:
-                temp:
-                  type: string
+              $ref: '#/components/schemas/UserWebhook'
           required:
             - eventType
             - eventPayload
@@ -3334,10 +3356,7 @@ components:
               description: 'CARD_HOLDER_UPDATION'
               example: 'CARD_HOLDER_UPDATION'
             eventPayload:
-              type: object
-              properties:
-                temp:
-                  type: string
+              $ref: '#/components/schemas/UserWebhook'
           required:
             - eventType
             - eventPayload
@@ -3351,10 +3370,7 @@ components:
               description: 'CARD_HOLDER_DELETION'
               example: 'CARD_HOLDER_DELETION'
             eventPayload:
-              type: object
-              properties:
-                temp:
-                  type: string
+              $ref: '#/components/schemas/UserWebhook'
           required:
             - eventType
             - eventPayload
@@ -3415,8 +3431,25 @@ components:
             eventPayload:
               type: object
               properties:
-                temp:
+                sourceCardProgramUuid:
                   type: string
+                  description: |-
+                    This is a unique identifier for the program that was created using the Create Card Program API.
+                  example: '6debbc89-92ae-4a8f-a3bd-ca96af50af2e'
+                destCardProgramUuid:
+                  type: string
+                  description: |-
+                    This is a unique identifier for the program that was created using the Create Card Program API.
+                  example: '2f9abc5c-63eb-4071-b519-dfbdc083e467'
+                amount:
+                  type: number
+                  format: decimal
+                  description: The amount which has been transferred
+                  example: 10000.45
+              required:
+                - sourceCardProgramUuid
+                - destCardProgramUuid
+                - amount
           required:
             - eventType
             - eventPayload
@@ -3432,8 +3465,47 @@ components:
             eventPayload:
               type: object
               properties:
-                temp:
+                fundingRequestUuid:
                   type: string
+                  description: This field contains the unique identifier of raise funding
+                companyUuid:
+                  $ref: '#/components/schemas/CompanyUuidParameter'
+                cardProgramUuid:
+                  type: string
+                  description: |-
+                    This is a unique identifier for the program that was created using the Create Card Program API.
+                  example: '57846713-07cf-4632-97c7-608cda4a1773'
+                amount:
+                  type: number
+                  format: decimal
+                  description: The amount which has been `LOAD` or `UNLOAD` in this raise funding
+                  example: 10000.45
+                transactionType:
+                  type: string
+                  description: This field tells if the transaction is of `LOAD` or `UNLOAD`
+                  example: LOAD
+                  enum:
+                    - CREDIT
+                    - UNLOAD
+                fundingStatus:
+                  type: string
+                  description: This field contains the status of the raise funding
+                  example: 'APPROVED'
+                  enum:
+                    - PENDING
+                    - ACKNOWLEDGED
+                    - APPROVED
+                    - REJECTED
+                description:
+                  type: string
+                  description: This field contains any comments related to raise funding
+                  example: 'NA'
+              required:
+                - fundingRequestUuid
+                - cardProgramUuid
+                - amount
+                - transactionType
+                - fundingStatus
           required:
             - eventType
             - eventPayload
@@ -3450,8 +3522,66 @@ components:
             eventPayload:
               type: object
               properties:
-                temp:
+                transactionId:
+                  $ref: '#/components/schemas/TransactionIdParameter'
+                transactionUuid:
+                  $ref: '#/components/schemas/TransactionUuidParameter'
+                cardUuid:
+                  $ref: '#/components/schemas/CardUuidParameter'
+                transactionType:
+                  $ref: '#/components/schemas/TransactionTypeParameter'
+                transactionAmount:
+                  type: number
+                  format: decimal
+                  description: This field contains the total amount that was transacted.
+                  example: '100.54'
+                transactionCurrency:
                   type: string
+                  description: This field contains the currency in which the amount was transacted.
+                  example: 'AED'
+                billAmount:
+                  type: number
+                  format: decimal
+                  description: This field contains the total amount that was transacted in card's currency.
+                  example: '100.54'
+                billCurrency:
+                  type: string
+                  description: This field contains the card's currency.
+                  example: 'AED'
+                transactionStatusCode:
+                  type: string
+                  description: One or Two digit status code of the transaction
+                  example: '00'
+                mccCode:
+                  type: string
+                  description: This field contains the Merchant Category Code
+                  example: 4081
+                merchantId:
+                  type: string
+                  description: This field contains the Merchant ID
+                  example: '230198000202156'
+                merchantName:
+                  type: string
+                  description: This field contains the name of the Merchant where the transaction happened
+                  example: 'TikTok Ads'
+                transactionDate:
+                  type: string
+                  format: date-time
+                  description: This field contains the date and time when the transaction happened
+                  example: '2025-02-28 13:45:00'
+                transactionReferenceId:
+                  type: string
+                  description: This field contains a non unique Transaction Reference ID from the processor
+                  example: '309749019517678779'
+              required:
+                - transactionId
+                - transactionUuid
+                - cardUuid
+                - transactionType
+                - transactionAmount
+                - transactionCurrency
+                - transactionStatusCode
+                - transactionDate
           required:
             - eventType
             - eventPayload
@@ -3467,8 +3597,36 @@ components:
             eventPayload:
               type: object
               properties:
-                temp:
+                transactionUuid:
+                  $ref: '#/components/schemas/TransactionUuidParameter'
+                categoryName:
                   type: string
+                  description: This field contains the Category Name
+                  example: 'Travel'
+                subCategoryName:
+                  type: string
+                  description: This field contains the Sub-Category Name
+                  example: 'Hotel and Accommodation'
+                brandId:
+                  type: integer
+                  description: This field contains the unique Brand ID
+                  example: 10705
+                brandName:
+                  type: string
+                  description: This field contains the Brand Name
+                  example: 'WordPress'
+                brandLogo:
+                  type: string
+                  description: This field contains the URL of the Brand Logo
+                  example: 'https://simplifipay.com/word_press.png'
+                brandUrl:
+                  type: string
+                  description: This field contains the URL of the Brand official website
+                  example: 'https://simplifipay.com/'
+              required:
+                - transactionUuid
+                - categoryName
+                - subCategoryName
           required:
             - eventType
             - eventPayload
@@ -3484,8 +3642,25 @@ components:
             eventPayload:
               type: object
               properties:
-                temp:
+                cardUuid:
+                  $ref: '#/components/schemas/CardUuidParameter'
+                feeAmount:
+                  type: number
+                  format: decimal
+                  description: This field tells the amount of fee charged
+                  example: 1.25
+                currency:
                   type: string
+                  description: This field tells the currency in which the fee was charged
+                feeOperationType:
+                  type: string
+                  description: This field specifies the Fee Operation Type
+                  example: 'PRIMARY_VIRTUAL_CARD_ISSUANCE'
+              required:
+                - cardUuid
+                - feeAmount
+                - currency
+                - feeOperationType
           required:
             - eventType
             - eventPayload
