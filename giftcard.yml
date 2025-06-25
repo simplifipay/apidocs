@@ -284,6 +284,15 @@ components:
           format: int64
           description: This field contains the total number of cards ordered.
           example: 1000
+        batchNumber:
+          type: string
+          description: This field contains the unique identifier of the bulk order batch.
+          example: 'B-123'
+      required:
+        - uuid
+        - currency
+        - numberOfCards
+        - batchNumber
 
     CardOrderLinkRequest:
       type: object
@@ -339,6 +348,11 @@ components:
           description: This field contains the list of card identifiers included in the order.
           items:
             type: string
+      required:
+        - orderStatus
+        - loadAmount
+        - email
+        - cardIdentifier
 
     CardOrderDeLinkRequest:
       type: object
@@ -375,37 +389,58 @@ components:
           description: This field contains the list of card identifiers that were de-linked.
           items:
             type: string
+      required:
+        - orderStatus
+        - cardIdentifier
 
     Webhook:
       type: object
       properties:
         uuid:
           type: string
-          description: ''
+          description: This field contains the unique uuid of the entity of the event.
+          example: '929506e0-0b8f-4572-b492-5d3276c62bc5'
         requestUuid:
           type: string
-          description: ''
+          description: This field contains the unique uuid of the request that generated the event.
+          example: '19c96ca8-cd68-4a4f-bb43-cd225502cbde'
+        companyUuid:
+          type: string
+          description: This field contains the unique uuid of the company.
+          example: 'a58cd30e-955a-4905-87e1-4d70a62624f5'
         requesterUuid:
           type: string
-          description: ''
+          description: This field contains the unique uuid of the user who generated the request.
+          example: 'b0233bfb-10b4-4218-a807-2fef9c99f125'
         requestStatus:
           type: string
-          description: ''
+          description: This field contains the status of the event, whether it was a success or a failure
+          example: 'SUCCESS'
           enum:
             - SUCCESS
             - FAILURE
         errorCode:
           type: string
-          description: ''
+          description: |-
+            This field contains the error code when the `requestStatus` is a `FAILURE`.
+            It is a 5-7 digit number defining the error.
         errorMessage:
           type: string
-          description: ''
+          description: |-
+            This field contains the error message when the `requestStatus` is a `FAILURE`.
+            It is a brief message defining the error.
         sourceErrorCode:
           type: string
-          description: ''
+          description: |-
+            This field contains the error code, passed down from the processor,
+            when the `requestStatus` is a `FAILURE`.
+            It is a 5-7 digit number defining the error.
         sourceErrorMessage:
           type: string
-          description: ''
+          description: |-
+            This field contains the error message, passed down from the processor,
+            when the `requestStatus` is a `FAILURE`.
+            It is a brief message defining the error.
     CardBulkOrderWebhookModel:
       allOf:
         - $ref: '#/components/schemas/Webhook'
