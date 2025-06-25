@@ -455,13 +455,35 @@ components:
               properties:
                 uuid:
                   type: string
-                  description: This field contains a unique identifier of the card.
-                publicToken:
+                  description: This field contains a unique identifier of the bulk order.
+                  example: '48a5599e-f628-412b-9c8e-ea387bde0a87'
+                currency:
                   type: string
-                  description: This field contains a unique identifier of the card to redeem card.
-                requestUuid:
+                  description: This field contains the currency of the ordered cards.
+                  example: 'AED'
+                numberOfCardsRequested:
+                  type: integer
+                  format: int64
+                  description: This field contains the total number of cards ordered.
+                  example: 1000
+                numberOfCardsGenerated:
+                  type: integer
+                  format: int64
+                  description: This field contains the total number of cards generated.
+                  example: 1000
+                batchNumber:
                   type: string
-                  description: This field contains a unique identifier of the request.
+                  description: This field contains the unique identifier of the bulk order batch.
+                  example: 'B-123'
+                cards:
+                  type: array
+                  description: Details of the generated cards
+                  items:
+                    type: object
+                    properties:
+                      publicToken:
+                        type: string
+                        description: This field contains a unique identifier of the card to redeem card.
 
 security:
   - bearerAuth: []
