@@ -1335,7 +1335,7 @@ webhooks:
         '200':
           $ref: '#/components/responses/WebhookSuccessResponse'
 
-  cardToHolderCreation:
+  cardHolderCreation:
     post:
       tags:
         - webhook
@@ -1345,11 +1345,11 @@ webhooks:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CardToHolderCreationWebhook'
+              $ref: '#/components/schemas/CardHolderCreationWebhook'
       responses:
         '200':
           $ref: '#/components/responses/WebhookSuccessResponse'
-  cardToHolderUpdation:
+  cardHolderUpdation:
     post:
       tags:
         - webhook
@@ -1359,11 +1359,11 @@ webhooks:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CardToHolderUpdationWebhook'
+              $ref: '#/components/schemas/CardHolderUpdationWebhook'
       responses:
         '200':
           $ref: '#/components/responses/WebhookSuccessResponse'
-  CardToHolderDeletion:
+  cardHolderDeletion:
     post:
       tags:
         - webhook
@@ -1373,7 +1373,7 @@ webhooks:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CardToHolderDeletionWebhook'
+              $ref: '#/components/schemas/CardHolderDeletionWebhook'
       responses:
         '200':
           $ref: '#/components/responses/WebhookSuccessResponse'
@@ -3105,6 +3105,9 @@ components:
                 cardUuid:
                   $ref: '#/components/schemas/CardUuidParameter'
               required:
+                - status
+                - userUuid
+                - cardUuid
     CardTypeChangeWebhook:
       allOf:
         - $ref: '#/components/schemas/Webhook'
@@ -3117,8 +3120,24 @@ components:
             eventPayload:
               type: object
               properties:
-                temp:
+                cardUuid:
+                  $ref: '#/components/schemas/CardUuidParameter'
+                cardType:
                   type: string
+                  description: This field contains the Instrument Type of the Card
+                  example: 'PHYSICAL'
+                userUuid:
+                  $ref: '#/components/schemas/UserUuidParameter'
+                maskedPan:
+                  $ref: '#/components/schemas/MaskedPanParameter'
+                cardStatus:
+                  $ref: '#/components/schemas/CardStatusParameter'
+              required:
+                - cardUuid
+                - cardType
+                - userUuid
+                - maskedPan
+                - cardStatus
           required:
             - eventType
             - eventPayload
@@ -3135,8 +3154,49 @@ components:
             eventPayload:
               type: object
               properties:
-                temp:
+                loadStatus:
                   type: string
+                  description: This field indicates if the load was Successfull or not
+                  example: 'SUCCESSFUL'
+                  enum:
+                    - SUCCESSFUL
+                    - FAILURE
+                requestUuid:
+                  $ref: '#/components/schemas/RequestUuidParameter'
+                userUuid:
+                  $ref: '#/components/schemas/UserUuidParameter'
+                cardUuid:
+                  $ref: '#/components/schemas/CardUuidParameter'
+                cardProgramName:
+                  type: string
+                  description: This field contains the name of the card program to which the card belongs to
+                transactionAmount:
+                  type: number
+                  format: decimal
+                  description: Amount Loaded onto the card
+                  example: 100.45
+                transactionCurrency:
+                  type: string
+                  description: This field contains the currency of the load (usually the currency of the card)
+                  example: 'AED'
+                transactionUuid:
+                  type: string
+                  description: This is a unique identifier of the load transaction
+                  example: 'b5bdd913-9d40-42f4-9be8-cf7677ceed04'
+                transactionId:
+                  type: string
+                  description: This is a non-unique identifier of the load transaction
+                  example: '123456'
+                comments:
+                  type: string
+                  description: This field contains any comments associated with the load transaction
+              required:
+                - loadStatus
+                - userUuid
+                - cardUuid
+                - transactionAmount
+                - transactionId
+                - transactionUuid
           required:
             - eventType
             - eventPayload
@@ -3144,16 +3204,52 @@ components:
       allOf:
         - $ref: '#/components/schemas/Webhook'
         - type: object
-          properties:
-            eventType:
-              type: string
-              description: 'CARD_UNLOAD'
-              example: 'CARD_UNLOAD'
-            eventPayload:
-              type: object
-              properties:
-                temp:
-                  type: string
+          eventPayload:
+            type: object
+            properties:
+              unLoadStatus:
+                type: string
+                description: This field indicates if the unload was Successfull or not
+                example: 'SUCCESSFUL'
+                enum:
+                  - SUCCESSFUL
+                  - FAILURE
+              requestUuid:
+                $ref: '#/components/schemas/RequestUuidParameter'
+              userUuid:
+                $ref: '#/components/schemas/UserUuidParameter'
+              cardUuid:
+                $ref: '#/components/schemas/CardUuidParameter'
+              cardProgramName:
+                type: string
+                description: This field contains the name of the card program to which the card belongs to
+              transactionAmount:
+                type: number
+                format: decimal
+                description: Amount Unloaded from the card
+                example: 100.45
+              transactionCurrency:
+                type: string
+                description: This field contains the currency of the unload (usually the currency of the card)
+                example: 'AED'
+              transactionUuid:
+                type: string
+                description: This is a unique identifier of the unload transaction
+                example: '5c620986-772c-4261-8e74-7537e67a2efa'
+              transactionId:
+                type: string
+                description: This is a non-unique identifier of the unload transaction
+                example: '123456'
+              comments:
+                type: string
+                description: This field contains any comments associated with the unload transaction
+            required:
+              - loadStatus
+              - userUuid
+              - cardUuid
+              - transactionAmount
+              - transactionId
+              - transactionUuid
           required:
             - eventType
             - eventPayload
@@ -3169,13 +3265,49 @@ components:
             eventPayload:
               type: object
               properties:
-                temp:
+                requestUuid:
+                  $ref: '#/components/schemas/RequestUuidParameter'
+                srcCardUuid:
+                  $ref: '#/components/schemas/CardUuidParameter'
+                srcCardUserUuid:
+                  $ref: '#/components/schemas/UserUuidParameter'
+                dstCardUuid:
+                  $ref: '#/components/schemas/CardUuidParameter'
+                dstCardUserUuid:
+                  $ref: '#/components/schemas/UserUuidParameter'
+                transactionAmount:
+                  type: number
+                  format: decimal
+                  description: Amount transferred from the `srcCardUuid` to `dstCardUuid`
+                  example: 100.45
+                transactionCurrency:
                   type: string
+                  description: This field contains the currency of the transfer
+                  example: 'AED'
+                transactionUuid:
+                  type: string
+                  description: This is a unique identifier of the transfer transaction
+                  example: '5c620986-772c-4261-8e74-7537e67a2efa'
+                transactionId:
+                  type: string
+                  description: This is a non-unique identifier of the transfer transaction
+                  example: '123456'
+                comments:
+                  type: string
+                  description: This field contains any comments associated with the transfer transaction
+              required:
+                - srcCardUuid
+                - srcCardUserUuid
+                - dstCardUuid
+                - dstCardUserUuid
+                - transactionAmount
+                - transactionId
+                - transactionUuid
           required:
             - eventType
             - eventPayload
 
-    CardToHolderCreationWebhook:
+    CardHolderCreationWebhook:
       allOf:
         - $ref: '#/components/schemas/Webhook'
         - type: object
@@ -3192,7 +3324,7 @@ components:
           required:
             - eventType
             - eventPayload
-    CardToHolderUpdationWebhook:
+    CardHolderUpdationWebhook:
       allOf:
         - $ref: '#/components/schemas/Webhook'
         - type: object
@@ -3209,7 +3341,7 @@ components:
           required:
             - eventType
             - eventPayload
-    CardToHolderDeletionWebhook:
+    CardHolderDeletionWebhook:
       allOf:
         - $ref: '#/components/schemas/Webhook'
         - type: object
