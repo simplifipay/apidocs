@@ -15,13 +15,13 @@ externalDocs:
 servers:
   - url: https://{env}-lb.simplifipay.com
 tags:
-  - name: auth
+  - name: 'Auth'
     description: |-
       The Auth API Group is designed to authorize you to start using the SimpliFi platform.
       This group has the Login endpoint that allows you to enter into our system. Moreover,
       the endpoint’s response provides you with the access token, which would be used in
       making further API calls.
-  - name: card-program
+  - name: 'Card Program'
     description: |-
       The Card Program API Group is designed to manage common features among cards, by
       grouping them under a card program. The SimpliFi platform would create a bespoke
@@ -32,7 +32,7 @@ tags:
       Every card issued under a card program inherits the characteristics of that card
       program. Card program templates are shared separately and if you don’t have them
       already, click on [this link](https://simplifipay.com/).
-  - name: funding-source
+  - name: 'Funding Source'
     description: |-
       The Funding Source API Group is designed to add and manage the funding sources
       under a Company. Funding source is the equivalent of an unique account where all
@@ -44,11 +44,11 @@ tags:
 
       Funding source information would be shared with SimpliFi's clients separately
       and if you don't have them already, click on [this link](https://simplifipay.com/).
-  - name: document
+  - name: 'Document'
     description: |-
       The Document API Group is designed to allow users to handle documents of the
       SimpliFi system which are simply referred to as `Documents`.
-  - name: user
+  - name: 'User'
     description: |-
       The User API Group is designed to manage the users. It is mandatory
       that the users should only be created under a card program. User
@@ -63,23 +63,23 @@ tags:
 
       Following endpoints cover all the aspects of creating and maintaining
       users.
-  - name: card
+  - name: 'Card'
     description: |-
       The Cards API Group is designed to manage all the activities related to the cards
       life cycle. Cards can either be issued in physical or virtual form, or both. Cards
       would inherit the default characteristics of the card program under which they have
       been issued, however, some of these can be changed at the card level. Cards could
       be issued only to a registered user within a card program.
-  - name: transaction
+  - name: 'Transaction'
     description: |-
       The Transactions API Group is designed to allow you to have control over the listing of transactions
       that have been processed on a card. These endpoints enable you to get insights of different
       transactions being carried upon certain cards.
-  - name: fee
+  - name: 'Fee'
     description: |-
       The Fee API group is designed to allow clients to configure and apply transaction fee at various
       levels within their card programs using a simple, flexible API-driven approach.
-  - name: webhook
+  - name: 'Webhook'
     description: |-
       All the asynchronous API calls that are made using the endpoints published by the SimpliFi platform,
       return a webhook. The purpose of these webhooks is to inform the API user about the status of the
@@ -94,7 +94,7 @@ paths:
   /v1/auth/login/{companyName}:
     post:
       tags:
-       - auth
+       - 'Auth'
       security: []
       summary: Login to generate JWT token
       description: |-
@@ -129,7 +129,7 @@ paths:
   /v1/card-program:
     post:
       tags:
-        - card-program
+        - 'Card Program'
       summary: Create Card Program
       description: |-
         The Create Card Program endpoint allows API users to create a new card program
@@ -154,7 +154,7 @@ paths:
   /v1/card-program/{uuid}:
     get:
       tags:
-        - card-program
+        - 'Card Program'
       summary: Get Card Program
       description: |-
         The Get Card Program endpoint retrieves details about a card program.
@@ -182,7 +182,7 @@ paths:
   /v1/card-program/{uuid}/status:
     patch:
       tags:
-        - card-program
+        - 'Card Program'
       summary: Change Card Program Status
       description: |-
         The Change Card Program Status endpoint changes the status of a card program. This endpoint is helpful
@@ -211,8 +211,8 @@ paths:
   /v2/card-program/{uuid}/funding-source:
     post:
       tags:
-        - card-program
-        - funding-source
+        - 'Card Program'
+        - 'Funding Source'
       summary: Link Funding Source to Card Program
       description: |-
         The Link Funding Source to Card Program endpoint links a funding source to a card program.
@@ -245,8 +245,8 @@ paths:
   /v1/card-program/{uuid}/funding-source-balance:
     get:
       tags:
-        - card-program
-        - funding-source
+        - 'Card Program'
+        - 'Funding Source'
       summary: Get Balance of Funding Source
       description: |-
         The Get Balance of Funding Source endpoint retrieves the remaining balance of a funding source.
@@ -273,7 +273,7 @@ paths:
   /v1/card-program/transfer-fund:
     post:
       tags:
-        - card-program
+        - 'Card Program'
       summary: Transfer funds from one Card Program to other
       description: |-
         The Transfer Fund endpoint allows API users to transfer funds from a one
@@ -294,8 +294,8 @@ paths:
   /v1/card-program/raise-funding:
     post:
       tags:
-        - card-program
-        - funding-source
+        - 'Card Program'
+        - 'Funding Source'
       summary: Raise Funding
       description: |-
         The Raise Funding endpoint helps in adding or removing funds from a funding source. This API doesn't
@@ -319,8 +319,8 @@ paths:
   /v1/document/upload:
     post:
       tags:
-        - card-program
-        - document
+        - 'Card Program'
+        - 'Document'
       summary: Raise Funding Document Upload
       description: |-
         This API should be called before calling Raise Funding API to attach `Proof of funds / Confirmation of
@@ -349,8 +349,8 @@ paths:
   /v1/document:
     post:
       tags:
-        - user
-        - document
+        - 'User'
+        - 'Document'
       summary: Upload Document
       description: |-
         The Upload Document endpoint uploads the user documents to the SimpliFi system which are required
@@ -377,9 +377,9 @@ paths:
   /v1/statement:
     get:
       tags:
-        - card-program
-        - funding-source
-        - transaction
+        - 'Card Program'
+        - 'Funding Source'
+        - 'Transaction'
       summary: Funding Source Statement
       description: Get funding source statement based on date range.
       parameters:
@@ -426,8 +426,8 @@ paths:
   /v1/statement/card/{uuid}:
     get:
       tags:
-        - card
-        - transaction
+        - 'Card'
+        - 'Transaction'
       summary: Get Card Statement
       description: Get card statement based on date range.
       parameters:
@@ -476,7 +476,7 @@ paths:
   /v1/transaction:
     post:
       tags:
-        - transaction
+        - 'Transaction'
       summary: List All Transactions
       description: |-
         The List All Transactions endpoint retrieves a paginated array of all the transactions carried
@@ -503,7 +503,7 @@ paths:
   /v1/user:
     get:
       tags:
-        - user
+        - 'User'
       summary: List all Users
       description: |-
         The List all Users endpoint retrieves all the existing users, grouped under a company.
@@ -543,7 +543,7 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
     post:
       tags:
-        - user
+        - 'User'
       summary: Create a User
       description: |-
         The Create a User endpoint creates a new user. In the SimpliFi platform, it is mandatory
@@ -569,7 +569,7 @@ paths:
   /v1/user/{uuid}:
     get:
       tags:
-        - user
+        - 'User'
       summary: Retrieve a User
       description: |-
         The Retrieve a User endpoint retrieves details about an existing user.
@@ -596,7 +596,7 @@ paths:
           $ref: '#/components/responses/EntityNotFoundError'
     put:
       tags:
-        - user
+        - 'User'
       summary: Update a User
       description: |-
         The Update a User endpoint updates the details of an existing user.
@@ -629,7 +629,7 @@ paths:
           $ref: '#/components/responses/EntityNotFoundError'
     delete:
       tags:
-        - user
+        - 'User'
       summary: Delete a User
       description: |-
         The Delete a User endpoint deletes an existing user. Deleting a user does not erase data from the
@@ -655,7 +655,7 @@ paths:
   /v1/card:
     get:
       tags:
-        - card
+        - 'Card'
       summary: List all Cards
       description: |-
         The List all Cards endpoint retrieves all the existing cards, grouped under a company.
@@ -695,7 +695,7 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
     post:
       tags:
-        - card
+        - 'Card'
       summary: Create a Card
       description: |-
         The Create a Card endpoint creates/issues a card to a user under a Card Program. The card issued
@@ -721,7 +721,7 @@ paths:
   /v1/card/{uuid}:
     get:
       tags:
-        - card
+        - 'Card'
       summary: Get Card Details
       description: |-
         The Get Card Details endpoint retrieves all the details of a specific card.
@@ -749,7 +749,7 @@ paths:
   /v1/card/{uuid}/balance-inquiry:
     get:
       tags:
-        - card
+        - 'Card'
       summary: Retrieve Balance on the Card
       description: |-
         The Retrieve Balance on the Card endpoint retrieves the remaining balance of a card.
@@ -777,7 +777,7 @@ paths:
   /v1/card/{uuid}/activate:
     post:
       tags:
-        - card
+        - 'Card'
       summary: Activate a Card
       description: |-
         The Activate a Card endpoint activates an issued/created card.
@@ -801,7 +801,7 @@ paths:
   /v1/card/{uuid}/status:
     post:
       tags:
-        - card
+        - 'Card'
       summary: Manage Card Status
       description: |-
         The Manage Card Status endpoint manages the status of a card. This endpoint is helpful as
@@ -832,7 +832,7 @@ paths:
   /v1/card/{uuid}/load:
     post:
       tags:
-        - card
+        - 'Card'
       summary: Load a Card
       description: |-
         The Load a Card endpoint adds funds to an active card.
@@ -862,7 +862,7 @@ paths:
   /v1/card/{uuid}/unload:
     post:
       tags:
-        - card
+        - 'Card'
       summary: Unload a Card
       description: |-
         The Unload a Card endpoint removes funds from an active card and moves them back to the Funding
@@ -893,7 +893,7 @@ paths:
   /v1/card/{uuid}/renew:
     post:
       tags:
-        - card
+        - 'Card'
       summary: Renewal of the Card
       description: |-
         The Renewal of the Card endpoint renews an expired, lost, or stolen card. In this case, a new
@@ -922,7 +922,7 @@ paths:
   /v1/card/{uuid}/card-type:
     post:
       tags:
-        - card
+        - 'Card'
       summary: Request a Physical Card
       description: |-
         The Request a Physical Card endpoint issues a Physical card against the Card UUID of the activated
@@ -949,7 +949,7 @@ paths:
   /v1/fees:
     post:
       tags:
-        - fee
+        - 'Fee'
       summary: Add fee configuration
       description: |-
         Configure fee based on transaction types and apply them to a card program template.
@@ -974,7 +974,7 @@ paths:
   /v1/fees/{uuid}:
     get:
       tags:
-        - fee
+        - 'Fee'
       summary: Fetch fee config
       description: This endpoint fetches the fee config
       parameters:
@@ -998,7 +998,7 @@ paths:
           $ref: '#/components/responses/EntityNotFoundError'
     patch:
       tags:
-        - fee
+        - 'Fee'
       summary: Change the status of fee config
       description: This endpoint changes the status of the fee config
       parameters:
@@ -1029,7 +1029,7 @@ paths:
   /v1/fees/application/card/{cardUuid}:
     post:
       tags:
-        - fee
+        - 'Fee'
       summary: Add Fee event against card uuid in queue
       parameters:
         - $ref: '#/components/parameters/requestUuidParam'
@@ -1059,7 +1059,7 @@ paths:
   /v1/fees/application/card/{cardUuid}/apply:
     post:
       tags:
-        - fee
+        - 'Fee'
       summary: Apply fee against card uuid present in queue
       parameters:
         - $ref: '#/components/parameters/requestUuidParam'
@@ -1086,7 +1086,7 @@ paths:
   /v1/webhook/events:
     get:
       tags:
-        - webhook
+        - 'Webhook'
       summary: Get all events
       description: This endpoint fetches all available events for webhooks
       parameters:
@@ -1103,7 +1103,7 @@ paths:
   /v1/webhook:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       summary: Create a webhook
       description: This endpoint allows you to create a webhook, where events will be posted
       parameters:
@@ -1126,7 +1126,7 @@ paths:
   /webhook/{uuid}:
     put:
       tags:
-        - webhook
+        - 'Webhook'
       summary: Update a Webhook
       description: This endpoint allows you to update an existing webhook
       parameters:
@@ -1156,7 +1156,7 @@ paths:
           $ref: '#/components/responses/EntityNotFoundError'
     delete:
       tags:
-        - webhook
+        - 'Webhook'
       summary: Delete a Webhook
       description: This endpoint allows you to delete an existing webhook
       parameters:
@@ -1177,7 +1177,7 @@ paths:
   /webhook/{uuid}/status:
     put:
       tags:
-        - webhook
+        - 'Webhook'
       summary: Updates the status of Webhook
       description: This endpoint allows you to update the status of an existing webhook
       parameters:
@@ -1210,7 +1210,7 @@ webhooks:
   cardActivation:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: [ ]
       summary: Card Activation webhook
       requestBody:
@@ -1224,7 +1224,7 @@ webhooks:
   cardIssuance:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: [ ]
       summary: Card Issuance webhook
       requestBody:
@@ -1238,7 +1238,7 @@ webhooks:
   cardPinSetup:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: [ ]
       summary: Card PIN Setup webhook
       requestBody:
@@ -1252,7 +1252,7 @@ webhooks:
   cardRenewed:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: [ ]
       summary: Card Renewed webhook
       requestBody:
@@ -1266,7 +1266,7 @@ webhooks:
   cardStatusChange:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: [ ]
       summary: Card Status Change webhook
       requestBody:
@@ -1280,7 +1280,7 @@ webhooks:
   cardTypeChange:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: [ ]
       summary: Card Type Change webhook
       requestBody:
@@ -1295,7 +1295,7 @@ webhooks:
   cardLoad:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: [ ]
       summary: Card Load webhook
       requestBody:
@@ -1309,7 +1309,7 @@ webhooks:
   cardUnload:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: [ ]
       summary: Card Unload webhook
       requestBody:
@@ -1323,7 +1323,7 @@ webhooks:
   cardToCardTransfer:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: [ ]
       summary: Card Unload webhook
       requestBody:
@@ -1338,7 +1338,7 @@ webhooks:
   cardHolderCreation:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: [ ]
       summary: User creation webhook
       requestBody:
@@ -1352,7 +1352,7 @@ webhooks:
   cardHolderUpdation:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: [ ]
       summary: User updation webhook
       requestBody:
@@ -1366,7 +1366,7 @@ webhooks:
   cardHolderDeletion:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: [ ]
       summary: User deletion webhook
       requestBody:
@@ -1381,7 +1381,7 @@ webhooks:
   cardProgramCreation:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: []
       summary: Card Program Creation webhook
       requestBody:
@@ -1395,7 +1395,7 @@ webhooks:
   fundTransfer:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: []
       summary: Funds transfer webhook
       requestBody:
@@ -1409,7 +1409,7 @@ webhooks:
   raiseFunding:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: []
       summary: Raise funding webhook
       requestBody:
@@ -1424,7 +1424,7 @@ webhooks:
   transaction:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: []
       summary: Transaction webhook
       requestBody:
@@ -1438,7 +1438,7 @@ webhooks:
   transactionEnrichment:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: []
       summary: Transaction Enrichment webhook
       requestBody:
@@ -1452,7 +1452,7 @@ webhooks:
   FeesApply:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: []
       summary: Fees apply webhook
       requestBody:
