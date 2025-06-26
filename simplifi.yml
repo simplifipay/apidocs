@@ -1551,6 +1551,8 @@ components:
           description: |-
             This field contains the token type which is coupled with access token to form
             an authorization header. Accepted value is `bearer`.
+      required:
+        - access_token
 
     CardProgramRequestModel:
       type: object
@@ -1787,6 +1789,12 @@ components:
           description: This field checks if fee operation is enabled or not.
           example: 'true'
           default: false
+      required:
+        - uuid
+        - name
+        - companyUuid
+        - cardProgramStatus
+        - cardProgramTemplateUuid
     FundingSourceBalanceModel:
       type: object
       properties:
@@ -1799,6 +1807,9 @@ components:
           type: string
           description: This field contains the balance amount of the funding source.
           example: 'AED'
+      required:
+        - amount
+        - currency
 
     CardProgramTransferFundsModel:
       type: object
@@ -1818,6 +1829,10 @@ components:
           format: decimal
           description: Amount to be transferred.
           example: '100.50'
+      required:
+        - sourceCardProgramUuid
+        - destCardProgramUuid
+        - amount
 
     FundingSourceRequestModel:
       type: object
@@ -1853,6 +1868,11 @@ components:
           type: string
           description: Currency of card program.
           example: 'USD'
+      required:
+        - uuid
+        - cardProgramUuid
+        - fundingSource
+        - currency
 
     CardProgramStatusChangeRequestModel:
       type: object
@@ -1865,6 +1885,8 @@ components:
             - ACTIVE
             - SUSPENDED
             - INACTIVE
+      required:
+        - cardProgramStatus
 
     RaiseFundingRequestModel:
       type: object
@@ -1889,6 +1911,10 @@ components:
             - TRADING_ACTIVITIES
             - RETAINED_PROFITS
             - INVESTMENT
+      required:
+        - cardProgramUuid
+        - amount
+        - sourceFunds
 
     StatementResponse:
       type: object
@@ -1935,6 +1961,16 @@ components:
           description: The array of transactions.
           items:
             $ref: '#/components/schemas/StatementResponseDetails'
+      required:
+        - companyName
+        - statementDate
+        - accountId
+        - currency
+        - startDate
+        - endDate
+        - openingBalance
+        - closingBalance
+        - transactions
     CardStatementResponse:
       type: object
       properties:
@@ -2000,6 +2036,20 @@ components:
           description: The array of transactions.
           items:
             $ref: '#/components/schemas/TransactionResponseDetails'
+      required:
+        - companyName
+        - statementDate
+        - maskPan
+        - currency
+        - startDate
+        - endDate
+        - openingBalance
+        - currentBalance
+        - settledBalance
+        - unsettledBalance
+        - blockedAmount
+        - totals
+        - transactions
     StatementResponseDetails:
       type: object
       properties:
@@ -2069,6 +2119,14 @@ components:
           type: string
           description: Destination currency
           example: 'USD'
+      required:
+        - fundRequestUuid
+        - transactionId
+        - transactionDate
+        - amount
+        - fundRequestCategory
+        - previousBalance
+        - currentBalance
     TransactionRequestModel:
       type: object
       properties:
@@ -2132,6 +2190,9 @@ components:
           format: int64
           description: |-
             This field contains the total number of elements against the criteria.
+      required:
+        - transactions
+        - totalElement
     TransactionResponseDetails:
       type: object
       properties:
@@ -2234,6 +2295,20 @@ components:
         comments:
           type: string
           description: Any notes for this transaction
+      required:
+        - transactionUuid
+        - transactionId
+        - cardUuid
+        - maskedPan
+        - userName
+        - userEmail
+        - userFullName
+        - transactionType
+        - statusCode
+        - authResponse
+        - transactionAmount
+        - transactionCurrency
+        - transactionDate
 
     RaiseFundingDocumentModel:
       type: object
@@ -2360,7 +2435,8 @@ components:
         - firstName
         - lastName
         - userDetail
-        - contact
+        - address
+        - contacts
     UserDetailModel:
       type: object
       properties:
@@ -2388,6 +2464,7 @@ components:
           example: 'Employee'
       required:
         - cardProgramUuid
+        - dob
         - roleName
     AddressModel:
       type: object
@@ -2418,6 +2495,9 @@ components:
         postalCode:
           type: string
           description: This field contains the postal code of the user.
+      required:
+        - addressType
+        - countryCode
     ContactModel:
       type: object
       properties:
@@ -2433,6 +2513,9 @@ components:
           type: string
           description: This field contains the contact value of the user.
           example: '+971123456789, john.smit@simplifipay.com'
+      required:
+        - contactType
+        - contactValue
     UserModel:
       type: object
       properties:
@@ -2497,6 +2580,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ContactModel'
+      required:
+        - uuid
+        - username
+        - firstName
+        - lastName
+        - gender
+        - userStatus
+        - createdAt
+        - userDetail
+        - address
+        - contacts
 
     CardRequestModel:
       type: object
@@ -2524,6 +2618,7 @@ components:
           $ref: '#/components/schemas/InstrumentType'
       required:
         - userUuid
+        - instrument
     CardResponseModel:
       type: object
       properties:
@@ -2537,10 +2632,6 @@ components:
             This is a system-generated unique identifier of the user
             that was created using the Create User API.
           example: '7ace3a56-3cb1-44db-a81d-2735e54c7c15'
-        traceUuid:
-          type: string
-          description: This field contains a unique identifier for the request.
-          example: '1a59bec7-8f64-4e11-a3d7-fc9f2ca01c87'
         companyUuid:
           type: string
           description: This field contains a unique identifier of the company for which the card has been configured.
@@ -2591,6 +2682,17 @@ components:
           type: string
           description: This is a system-generated unique identifier of the linked VIRTUAL card.
           example: '86d3111d-6d55-45e0-91c1-32c1397f39ab'
+      required:
+        - uuid
+        - userUuid
+        - companyUuid
+        - cardProgramUuid
+        - instrument
+        - creationDate
+        - cardStatus
+        - maskedPan
+        - cardMode
+        - currency
     CardRenewalModel:
       type: object
       properties:
@@ -2602,6 +2704,9 @@ components:
           description: |-
             This is a system-generated unique identifier of the renewed card
             that is issued in place of the original card.
+      required:
+        - originalCardUuid
+        - renewedCardUuid
     InstrumentType:
       type: string
       description: This field specifies the type of card that is being issued.
@@ -2622,6 +2727,8 @@ components:
           type: string
           description: This field contains the currency of Card
           example: 'AED'
+      required:
+        - amount
     CardStatusModel:
       type: object
       properties:
@@ -2645,6 +2752,9 @@ components:
             - SECURITY_VIOLATION
             - RESTRICTED
             - VOIDED
+      required:
+        - status
+        - reason
     CardAmountModel:
       type: object
       properties:
@@ -2656,6 +2766,8 @@ components:
         comments:
           type: string
           description: Comments related to the load request
+      required:
+        - requestedAmount
 
     FeesSetupModel:
       type: object
@@ -2678,6 +2790,10 @@ components:
           description: This array of objects contains fees setup configuration with respect to fee operation type
           items:
             $ref: '#/components/schemas/FeeConfigurationModel'
+      required:
+        - entityType
+        - entityUuid
+        - fees
     FeeConfigurationModel:
       type: object
       properties:
@@ -2726,6 +2842,11 @@ components:
           type: string
           description: This is a system-generated unique identifier of the fee configuration.
           example: 'e00507d5-f5a0-4951-9037-2b15ab852c88'
+      required:
+        - feeOperationType
+        - feeAmount
+        - currency
+        - feesDetectType
     FeesStatusUpdateModel:
       type: object
       properties:
@@ -2736,6 +2857,8 @@ components:
           enum:
             - ACTIVE
             - INACTIVE
+      required:
+        - status
     FeesApplicationCardRequest:
       type: object
       properties:
@@ -2743,6 +2866,8 @@ components:
           type: string
           description: This field contains the unique uuid of fees configuration.
           example: 'b767416b-e6d6-4e09-b741-daa211b4c60c'
+      required:
+        - feeConfigUuid
     FeeApplicationEventResponse:
       type: object
       properties:
@@ -2750,6 +2875,8 @@ components:
           type: string
           description: This field contains the unique uuid of the fee application event.
           example: 'bf4b513a-283d-4405-ae7b-2051e0be1bc0'
+      required:
+        - uuid
     ApplyFeesOnCardRequest:
       type: object
       properties:
@@ -2758,6 +2885,8 @@ components:
           description: This field contains the unique uuid of fee application event.
           items:
             type: string
+      required:
+        - feeApplicationUuids
 
     WebhookEventType:
       type: string
@@ -2791,6 +2920,8 @@ components:
       properties:
         eventType:
           $ref: '#/components/schemas/WebhookEventType'
+      required:
+        - eventType
     WebhookRequestModel:
       type: object
       properties:
@@ -2809,6 +2940,10 @@ components:
           description: A key-value pair of any extra header to be sent when calling the `endpoitnUrl`.
           additionalProperties:
             type: string
+      required:
+        - name
+        - eventType
+        - endpointUrl
     WebhookResponseModel:
       type: object
       properties:
@@ -2841,6 +2976,14 @@ components:
           type: string
           format: date-time
           example: '2025-02-28 13:31:00'
+      required:
+        - uuid
+        - name
+        - eventType
+        - status
+        - endpointUrl
+        - creationDate
+        - lastModified
 
     Webhook:
       type: object
