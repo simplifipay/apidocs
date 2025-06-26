@@ -500,6 +500,191 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
+  /v1/funding-source/{thirdPartyId}/rule-group:
+    post:
+      tags:
+        - 'Funding Source'
+      summary: Create Rule Group on Funding Account
+      description: |-
+        The 'Create Rule Group' endpoint creates new rule group on the Funding Account.
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: thirdPartyId
+          in: path
+          description: |-
+            This is a unique identifier for the Account ID of funding source (wallet)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleGroupModel'
+        required: true
+      responses:
+        '202':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleGroupModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    put:
+      tags:
+        - 'Funding Source'
+      summary: Update Rule Group on Funding Account
+      description: |-
+        The 'Update Rule Group' endpoint updates an existing group on the Funding Account.
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: thirdPartyId
+          in: path
+          description: |-
+            This is a unique identifier for the Account ID of funding source (wallet)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleGroupModel'
+        required: true
+      responses:
+        '202':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleGroupModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Funding Source'
+      summary: Delete Rule Group on Funding Account
+      description: |-
+        The 'Delete Rule Group' endpoint deletes an existing group on the Funding Account.
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: thirdPartyId
+          in: path
+          description: |-
+            This is a unique identifier for the Account ID of funding source (wallet)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleGroupModel'
+        required: true
+      responses:
+        '202':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleGroupModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    get:
+      tags:
+        - 'Funding Source'
+      summary: Get Rule Groups on Funding Account
+      description: |-
+        The 'Get Rule Group' endpoint fetches all existing groups on the Funding Account.
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: thirdPartyId
+          in: path
+          description: |-
+            This is a unique identifier for the Account ID of funding source (wallet)
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RuleGroupResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/funding-source/{thirdPartyId}/rule-group/{ruleGroupUuid}:
+    post:
+      tags:
+        - 'Funding Source'
+      summary: Appply Rule Group on Funding Account
+      description: |-
+        The 'Apply Rule Group' endpoint applies an existing rule group on the Funding Account.
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: thirdPartyId
+          in: path
+          description: |-
+            This is a unique identifier for the Account ID of funding source (wallet)
+          required: true
+          schema:
+            type: string
+        - name: ruleGroupUuid
+          in: path
+          description: |-
+            This is a unique identifier for the Rule Group
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
+          description: accepted.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Funding Source'
+      summary: Remove Rule Group on Funding Account
+      description: |-
+        The 'Remove Rule Group' endpoint removes an existing rule group on the Funding Account.
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: thirdPartyId
+          in: path
+          description: |-
+            This is a unique identifier for the Account ID of funding source (wallet)
+          required: true
+          schema:
+            type: string
+        - name: ruleGroupUuid
+          in: path
+          description: |-
+            This is a unique identifier for the Rule Group
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
+          description: accepted.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+
   /v1/user:
     get:
       tags:
@@ -940,6 +1125,67 @@ paths:
           required: true
       responses:
         '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/card/{uuid}/rule-group/{ruleGroupUuid}:
+    post:
+      tags:
+        - 'Card'
+      summary: Apply rule group on card
+      description: |-
+        This endpoint applies an existing Rule Group on a Card.
+        Following are the properties of this endpoint.
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+        - name: ruleGroupUuid
+          in: path
+          description: |-
+            This is a unique identifier for the Rule Group.
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Card'
+      summary: Remove rule group on card
+      description: |-
+        This endpoint removes an existing Rule Group from a Card.
+        Following are the properties of this endpoint.
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+        - name: ruleGroupUuid
+          in: path
+          description: |-
+            This is a unique identifier for the Rule Group.
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
           description: OK
         '401':
           $ref: '#/components/responses/UnauthorizedError'
@@ -1460,6 +1706,105 @@ webhooks:
           application/json:
             schema:
               $ref: '#/components/schemas/FeesApplyWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+
+  RuleGroupCreation:
+    post:
+      tags:
+        - 'Webhook'
+      security: []
+      summary: Rule group creation webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleGroupCreationWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  RuleGroupUpdation:
+    post:
+      tags:
+        - 'Webhook'
+      security: []
+      summary: Rule group updation webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleGroupUpdationWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  RuleGroupDeletion:
+    post:
+      tags:
+        - 'Webhook'
+      security: []
+      summary: Rule group deletion webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleGroupDeletionWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  WalletRuleGroupCreation:
+    post:
+      tags:
+        - 'Webhook'
+      security: [ ]
+      summary: Wallet rule group creation webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletRuleGroupCreationWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  WalletRuleGroupDeletion:
+    post:
+      tags:
+        - 'Webhook'
+      security: []
+      summary: Wallet rule group deletion webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletRuleGroupDeletionWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  CardRuleGroupCreation:
+    post:
+      tags:
+        - 'Webhook'
+      security: [ ]
+      summary: Card rule group creation webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardRuleGroupCreationWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+  CardRuleGroupDeletion:
+    post:
+      tags:
+        - 'Webhook'
+      security: []
+      summary: Card rule group deletion webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardRuleGroupDeletionWebhook'
       responses:
         '200':
           $ref: '#/components/responses/WebhookSuccessResponse'
@@ -2310,6 +2655,138 @@ components:
         - transactionCurrency
         - transactionDate
 
+    RuleGroupResponseModel:
+      type: object
+      properties:
+        ruleGroup:
+          $ref: '#/components/schemas/RuleGroupModel'
+        enabled:
+          type: boolean
+          description: This field tells whether the `ruleGroup` is enabled or not
+          example: 'true'
+      required:
+        - ruleGroup
+        - enabled
+    RuleGroupModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: |-
+            This field contains the system generated unique identifier for the rule group
+            that was created using the Rule Group API.
+          example: 'cceec464-eb26-4fbf-8e91-695f133ced0a'
+        name:
+          type: string
+          description: Name of the rule group
+          example: 'Rule Group 1'
+        description:
+          type: string
+          description: Description of the rule group
+          example: 'Rule Group 1 Description'
+        transactionRestrictions:
+          $ref: '#/components/schemas/RuleGroupTransactionRestrictions'
+        loadRestrictions:
+          $ref: '#/components/schemas/RuleGroupLoadRestrictions'
+        spendRestrictions:
+          $ref: '#/components/schemas/RuleGroupSpendRestrictions'
+      required:
+        - name
+    RuleGroupTransactionRestrictions:
+      type: object
+      description: Details of transaction-related restrictions.
+      properties:
+        merchantRules:
+          $ref: '#/components/schemas/RuleGroupMerchantRules'
+      required:
+        - merchantRules
+    RuleGroupMerchantRules:
+      type: object
+      description: Allow or deny merchant category codes.
+      properties:
+        allow:
+          type: boolean
+          example: 'true'
+        mcc:
+          type: array
+          items:
+            type: string
+        mccException:
+          type: array
+          items:
+            type: string
+      required:
+        - allow
+        - mcc
+    RuleGroupLoadRestrictions:
+      type: object
+      description: Details of card load-related restrictions.
+      properties:
+        minimumLoad:
+          type: number
+          format: decimal
+          example: 1.5
+        maximumLoad:
+          type: number
+          format: decimal
+          example: 123.45
+        loadCountDailyLimit:
+          type: number
+          format: int32
+          example: 3
+        loadCountWeeklyLimit:
+          type: number
+          format: int32
+          example: 5
+        loadCountMonthlyLimit:
+          type: number
+          format: int32
+          example: 10
+        loadDailyLimit:
+          type: number
+          format: decimal
+          example: 123.45
+        loadWeeklyLimit:
+          type: number
+          format: decimal
+          example: 523.45
+        loadMonthlyLimit:
+          type: number
+          format: decimal
+          example: 1023.45
+    RuleGroupSpendRestrictions:
+      type: object
+      description: Details of card spend-related restrictions.
+      properties:
+        setLimitPerTxn:
+          type: number
+          format: decimal
+          example: 123.45
+        velocityDailyLimit:
+          type: number
+          format: decimal
+          example: 3.45
+        velocityWeeklyLimit:
+          type: number
+          format: decimal
+          example: 23.45
+        velocityMonthlyLimit:
+          type: number
+          format: decimal
+          example: 123.45
+        txnCountDaily:
+          type: number
+          format: int32
+          example: 3
+        txnCountWeekly:
+          type: number
+          format: int32
+          example: 5
+        txnCountMonthly:
+          type: number
+          format: int32
+          example: 10
+
     RaiseFundingDocumentModel:
       type: object
       properties:
@@ -2898,6 +3375,9 @@ components:
         CARD_STATUS_CHANGE,
         CARD_TYPE_CHANGE,
 
+        CARD_RULE_GROUP_CREATION,
+        CARD_RULE_GROUP_DELETION,
+
         CARD_LOAD,
         CARD_UNLOAD,
         CARD_TO_CARD_TRANSFER,
@@ -2908,8 +3388,15 @@ components:
 
         CARD_PROGRAM_CREATION,
 
+        WALLET_RULE_GROUP_CREATION,
+        WALLET_RULE_GROUP_DELETION,
+
         FUNDS_TRANSFER,
         RAISE_FUNDING_SOURCE,
+
+        RULE_GROUP_CREATION,
+        RULE_GROUP_UPDATION,
+        RULE_GROUP_DELETION,
 
         TRANSACTION,
         TRANSACTION_ENRICHMENT,
@@ -3809,6 +4296,199 @@ components:
                 - feeAmount
                 - currency
                 - feeOperationType
+          required:
+            - eventType
+            - eventPayload
+
+    RuleGroupCreationWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'RULE_GROUP_CREATION'
+              example: 'RULE_GROUP_CREATION'
+            eventPayload:
+              type: object
+              properties:
+                thirdPartyId:
+                  type: string
+                  description: This is a unique identifier for the Account ID of funding source (wallet)
+                  example: '885180627'
+                ruleGroupUuid:
+                  type: string
+                  description: |-
+                    This field contains the system generated unique identifier for the rule group
+                    that was created using the Rule Group API.
+                  example: 'aad555d8-5fd9-417e-8474-a11d2b09233a'
+              required:
+                - thirdPartyId
+                - ruleGroupUuid
+          required:
+            - eventType
+            - eventPayload
+    RuleGroupUpdationWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'RULE_GROUP_UPDATION'
+              example: 'RULE_GROUP_UPDATION'
+            eventPayload:
+              type: object
+              properties:
+                thirdPartyId:
+                  type: string
+                  description: This is a unique identifier for the Account ID of funding source (wallet)
+                  example: '885180627'
+                ruleGroupUuid:
+                  type: string
+                  description: |-
+                    This field contains the system generated unique identifier for the rule group
+                    that was created using the Rule Group API.
+                  example: 'aad555d8-5fd9-417e-8474-a11d2b09233a'
+              required:
+                - thirdPartyId
+                - ruleGroupUuid
+          required:
+            - eventType
+            - eventPayload
+    RuleGroupDeletionWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'RULE_GROUP_DELETION'
+              example: 'RULE_GROUP_DELETION'
+            eventPayload:
+              type: object
+              properties:
+                thirdPartyId:
+                  type: string
+                  description: This is a unique identifier for the Account ID of funding source (wallet)
+                  example: '885180627'
+                ruleGroupUuid:
+                  type: string
+                  description: |-
+                    This field contains the system generated unique identifier for the rule group
+                    that was created using the Rule Group API.
+                  example: 'aad555d8-5fd9-417e-8474-a11d2b09233a'
+              required:
+                - thirdPartyId
+                - ruleGroupUuid
+          required:
+            - eventType
+            - eventPayload
+    WalletRuleGroupCreationWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'WALLET_RULE_GROUP_CREATION'
+              example: 'WALLET_RULE_GROUP_CREATION'
+            eventPayload:
+              type: object
+              properties:
+                thirdPartyId:
+                  type: string
+                  description: This is a unique identifier for the Account ID of funding source (wallet)
+                  example: '885180627'
+                ruleGroupUuid:
+                  type: string
+                  description: |-
+                    This field contains the system generated unique identifier for the rule group
+                    that was created using the Rule Group API.
+                  example: 'aad555d8-5fd9-417e-8474-a11d2b09233a'
+              required:
+                - thirdPartyId
+                - ruleGroupUuid
+          required:
+            - eventType
+            - eventPayload
+    WalletRuleGroupDeletionWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'WALLET_RULE_GROUP_DELETION'
+              example: 'WALLET_RULE_GROUP_DELETION'
+            eventPayload:
+              type: object
+              properties:
+                thirdPartyId:
+                  type: string
+                  description: This is a unique identifier for the Account ID of funding source (wallet)
+                  example: '885180627'
+                ruleGroupUuid:
+                  type: string
+                  description: |-
+                    This field contains the system generated unique identifier for the rule group
+                    that was created using the Rule Group API.
+                  example: 'aad555d8-5fd9-417e-8474-a11d2b09233a'
+              required:
+                - thirdPartyId
+                - ruleGroupUuid
+          required:
+            - eventType
+            - eventPayload
+    CardRuleGroupCreationWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_RULE_GROUP_CREATION'
+              example: 'CARD_RULE_GROUP_CREATION'
+            eventPayload:
+              type: object
+              properties:
+                cardUuid:
+                  $ref: '#/components/schemas/CardUuidParameter'
+                ruleGroupUuid:
+                  type: string
+                  description: |-
+                    This field contains the system generated unique identifier for the rule group
+                    that was created using the Rule Group API.
+                  example: 'aad555d8-5fd9-417e-8474-a11d2b09233a'
+              required:
+                - thirdPartyId
+                - ruleGroupUuid
+          required:
+            - eventType
+            - eventPayload
+    CardRuleGroupDeletionWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_RULE_GROUP_DELETION'
+              example: 'CARD_RULE_GROUP_DELETION'
+            eventPayload:
+              type: object
+              properties:
+                cardUuid:
+                  $ref: '#/components/schemas/CardUuidParameter'
+                ruleGroupUuid:
+                  type: string
+                  description: |-
+                    This field contains the system generated unique identifier for the rule group
+                    that was created using the Rule Group API.
+                  example: 'aad555d8-5fd9-417e-8474-a11d2b09233a'
+              required:
+                - thirdPartyId
+                - ruleGroupUuid
           required:
             - eventType
             - eventPayload
