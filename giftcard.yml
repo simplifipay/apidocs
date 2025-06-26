@@ -16,20 +16,20 @@ servers:
   - url: https://{env}-lb.simplifipay.com
 
 tags:
-  - name: auth
+  - name: 'Auth'
     description: |-
       The Auth API Group is designed to authorize you to start using the SimpliFi platform.
       This group has the Login endpoint that allows you to enter into our system. Moreover,
       the endpoint’s response provides you with the access token, which would be used in
       making further API calls.
-  - name: card
+  - name: 'Card'
     description: |-
       The Cards API Group is designed to manage all the activities related to the cards
       life cycle. Cards can either be issued in physical or virtual form, or both. Cards
       would inherit the default characteristics of the card program under which they have
       been issued, however, some of these can be changed at the card level. Cards could
       be issued only to a registered user within a card program.
-  - name: webhook
+  - name: 'Webhook'
     description: |-
       All the asynchronous API calls that are made using the endpoints published by the SimpliFi platform,
       return a webhook. The purpose of these webhooks is to inform the API user about the status of the
@@ -44,7 +44,7 @@ paths:
   /v1/auth/login/{companyName}:
     post:
       tags:
-        - auth
+       - 'Auth'
       security: []
       summary: Login to generate JWT token
       description: |-
@@ -79,7 +79,7 @@ paths:
   /card/bulk/order:
     post:
       tags:
-        - card
+        - 'Card'
       summary: Add card bulk order
       description: |-
         This endpoint allows you to place a bulk order for gift cards in the specified currency. 
@@ -103,8 +103,8 @@ paths:
   /card/order/link:
     post:
       tags:
-        - card
-      summary: Create a Card Order Link
+        - 'Card'
+      summary: Link a card to order
       description: |-
         This endpoint allows you to create a card order link by assigning one or more cards to a specific order.
         The link includes a load amount and relevant identifiers.
@@ -127,7 +127,7 @@ paths:
   /card/order/de-link:
     post:
       tags:
-        - card
+        - 'Card'
       summary: De-link a Card from Order
       description: |-
         This endpoint de-links one or more cards from a given card order, removing the association between them.
@@ -152,7 +152,7 @@ webhooks:
   bulkCardWebhook:
     post:
       tags:
-        - webhook
+        - 'Webhook'
       security: []
       summary: Bulk Card Order webhook
       description: A bulk order card is created in the SimpliFi system and a webhook is published.
@@ -252,6 +252,8 @@ components:
           description: |-
             This field contains the token type which is coupled with access token to form
             an authorization header. Accepted value is `bearer`.
+      required:
+        - access_token
 
     CardBulkOrderRequestModel:
       type: object
@@ -302,10 +304,6 @@ components:
           format: decimal
           description: This field contains the the amount to be loaded on the cards.
           example: 50.75
-        email:
-          type: string
-          description: This field contains the email of the user to whom the order is assigned.
-          example: 'john.smith@simplifipay.com'
         orderIdentifier:
           type: string
           description: This field contains the identifier of the order.
@@ -335,10 +333,6 @@ components:
           format: decimal
           description: This field contains the the amount loaded on the cards.
           example: 50.75
-        email:
-          type: string
-          description: This field contains the email of the user to whom the order is assigned.
-          example: 'john.smith@simplifipay.com'
         orderIdentifier:
           type: string
           description: This field contains the identifier of the order.
@@ -484,6 +478,15 @@ components:
                       publicToken:
                         type: string
                         description: This field contains a unique identifier of the card to redeem card.
+                      expiryDate:
+                        type: string
+                        description: |-
+                          This field contains the expiry date of the card.
+                          The format is `MM/yy`
+                        example: '12/31'
+                    required:
+                      - publicToken
+                      - expiryDate
 
 security:
   - bearerAuth: []
