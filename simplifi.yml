@@ -1931,7 +1931,6 @@ components:
       required:
         - name
         - cardProgramTemplateUuid
-        - config
     CardConfigModel:
       type: object
       description: |-
