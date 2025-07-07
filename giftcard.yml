@@ -313,10 +313,16 @@ components:
           description: This field contains the list of card identifiers to be included in the order.
           items:
             type: string
+        mobileNumber:
+          type: string
+          description: |-
+            This field contains the mobile number on which the OTP will be triggered while activating the gift card.
+          example: '+97123456789'
       required:
         - loadAmount
         - email
         - cardIdentifier
+        - mobileNumber
     CardOrderLinkResponse:
       type: object
       properties:
@@ -342,11 +348,17 @@ components:
           description: This field contains the list of card identifiers included in the order.
           items:
             type: string
+        mobileNumber:
+          type: string
+          description: |-
+            This field contains the mobile number on which the OTP will be triggered while activating the gift card.
+          example: '+97123456789'
       required:
         - orderStatus
         - loadAmount
         - email
         - cardIdentifier
+        - mobileNumber
 
     CardOrderDeLinkRequest:
       type: object
