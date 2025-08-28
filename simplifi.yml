@@ -1836,6 +1836,9 @@ components:
       required: true
       schema:
         type: string
+        allowEmptyValue: false
+        minLength: 20
+        maxLength: 40
         example: '00d366f2-a6e9-4714-b172-02c4e58c29d8'
 
   schemas:
