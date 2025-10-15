@@ -2833,11 +2833,32 @@ components:
         file:
           type: string
           format: binary
-        documentModel:
-          $ref: '#/components/schemas/DocumentModel'
+        userUuid:
+          type: string
+          description: |-
+            This is a system-generated unique identifier of the user that was
+            created using the Create User API.
+          example: '96f78ee1-9e0d-47b1-acc8-d4e65d711aaf'
+        documentType:
+          type: string
+          description: This field contains the type of the document attached by the cardholder.
+          example: 'PASSPORT'
+          enum:
+            - ID_CARD
+            - PASSPORT
+        documentContext:
+          type: string
+          description: This field contains the orientation of the document to be uploaded.
+          example: 'DOCUMENT_FRONT'
+          enum:
+            - DOCUMENT_FRONT
+            - DOCUMENT_BACK
+            - FACE
       required:
         - file
-        - documentModel
+        - userUuid
+        - documentType
+        - documentContext
     DocumentModel:
       type: object
       properties:
