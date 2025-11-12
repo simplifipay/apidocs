@@ -1263,7 +1263,7 @@ paths:
     post:
       tags:
         - 'Card'
-      summary: Apply rule group on card
+      summary: Apply Rule Group on Card
       description: |-
         This endpoint applies an existing Rule Group on a Card.
         Following are the properties of this endpoint.
@@ -1293,7 +1293,7 @@ paths:
     delete:
       tags:
         - 'Card'
-      summary: Remove rule group on card
+      summary: Remove Rule Group on Card
       description: |-
         This endpoint removes an existing Rule Group from a Card.
         Following are the properties of this endpoint.
