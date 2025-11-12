@@ -1147,21 +1147,15 @@ paths:
           description: |-
             This field contains a unique identifier of the card.
           required: true
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/RuleGroupResponseModel'
-        required: true
       responses:
         '202':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RuleGroupModel'
+                type: array
+                items:
+                  $ref: '#/components/schemas/RuleGroupResponseModel'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '400':
