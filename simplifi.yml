@@ -1130,6 +1130,141 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '400':
           $ref: '#/components/responses/EntityNotFoundError'
+  /v1/crd/{uuid}/rule-group:
+    get:
+      tags:
+        - 'Card'
+      summary: Get Rule Groups on Card
+      description: |-
+        This endpoint retrieves all the rule groups on a Card.
+        Following are the properties of this endpoint.
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/RuleGroupResponseModel'
+        required: true
+      responses:
+        '202':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleGroupModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    post:
+      tags:
+        - 'Card'
+      summary: Create Rule Group on Card
+      description: |-
+        This endpoint creates a new rule group on a Card.
+        Following are the properties of this endpoint.
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleGroupModel'
+        required: true
+      responses:
+        '202':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleGroupModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    put:
+      tags:
+        - 'Card'
+      summary: Update Rule Group on Card
+      description: |-
+        This endpoint updates an existing rule group on a Card.
+        Following are the properties of this endpoint.
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleGroupModel'
+        required: true
+      responses:
+        '202':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleGroupModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Card'
+      summary: Delete Rule Group on Card
+      description: |-
+        This endpoint deletes an existing rule group on a Card.
+        Following are the properties of this endpoint.
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleGroupModel'
+        required: true
+      responses:
+        '202':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleGroupModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
   /v1/card/{uuid}/rule-group/{ruleGroupUuid}:
     post:
       tags:
