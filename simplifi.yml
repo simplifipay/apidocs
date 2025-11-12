@@ -1130,7 +1130,7 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '400':
           $ref: '#/components/responses/EntityNotFoundError'
-  /v1/crd/{uuid}/rule-group:
+  /v1/card/{uuid}/rule-group:
     get:
       tags:
         - 'Card'
