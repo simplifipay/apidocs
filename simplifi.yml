@@ -2639,6 +2639,9 @@ components:
         billCurrency:
           description: This field contains the currency in which the amount has been billed.
           type: string
+        classificationType:
+          description: This field contains the classification type of the transaction.
+          type: string
         sortBy:
           type: string
           enum:
@@ -2771,6 +2774,9 @@ components:
         comments:
           type: string
           description: Any notes for this transaction
+        classificationType:
+          type: string
+          description: Classification of the transaction (Business/Personal)
       required:
         - transactionUuid
         - transactionId
