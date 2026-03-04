@@ -313,6 +313,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RaiseFundingResponseModel'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
@@ -325,7 +329,7 @@ paths:
       description: |-
         This API should be called before calling Raise Funding API to attach `Proof of funds / Confirmation of
         funds transfer from the Bank` document (PNG, JPEG, PDF are allowed formats) and the string value returned
-        in the `fileUrl` field of the response should be used in Raise Funding API's attachment parameter.
+        in the `documentUploadUuid` field of the response should be used in Raise Funding API's document parameter.
 
         Note: After the funds are transferred from the whitelisted Bank account to the Issuer/Processor Bank
         account, the confirmation of transfer of funds screenshot/image/PDF should be used as an attachment.
@@ -2378,19 +2382,60 @@ components:
           format: decimal
           description: This field contains the amount that has been requested for fund transfer.
           example: '10000.00'
-        sourceFunds:
+        transactionType:
           type: string
-          description: This field contains the source of funds. Allowed value `OTHER`.
-          example: 'OTHER'
+          description: This field contains the type of the transaction either `CREDIT` or `DEBIT`.
+          example: 'CREDIT'
           enum:
-            - OTHER
-            - TRADING_ACTIVITIES
-            - RETAINED_PROFITS
-            - INVESTMENT
+            - CREDIT
+            - DEBIT
+        documentUploadUuid:
+          type: string
+          description: |-
+            This field contains the system generated unique identifier for the document
+            that was uploaded
+          example: 'e95a7a97-5889-4001-8c40-ed79a8ab6ae9'
       required:
         - cardProgramUuid
         - amount
-        - sourceFunds
+        - transactionType
+        - documentUploadUuid
+    RaiseFundingResponseModel:
+      type: object
+      properties:
+        cardProgramUuid:
+          type: string
+          description: |-
+            This field contains the system generated unique identifier for the program
+            that was created using the Create Card Program API.
+          example: 'c83d26ed-f093-4e43-b81b-35884f068d4b'
+        amount:
+          type: number
+          format: decimal
+          description: This field contains the amount that has been requested for fund transfer.
+          example: '10000.00'
+        transactionType:
+          type: string
+          description: This field contains the type of the transaction either `CREDIT` or `DEBIT`.
+          example: 'CREDIT'
+          enum:
+            - CREDIT
+            - DEBIT
+        status:
+          type: string
+          description: This field contains the status of the Raise Funding
+          example: 'PENDING'
+          enum:
+            - PENDING
+            - ACKNOWLEDGED
+            - APPROVED
+            - NOT_APPROVED
+            - REJECTED
+      required:
+        - cardProgramUuid
+        - amount
+        - transactionType
+        - status
 
     StatementResponse:
       type: object
@@ -2930,17 +2975,6 @@ components:
         file:
           type: string
           format: binary
-        fileUploadModel:
-          $ref: '#/components/schemas/FileUploadModel'
-      required:
-        - file
-        - fileUploadModel
-    FileUploadModel:
-      type: object
-      properties:
-        fileUrl:
-          type: string
-          description: Uploaded file name
         cardProgramUuid:
           type: string
           description: |-
@@ -2959,9 +2993,41 @@ components:
             - LOAD
             - UNLOAD
       required:
+        - file
         - cardProgramUuid
         - amount
         - fundRequestType
+    FileUploadModel:
+      type: object
+      properties:
+        cardProgramUuid:
+          type: string
+          description: |-
+            This field contains the system generated unique identifier for the program
+            that was created using the Create Card Program API.
+          example: '22b52244-fb76-4ae7-be85-ecafba89e5ca'
+        amount:
+          type: number
+          description: This field contains the amount that has been requested for fund transfer.
+          example: '10000.00'
+        fundRequestType:
+          type: string
+          description: This field contains the type for fund request.
+          example: 'LOAD'
+          enum:
+            - LOAD
+            - UNLOAD
+        documentUploadUuid:
+          type: string
+          description: |-
+            This field contains the system generated unique identifier for the document
+            that was uploaded
+          example: 'e95a7a97-5889-4001-8c40-ed79a8ab6ae9'
+      required:
+        - cardProgramUuid
+        - amount
+        - fundRequestType
+        - documentUploadUuid
     DocumentUploadModel:
       type: object
       properties:
