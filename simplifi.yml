@@ -840,6 +840,47 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '400':
           $ref: '#/components/responses/EntityNotFoundError'
+  /v1/user/{uuid}/address/{type}:
+    post:
+      tags:
+        - 'User'
+      summary: Add update address of user
+      operationId: addAddress
+      description: |-
+        One can either add or update an address of the user. Address type can be either `PRIMARY` or `DELIVERY`
+      parameters:
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the user.
+          required: true
+        - name: type
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains the Address Type, either `PRIMARY` or `DELIVERY`
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressRequestModel'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
 
   /v1/card:
     get:
@@ -3198,6 +3239,32 @@ components:
           description: This field contains the postal code of the user.
       required:
         - addressType
+        - countryCode
+    AddressRequestModel:
+      type: object
+      properties:
+        streetAddress:
+          type: string
+          description: This field contains the street address of the user.
+        address2:
+          type: string
+          description: This field contains the second line of address of the user.
+        cityCode:
+          type: string
+          description: This field contains the city name of the user.
+        stateCode:
+          type: string
+          description: This field contains the state name of the user.
+        countryCode:
+          type: string
+          description: This field contains the country code of the user.
+        postalCode:
+          type: string
+          description: This field contains the postal code of the user.
+      required:
+        - streetAddress
+        - cityCode
+        - stateCode
         - countryCode
     ContactModel:
       type: object
