@@ -3246,21 +3246,26 @@ components:
         streetAddress:
           type: string
           description: This field contains the street address of the user.
+          example: Dubai
         address2:
           type: string
           description: This field contains the second line of address of the user.
         cityCode:
           type: string
           description: This field contains the city name of the user.
+          example: Dubai
         stateCode:
           type: string
           description: This field contains the state name of the user.
+          example: DXB
         countryCode:
           type: string
           description: This field contains the country code of the user.
+          example: UAE
         postalCode:
           type: string
           description: This field contains the postal code of the user.
+          example: 0000
       required:
         - streetAddress
         - cityCode
