@@ -3186,16 +3186,15 @@ components:
                     `Load` - for Card Load transactions
                     `Unload` - for Card Unload transactions
                     `Fees` - for Fee transactions
-                  items:
-                    type: string
-                    enum:
-                      - Auth
-                      - Reversal
-                      - Settlement
-                      - Refund
-                      - Load
-                      - Unload
-                      - Fees
+                  example: 'Auth'
+                  enum:
+                    - Auth
+                    - Reversal
+                    - Settlement
+                    - Refund
+                    - Load
+                    - Unload
+                    - Fees
                 transactionAmount:
                   type: number
                   format: decimal
