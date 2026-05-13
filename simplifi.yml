@@ -125,6 +125,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponseModel'
+  /v1/auth/sdk-admin-token/{companyName}:
+    post:
+      tags:
+       - 'Auth'
+      security: []
+      summary: Login to generate SDK Admin JWT token
+      description: |-
+        This Login endpoint allows you to generate an `SDK_ADMIN` token used in the SDK.
+        If you don't have the credentials already, you can request them through
+        [this link](https://simplifipay.com/). The endpoint returns an access token to be
+        used in making further SDK related API calls. Following are the properties of this endpoint.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: companyName
+          in: path
+          description: |-
+            This is an internal identifier of your company in the SimpliFi platform. We will
+            generate the company name for you and share it. If you don't have it already,
+            you can request it through [this link](https://simplifipay.com/).
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SdkAuthRequestModel'
+      responses:
+        200:
+          description: On successful operation JWT token is returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponseModel'
 
   /v1/card-program:
     post:
@@ -1964,6 +1999,9 @@ webhooks:
         - 'Webhook'
       security: [ ]
       summary: Card Activation webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -1978,6 +2016,9 @@ webhooks:
         - 'Webhook'
       security: [ ]
       summary: Card Issuance webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -1992,6 +2033,9 @@ webhooks:
         - 'Webhook'
       security: [ ]
       summary: Card PIN Setup webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2006,6 +2050,9 @@ webhooks:
         - 'Webhook'
       security: [ ]
       summary: Card Renewed webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2020,6 +2067,9 @@ webhooks:
         - 'Webhook'
       security: [ ]
       summary: Card Status Change webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2034,6 +2084,9 @@ webhooks:
         - 'Webhook'
       security: [ ]
       summary: Card Type Change webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2049,6 +2102,9 @@ webhooks:
         - 'Webhook'
       security: [ ]
       summary: Card Load webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2063,6 +2119,9 @@ webhooks:
         - 'Webhook'
       security: [ ]
       summary: Card Unload webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2076,7 +2135,10 @@ webhooks:
       tags:
         - 'Webhook'
       security: [ ]
-      summary: Card Unload webhook
+      summary: Card -to- Card Transfer webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2091,7 +2153,10 @@ webhooks:
       tags:
         - 'Webhook'
       security: [ ]
-      summary: User creation webhook
+      summary: User create webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2105,7 +2170,10 @@ webhooks:
       tags:
         - 'Webhook'
       security: [ ]
-      summary: User updation webhook
+      summary: User update webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2119,7 +2187,10 @@ webhooks:
       tags:
         - 'Webhook'
       security: [ ]
-      summary: User deletion webhook
+      summary: User delete webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2134,7 +2205,10 @@ webhooks:
       tags:
         - 'Webhook'
       security: []
-      summary: Card Program Creation webhook
+      summary: Card Program Create webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2149,6 +2223,9 @@ webhooks:
         - 'Webhook'
       security: []
       summary: Funds transfer webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2163,6 +2240,9 @@ webhooks:
         - 'Webhook'
       security: []
       summary: Raise funding webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2178,6 +2258,9 @@ webhooks:
         - 'Webhook'
       security: []
       summary: Transaction webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2192,6 +2275,9 @@ webhooks:
         - 'Webhook'
       security: []
       summary: Transaction Enrichment webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2205,7 +2291,10 @@ webhooks:
       tags:
         - 'Webhook'
       security: []
-      summary: Fees apply webhook
+      summary: Fee apply webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2220,7 +2309,10 @@ webhooks:
       tags:
         - 'Webhook'
       security: []
-      summary: Rule group creation webhook
+      summary: Rule group create webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2234,7 +2326,10 @@ webhooks:
       tags:
         - 'Webhook'
       security: []
-      summary: Rule group updation webhook
+      summary: Rule group update webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2248,7 +2343,10 @@ webhooks:
       tags:
         - 'Webhook'
       security: []
-      summary: Rule group deletion webhook
+      summary: Rule group delete webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2262,7 +2360,10 @@ webhooks:
       tags:
         - 'Webhook'
       security: [ ]
-      summary: Wallet rule group creation webhook
+      summary: Wallet rule group create webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2276,7 +2377,10 @@ webhooks:
       tags:
         - 'Webhook'
       security: []
-      summary: Wallet rule group deletion webhook
+      summary: Wallet rule group delete webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2290,7 +2394,10 @@ webhooks:
       tags:
         - 'Webhook'
       security: [ ]
-      summary: Card rule group creation webhook
+      summary: Card rule group create webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2304,7 +2411,10 @@ webhooks:
       tags:
         - 'Webhook'
       security: []
-      summary: Card rule group deletion webhook
+      summary: Card rule group delete webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
       requestBody:
         content:
           application/json:
@@ -2354,6 +2464,27 @@ components:
         minLength: 20
         maxLength: 40
         example: '00d366f2-a6e9-4714-b172-02c4e58c29d8'
+    webhookTimestampParam:
+      in: header
+      name: X-SimpliFi-Webhook-Timestamp
+      description: |-
+        Time in milliseconds when the webhook was sent. This time is the difference between the time
+        and midnight, January 1, 1970 UTC.
+      required: true
+      schema:
+        type: string
+        allowEmptyValue: false
+        example: 1778058412016
+    webhookSignatureParam:
+      in: header
+      name: X-SimpliFi-Webhook-Signature
+      description: |-
+        The HMAC-SHA256 signature of the webhook payload. This is used to verify that the webhook was sent by SimpliFi.
+      required: true
+      schema:
+        type: string
+        allowEmptyValue: false
+        example: dIWFyr6BK+5i4r74KiL0XgK7exhF1uX7X0QszXSWCPY=
 
   schemas:
     ErrorModel:
@@ -2375,8 +2506,8 @@ components:
           description: |-
             The values of this enumeration identify your channel for calling the endpoint.
             Example: If you want to generate the access token to call subsequent APIs from
-            your back-end system then use the value simplifi-api-client. Allowed values
-            are: `simplifi-ios-client`, `simplifi-android-client`, and `simplifi-api-client`.
+            your back-end system then use the value `simplifi-api-client`.
+          example: simplifi-api-client
         client_secret:
           type: string
           description: |-
@@ -2384,16 +2515,55 @@ components:
             For each allowed value of “client_id” there is a respective client secret value
             shared with you before the start of the integration. Pass the respective value here.
             If you don't have it already, you can request it through [this link](https://simplifipay.com/).
+          example: 31f7f420-f88c-4809-af2e-8a96ed5727d4
         grant_type:
           type: string
           description: |-
             You need to pass this value to log in through the Client Secret shared by SimpliFi.
             Allowed value is `client_credentials`. If you don't already have these credentials,
             you can request them through [this link](https://simplifipay.com/).
+          example: client_credentials
       required:
         - client_id
         - client_secret
         - grant_type
+    SdkAuthRequestModel:
+      type: object
+      properties:
+        client_id:
+          type: string
+          description: |-
+            The values of this enumeration identify your channel for calling the endpoint.
+            Example: If you want to generate the access token to call subsequent APIs from
+            your back-end system then use the value `simplifi-portal-client`.
+          example: simplifi-portal-client
+        client_secret:
+          type: string
+          description: |-
+            This is a secret identification pattern assigned to you by the SimpliFi platform.
+            For each allowed value of “client_id” there is a respective client secret value
+            shared with you before the start of the integration. Pass the respective value here.
+            If you don't have it already, you can request it through [this link](https://simplifipay.com/).
+          example: 8fbcf78b-d7e8-44ea-be87-118898f24ab2
+        grant_type:
+          type: string
+          description: |-
+            You need to pass this value to log in through the Client Secret shared by SimpliFi.
+            Allowed value is `client_credentials`. If you don't already have these credentials,
+            you can request them through [this link](https://simplifipay.com/).
+          example: client_credentials
+        userUuid:
+          type: string
+          description: |-
+            This field contains the unique identifier for the user.
+            The token generated would be linked with the supplied user identification, and only work
+            with APIs related to the linked user.
+          example: '7fe36866-b2fb-42ca-82ee-75d9dd6e0cdd'
+      required:
+        - client_id
+        - client_secret
+        - grant_type
+        - userUuid
     AuthResponseModel:
       type: object
       properties:
