@@ -121,7 +121,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponseModel'
-  /v1/auth/sdk-admin-token/{companyName}:
+  /v1/auth/sdk/{companyName}:
     post:
       tags:
        - 'Auth'
