@@ -2626,14 +2626,8 @@ components:
       properties:
         poi:
           $ref: '#/components/schemas/CardPoi'
-        velocityControls:
-          $ref: '#/components/schemas/VelocityControlConfigModel'
-        merchantControls:
-          $ref: '#/components/schemas/MerchantDetailModel'
       required:
         - poi
-        - velocityControls
-        - merchantControls
     CardPoi:
       type: object
       description: |-
@@ -2657,6 +2651,7 @@ components:
           description: |-
             This field, if enabled, allows Point of Sale (POS) transactions.
             The allowed values are `true` and `false`.
+            <span class="simplifi-note-nam"><span class="simplifi-note">Note:</span> Not available in all markets</span>
           example: 'true'
         international:
           type: boolean
@@ -2664,100 +2659,6 @@ components:
             This field, if enabled, allows International transactions.
             The allowed values are `true` and `false`.
           example: 'true'
-        contactless:
-          type: boolean
-          description: |-
-            This field, if enabled, allows contactless (RFID, Bluetooth, NFC, etc) transactions.
-            The allowed values are `true` and `false`.
-          example: 'true'
-        dcc:
-          type: boolean
-          description: |-
-            This field, if enabled, allows Dynamic Currency Conversion (DCC) transactions.
-            The allowed values are `true` and `false`.
-          example: 'true'
-    VelocityControlConfigModel:
-      type: object
-      description: |-
-        This object is a collection of velocity control fields that defines the frequency of card's usage,
-        issued under this card program. It contains sub-fields explained in the rows below.
-      properties:
-        activeVelocityAdapterKey:
-          type: string
-          description: |-
-            This is a key for a velocity control group that you want to activate for your card program.
-            A velocity control group contains multiple combinations of card's usage frequency (For example,
-            your daily withdrawal limits at the ATMs). A velocity control key is mapped to each velocity
-            control group that is configured at SimpliFi's backend. Note (this value gets set as the default
-            key for the cards issued once this Card Program is created). The applicable values are shared by
-            SimpliFi separately. If you don’t have them already, click on [this link](https://simplifipay.com/).
-          example: 'SPF-VL-002'
-        velocityControlList:
-          type: array
-          items:
-            $ref: '#/components/schemas/VelocityControlDetailConfigModel'
-    VelocityControlDetailConfigModel:
-      type: object
-      description: |-
-        This array of objects lists the available velocity adapter keys, from which the active velocity
-        adapter key is chosen. It contains the subfields explained in the rows below. Velocity control
-        key list are shared by SimpliFi separately. If you don’t have them already, click
-        on [this link](https://simplifipay.com/).
-      properties:
-        velocityAdapterKey:
-          type: string
-          description: |-
-            This field contains the key to identify velocity control at the processor. A velocity control
-            group contains multiple combinations of card’s usage frequency (For example, your daily
-            withdrawal limits at the ATMs). A velocity control key is mapped to each velocity control group
-            that is configured at SimpliFi’s backend. Note (this value gets set as the default key for the
-            cards issued once this Card Program is created). The applicable values will be shared by SimpliFi
-            separately. If you don’t have them already, click on [this link](https://simplifipay.com/).
-          example: '201'
-        name:
-          type: string
-          description: |-
-            This is the name of the velocity control group. We recommend using unique and identifiable names.
-          example: 'Velocity 201'
-    MerchantDetailModel:
-      type: object
-      description: |-
-        This object is a collection of merchant control fields. These are customizable controls over the
-        top of pre-configured ones. For example, restriction over certain types of merchants such as drugs 
-        nd gambling merchants etc. It contains sub-fields explained in the rows below.
-      properties:
-        whiteList:
-          $ref: '#/components/schemas/MerchantListModel'
-        blackList:
-          $ref: '#/components/schemas/MerchantListModel'
-    MerchantListModel:
-      type: object
-      description: |-
-        This object lists the merchant IDs (MIDs) and MCCs that are to be whitelisted/blacklisted. Any card
-        issued under this card program will work at all the merchants whitelisted and will not work at all
-        the merchants blacklisted.
-      properties:
-        name:
-          type: string
-          description: |-
-            The name that is to be assigned to identify the group of merchant IDs (MIDs)
-            and MCCs to be whitelisted/blacklisted.
-          example: 'whitelist'
-        merchants:
-          type: array
-          description: |-
-            This array of objects is a collection of merchant IDs (MIDs) and MCCs that are to be
-            whitelisted/blacklisted. It contains sub-fields explained in the rows below.
-          items:
-            $ref: '#/components/schemas/MerchantModel'
-    MerchantModel:
-      type: object
-      properties:
-        mid:
-          type: string
-          description: |-
-            This field contains the list of merchant IDs (MIDs) and MCCs to be whitelisted/blacklisted.
-          example: '1234'
     CardProgramResponseModel:
       type: object
       properties:
