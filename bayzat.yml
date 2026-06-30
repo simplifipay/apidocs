@@ -3377,10 +3377,12 @@ components:
                   format: date-time
                   description: This field contains the date and time when the transaction happened
                   example: '2025-02-28 13:45:00'
-                transactionReferenceId:
+                transactionReferenceUuid:
                   type: string
-                  description: This field contains a non unique Transaction Reference ID from the processor
-                  example: '309749019517678779'
+                  description: |-
+                    This is a unique identifier of the related transaction
+                    If there is no related transaction, this field will be null
+                  example: 'f0888e10-43e3-4686-9c79-256633d79559'
               required:
                 - transactionId
                 - transactionUuid
