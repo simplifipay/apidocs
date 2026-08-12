@@ -640,196 +640,6 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
-  /v1/funding-source/{thirdPartyId}/rule-group:
-    post:
-      tags:
-        - 'Funding Source'
-      summary: Create Rule Group on Funding Account
-      description: |-
-        The 'Create Rule Group' endpoint creates new rule group on the Funding Account.
-      parameters:
-        - $ref: '#/components/parameters/jwtTokenParam'
-        - $ref: '#/components/parameters/requestUuidParam'
-        - name: thirdPartyId
-          in: path
-          description: |-
-            This is a unique identifier for the Account ID of funding source (wallet)
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RuleGroupModel'
-        required: true
-      responses:
-        '202':
-          description: Successful operation.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RuleGroupModel'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/EntityNotFoundError'
-    put:
-      tags:
-        - 'Funding Source'
-      summary: Update Rule Group on Funding Account
-      description: |-
-        The 'Update Rule Group' endpoint updates an existing group on the Funding Account.
-      parameters:
-        - $ref: '#/components/parameters/requestUuidParam'
-        - name: thirdPartyId
-          in: path
-          description: |-
-            This is a unique identifier for the Account ID of funding source (wallet)
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RuleGroupModel'
-        required: true
-      responses:
-        '202':
-          description: Successful operation.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RuleGroupModel'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/EntityNotFoundError'
-    delete:
-      tags:
-        - 'Funding Source'
-      summary: Delete Rule Group on Funding Account
-      description: |-
-        The 'Delete Rule Group' endpoint deletes an existing group on the Funding Account.
-      parameters:
-        - $ref: '#/components/parameters/jwtTokenParam'
-        - $ref: '#/components/parameters/requestUuidParam'
-        - name: thirdPartyId
-          in: path
-          description: |-
-            This is a unique identifier for the Account ID of funding source (wallet)
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RuleGroupModel'
-        required: true
-      responses:
-        '202':
-          description: Successful operation.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RuleGroupModel'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/EntityNotFoundError'
-    get:
-      tags:
-        - 'Funding Source'
-      summary: Get Rule Groups on Funding Account
-      description: |-
-        The 'Get Rule Group' endpoint fetches all existing groups on the Funding Account.
-      parameters:
-        - $ref: '#/components/parameters/jwtTokenParam'
-        - $ref: '#/components/parameters/requestUuidParam'
-        - name: thirdPartyId
-          in: path
-          description: |-
-            This is a unique identifier for the Account ID of funding source (wallet)
-          required: true
-          schema:
-            type: string
-      responses:
-        '202':
-          description: Successful operation.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/RuleGroupResponseModel'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/EntityNotFoundError'
-  /v1/funding-source/{thirdPartyId}/rule-group/{ruleGroupUuid}:
-    post:
-      tags:
-        - 'Funding Source'
-      summary: Appply Rule Group on Funding Account
-      description: |-
-        The 'Apply Rule Group' endpoint applies an existing rule group on the Funding Account.
-      parameters:
-        - $ref: '#/components/parameters/jwtTokenParam'
-        - $ref: '#/components/parameters/requestUuidParam'
-        - name: thirdPartyId
-          in: path
-          description: |-
-            This is a unique identifier for the Account ID of funding source (wallet)
-          required: true
-          schema:
-            type: string
-        - name: ruleGroupUuid
-          in: path
-          description: |-
-            This is a unique identifier for the Rule Group
-          required: true
-          schema:
-            type: string
-      responses:
-        '202':
-          description: accepted.
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/EntityNotFoundError'
-    delete:
-      tags:
-        - 'Funding Source'
-      summary: Remove Rule Group on Funding Account
-      description: |-
-        The 'Remove Rule Group' endpoint removes an existing rule group on the Funding Account.
-      parameters:
-        - $ref: '#/components/parameters/jwtTokenParam'
-        - $ref: '#/components/parameters/requestUuidParam'
-        - name: thirdPartyId
-          in: path
-          description: |-
-            This is a unique identifier for the Account ID of funding source (wallet)
-          required: true
-          schema:
-            type: string
-        - name: ruleGroupUuid
-          in: path
-          description: |-
-            This is a unique identifier for the Rule Group
-          required: true
-          schema:
-            type: string
-      responses:
-        '202':
-          description: accepted.
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '400':
-          $ref: '#/components/responses/EntityNotFoundError'
-
   /v1/user:
     get:
       tags:
@@ -1246,6 +1056,10 @@ paths:
       description: |-
         The Retrieve Balance on the Card endpoint retrieves the remaining balance of a card.
         Following are the properties of this endpoint.
+
+        :::warning[Prepaid Debit/Credit card]
+        This API is dependent on card product type (credit/debit)
+        :::
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
@@ -1353,6 +1167,10 @@ paths:
       description: |-
         The Load a Card endpoint adds funds to an active card.
         Following are the properties of this endpoint.
+
+        :::warning[Prepaid Debit/Credit card]
+        This API is dependent on card product type (credit/debit)
+        :::
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
@@ -1385,6 +1203,10 @@ paths:
         The Unload a Card endpoint removes funds from an active card and moves them back to the Funding
         source (Virtual account that holds the funds in certain currency).
         Following are the properties of this endpoint.
+
+        :::warning[Prepaid Debit/Credit card]
+        This API is dependent on card product type (credit/debit)
+        :::
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
@@ -1448,6 +1270,10 @@ paths:
         virtual card. Note (this endpoint is specific to physical cards and cannot be used for virtual cards.
         Physical cards should be issued only for a virtual card in `ACTIVE` status).
         Following are the properties of this endpoint.
+
+        :::warning[Prepaid Debit/Credit card]
+        This API is dependent on card product type (credit/debit)
+        :::
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
@@ -1694,6 +1520,10 @@ paths:
       description: |-
         Configure fee based on transaction types and apply them to a card program template.
         Following are the properties of this endpoint.
+
+        :::warning[Prepaid Debit/Credit card]
+        This API is dependent on card product type (credit/debit)
+        :::
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
@@ -1717,7 +1547,12 @@ paths:
       tags:
         - 'Fee'
       summary: Fetch fee config
-      description: This endpoint fetches the fee config
+      description: |-
+        This endpoint fetches the fee config
+
+        :::warning[Prepaid Debit/Credit card]
+        This API is dependent on card product type (credit/debit)
+        :::
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
@@ -1743,7 +1578,12 @@ paths:
       tags:
         - 'Fee'
       summary: Change the status of fee config
-      description: This endpoint changes the status of the fee config
+      description: |-
+        This endpoint changes the status of the fee config
+
+        :::warning[Prepaid Debit/Credit card]
+        This API is dependent on card product type (credit/debit)
+        :::
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
@@ -1775,6 +1615,12 @@ paths:
       tags:
         - 'Fee'
       summary: Add Fee event against card uuid in queue
+      description: |-
+        This endpoint adds fee even against the card uuid in queue
+
+        :::warning[Prepaid Debit/Credit card]
+        This API is dependent on card product type (credit/debit)
+        :::
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
@@ -1806,6 +1652,12 @@ paths:
       tags:
         - 'Fee'
       summary: Apply fee against card uuid present in queue
+      description: |-
+        This endpoint applies the fee against the card uuid present in queue
+
+        :::warning[Prepaid Debit/Credit card]
+        This API is dependent on card product type (credit/debit)
+        :::
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
@@ -2847,6 +2699,11 @@ components:
             This field contains the system generated unique identifier for the document
             that was uploaded
           example: 'e95a7a97-5889-4001-8c40-ed79a8ab6ae9'
+        receiptDate:
+          type: string
+          format: date-time
+          description: This field contains the date and time when the receipt was generated.
+          example: '2023-07-18T10:00:00Z'
       required:
         - cardProgramUuid
         - amount
