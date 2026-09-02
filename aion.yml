@@ -2836,9 +2836,9 @@ paths:
     get:
       tags:
         - 'Approval'
-      summary: Get Approval Task by Entity
+      summary: Get Approval Tasks by Entity
       description: |-
-        This endpoint retrieves the approval task raised for a specific entity (e.g. the card
+        This endpoint retrieves the approval tasks raised for a specific entity (e.g. the card
         UUID of a physical card issuance request), optionally filtered by `eventName`.
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
@@ -2860,7 +2860,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TaskResponseModel'
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskResponseModel'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '400':
