@@ -88,6 +88,11 @@ tags:
     description: |-
       The Team API Group is designed to let you group users into Teams so that budgets and other
       controls can be applied collectively rather than per individual user.
+  - name: 'Approval'
+    description: |-
+      The Approval API Group is designed as a generic checker/maker workflow. Certain sensitive actions,
+      such as loading balance onto a card or issuing a physical card, are raised as a pending task that
+      a second user must review and either approve or reject before the action is carried out.
   - name: 'Webhook'
     description: |-
       All the asynchronous API calls that are made using the endpoints published by the SimpliFi platform,
@@ -2760,6 +2765,104 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TeamModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+
+  /checker/task:
+    get:
+      tags:
+        - 'Approval'
+      summary: List Pending Approval Tasks
+      description: |-
+        This endpoint retrieves the tasks that are pending review, optionally filtered by `eventName`
+        (e.g. `LOAD_BALANCE` for a card load request, `ISSUE_CARD` for a physical card issuance
+        request).
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: eventName
+          in: query
+          schema:
+            $ref: '#/components/schemas/EventKey'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    put:
+      tags:
+        - 'Approval'
+      summary: Approve or Reject a Task
+      description: |-
+        This endpoint records a decision on one or more pending tasks. Set `taskStatus` to `APPROVED`
+        to allow the underlying action to proceed (e.g. the card load is applied, or the physical
+        card is issued), or to `REJECTED` to block it. This same endpoint is used for both a
+        card load request (`eventName=LOAD_BALANCE`) and a physical card issuance request
+        (`eventName=ISSUE_CARD`) - the request type is determined by the task's `eventName`, not by
+        a separate endpoint.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TaskRequestModel'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /checker/task/entity/{entityUuid}:
+    get:
+      tags:
+        - 'Approval'
+      summary: Get Approval Tasks by Entity
+      description: |-
+        This endpoint retrieves the approval tasks raised for a specific entity (e.g. the card
+        UUID of a physical card issuance request), optionally filtered by `eventName`.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: entityUuid
+          in: path
+          description: |-
+            This is a unique identifier of the entity the task was raised for.
+          required: true
+          schema:
+            type: string
+        - name: eventName
+          in: query
+          schema:
+            $ref: '#/components/schemas/EventKey'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskResponseModel'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '400':
@@ -7503,6 +7606,78 @@ components:
         total:
           type: integer
           format: int64
+
+    EventKey:
+      type: string
+      description: |-
+        The type of action that raised the approval task.
+      enum:
+        - CREATE_USER
+        - INITIATE_KYC
+        - ISSUE_CARD
+        - ACTIVATE_CARD
+        - LOAD_BALANCE
+        - UNLOAD_BALANCE
+        - CARD_TRANSITION
+        - RENEW_CARD
+        - CARD_CONTROLS
+    TaskStatus:
+      type: string
+      enum:
+        - PENDING
+        - APPROVED
+        - REJECTED
+    TaskRequestModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: This is a unique identifier of the task being decided on.
+        taskStatus:
+          $ref: '#/components/schemas/TaskStatus'
+        reason:
+          type: string
+          description: An optional note explaining the decision.
+        modifiedPayload:
+          type: string
+          description: An optional replacement for the original request payload, if the approver amends it before approving.
+        checkerComment:
+          type: string
+      required:
+        - uuid
+        - taskStatus
+    TaskResponseModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+        eventName:
+          $ref: '#/components/schemas/EventKey'
+        entityUuid:
+          type: string
+          readOnly: true
+          description: This is a unique identifier of the entity the task was raised for (e.g. the card UUID for a card load or physical card request).
+        entityName:
+          type: string
+          readOnly: true
+        submittedBy:
+          type: string
+          readOnly: true
+        approvedBy:
+          type: string
+          readOnly: true
+        taskStatus:
+          $ref: '#/components/schemas/TaskStatus'
+        creationDate:
+          type: string
+        lastModified:
+          type: string
+        detailPayload:
+          type: string
+          description: The original request payload that is pending review.
+
 
 security:
   - bearerAuth: []
