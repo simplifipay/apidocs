@@ -2172,6 +2172,9 @@ paths:
         in the request body. A receipt rule defines the conditions (currency, amount threshold,
         channel, merchant or category) under which a receipt must be uploaded for a transaction, and
         the compliance/reminder behavior around it.
+
+        Only one active receipt rule is allowed per company. Creating a new rule while one is already
+        active fails validation; suspend the existing rule first via the status endpoint.
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
@@ -6790,10 +6793,47 @@ components:
         - type
         - currency
     TransactionReceiptPolicyRequest:
-      allOf:
-        - $ref: '#/components/schemas/TransactionReceiptPolicyDetails'
+      type: object
       description: |-
-        Supply `uuid` to update an existing receipt rule, or omit it to create a new one.
+        Supply `uuid` to update an existing receipt rule, or omit it to create a new one. The
+        condition fields (currency, amount threshold, channel, merchant, category) go under
+        `policyDetails`; only the auto-block/reminder configuration is top-level.
+      properties:
+        name:
+          type: string
+          description: Name of the receipt rule.
+        uuid:
+          type: string
+          description: Supply to update an existing rule; omit to create a new one.
+        policyDetails:
+          $ref: '#/components/schemas/TransactionReceiptPolicyDetails'
+        autoBlockEnabled:
+          type: boolean
+          description: Whether a card is automatically blocked once the compliance threshold is breached.
+        reminderThreshold:
+          type: integer
+          description: Number of days after the transaction before a receipt reminder is sent.
+        complianceDaysThreshold:
+          type: integer
+          description: Number of days a receipt may remain outstanding before the transaction is out of compliance.
+        manualUnblockAllowed:
+          type: boolean
+          description: Whether a card auto-blocked by this rule can be manually unblocked.
+        autoReminderEnabled:
+          type: boolean
+        reminderIntervalHours:
+          type: integer
+          enum:
+            - 24
+            - 48
+            - 72
+            - 168
+        autoReminderLimit:
+          type: integer
+          description: Maximum number of automatic reminders to send.
+      required:
+        - name
+        - policyDetails
     TransactionReceiptPolicyResponse:
       allOf:
         - $ref: '#/components/schemas/TransactionReceiptPolicyDetails'
