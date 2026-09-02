@@ -1731,6 +1731,160 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
+  /v1/card/{uuid}/autoload:
+    get:
+      tags:
+        - 'Card'
+      summary: Get Autoload Configuration on Card
+      description: |-
+        This endpoint retrieves the autoload configuration set up on a Card, including the
+        system-computed `nextLoadAt` occurrence of the schedule.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardAutoloadResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    post:
+      tags:
+        - 'Card'
+      summary: Create Autoload on Card
+      description: |-
+        This endpoint creates a new autoload schedule on a Card. An autoload schedule automatically
+        loads a fixed `amount` onto a card on a recurring `scheduleType` (`MONTHLY`, `WEEKLY` or `DAILY`)
+        basis, so that the card owner does not need to be manually loaded every cycle.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardAutoloadRequestModel'
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    put:
+      tags:
+        - 'Card'
+      summary: Update Autoload on Card
+      description: |-
+        This endpoint updates the existing autoload schedule on a Card.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardAutoloadRequestModel'
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Card'
+      summary: Suspend Autoload on Card
+      description: |-
+        This endpoint suspends (removes) the autoload schedule on a Card. There is no separate
+        pause/resume state — deleting the schedule is how autoload is switched off, and a new
+        schedule must be created to switch it back on.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/card/autoload:
+    get:
+      tags:
+        - 'Card'
+      summary: List All Autoload Configurations
+      description: |-
+        This endpoint retrieves a paginated list of all the autoload configurations set up across
+        cards under your company.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+        - name: sortDir
+          in: query
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardAutoloadResponseList'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
 webhooks:
   cardActivation:
     post:
@@ -5936,6 +6090,122 @@ components:
         - errorCode
         - errorMessage
 
+
+    CardAutoloadRequestModel:
+      type: object
+      properties:
+        scheduleType:
+          type: string
+          description: The recurrence basis of the autoload schedule.
+          enum:
+            - MONTHLY
+            - WEEKLY
+            - DAILY
+        dayOfTheMonth:
+          type: integer
+          description: The day of the month the autoload runs on. Required, and only applicable, when `scheduleType` is `MONTHLY`.
+          example: 1
+        dayOfWeek:
+          type: string
+          description: The day of the week the autoload runs on. Required, and only applicable, when `scheduleType` is `WEEKLY`.
+          enum:
+            - MONDAY
+            - TUESDAY
+            - WEDNESDAY
+            - THURSDAY
+            - FRIDAY
+            - SATURDAY
+            - SUNDAY
+        includedDaysOfWeek:
+          type: array
+          description: The days of the week the autoload runs on. Only applicable when `scheduleType` is `DAILY`.
+          items:
+            type: string
+            enum:
+              - MONDAY
+              - TUESDAY
+              - WEDNESDAY
+              - THURSDAY
+              - FRIDAY
+              - SATURDAY
+              - SUNDAY
+        scheduleTime:
+          type: string
+          description: |-
+            The time of day (whole hour, in `scheduleTimezone`) the autoload runs at, formatted as `HH:00`.
+          example: '09:00'
+        scheduleTimezone:
+          type: string
+          description: The IANA timezone identifier that `scheduleTime` is evaluated in.
+          example: 'Asia/Dubai'
+        skipIfBalanceAtLeast:
+          type: number
+          format: decimal
+          description: When set, the autoload is skipped for a cycle if the card balance is already at or above this amount.
+        amount:
+          type: number
+          format: decimal
+          description: The amount to load onto the card each time the autoload schedule runs.
+          example: '100.00'
+      required:
+        - scheduleType
+        - scheduleTime
+        - scheduleTimezone
+        - amount
+    CardAutoloadResponseModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: This is a system-generated unique identifier for the autoload configuration.
+        cardUuid:
+          type: string
+          description: This field contains a unique identifier of the card the autoload is set up on.
+        scheduleType:
+          type: string
+          enum:
+            - MONTHLY
+            - WEEKLY
+            - DAILY
+        dayOfTheMonth:
+          type: integer
+        dayOfWeek:
+          type: string
+        includedDaysOfWeek:
+          type: array
+          items:
+            type: string
+        scheduleTime:
+          type: string
+        scheduleTimezone:
+          type: string
+        skipIfBalanceAtLeast:
+          type: number
+          format: decimal
+        amount:
+          type: number
+          format: decimal
+        nextLoadAt:
+          type: string
+          format: date-time
+          description: |-
+            The next server-computed occurrence at which this schedule will run. This is `null` for
+            incomplete schedules.
+      required:
+        - uuid
+        - cardUuid
+        - scheduleType
+        - amount
+    CardAutoloadResponseList:
+      type: object
+      properties:
+        autoLoadConfig:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardAutoloadResponseModel'
+        totalElements:
+          type: integer
+          format: int64
 
 security:
   - bearerAuth: []
