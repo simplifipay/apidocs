@@ -2187,10 +2187,6 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TransactionReceiptPolicyResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '400':
@@ -6835,13 +6831,59 @@ components:
         - name
         - policyDetails
     TransactionReceiptPolicyResponse:
-      allOf:
-        - $ref: '#/components/schemas/TransactionReceiptPolicyDetails'
-        - type: object
-          properties:
-            creationDate:
-              type: string
-              format: date-time
+      type: object
+      description: |-
+        One row per merchant/category/channel combination configured on the rule. Unlike
+        `TransactionReceiptPolicyDetails`, `merchant`/`category`/`channel` here are single values,
+        not arrays.
+      properties:
+        uuid:
+          type: string
+        name:
+          type: string
+          description: Name of the receipt rule.
+        type:
+          type: string
+          example: 'RECEIPT_REQUIRED'
+        creationDate:
+          type: string
+          format: date-time
+        currency:
+          type: string
+        transactionAmount:
+          type: number
+          format: decimal
+          description: The transaction amount threshold above which a receipt is required.
+        merchant:
+          type: string
+          example: 'Uber'
+        category:
+          type: string
+          example: 'Transportation'
+        channel:
+          type: string
+          example: 'POS'
+        autoBlockEnabled:
+          type: boolean
+        reminderThreshold:
+          type: integer
+        complianceDaysThreshold:
+          type: integer
+        manualUnblockAllowed:
+          type: boolean
+        autoReminderEnabled:
+          type: boolean
+        reminderIntervalHours:
+          type: integer
+          enum:
+            - 24
+            - 48
+            - 72
+            - 168
+        autoReminderLimit:
+          type: integer
+        active:
+          type: boolean
     ReceiptPolicyResponse:
       type: object
       properties:
