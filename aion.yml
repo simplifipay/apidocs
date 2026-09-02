@@ -6377,13 +6377,12 @@ components:
           type: string
           description: |-
             The name of the tag. This is free-form text (max 100 characters) and must not contain the
-            `|` character.
+            `|` character. Required when creating/setting a tag; not required (and ignored) when
+            deleting a tag by `uuid`.
           example: 'grocery'
         status:
           type: string
           example: 'ACTIVE'
-      required:
-        - tag
     TransactionTagsRequestModel:
       type: object
       properties:
