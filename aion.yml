@@ -75,6 +75,11 @@ tags:
       The Transactions API Group is designed to allow you to have control over the listing of transactions
       that have been processed on a card. These endpoints enable you to get insights of different
       transactions being carried upon certain cards.
+  - name: 'Receipt Policy'
+    description: |-
+      The Receipt Policy API Group is designed to let you configure the conditions under which a receipt
+      is required for a transaction (e.g. by amount, channel, merchant or category), and manage the
+      lifecycle of those rules.
   - name: 'Webhook'
     description: |-
       All the asynchronous API calls that are made using the endpoints published by the SimpliFi platform,
@@ -2152,6 +2157,154 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DynamicFieldReasonResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+
+  /transaction/policy/receipt:
+    put:
+      tags:
+        - 'Receipt Policy'
+      summary: Create or Update a Receipt Rule
+      description: |-
+        This endpoint creates a new receipt rule, or updates an existing one when `uuid` is supplied
+        in the request body. A receipt rule defines the conditions (currency, amount threshold,
+        channel, merchant or category) under which a receipt must be uploaded for a transaction, and
+        the compliance/reminder behavior around it.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionReceiptPolicyRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionReceiptPolicyResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    get:
+      tags:
+        - 'Receipt Policy'
+      summary: List Receipt Rules
+      description: |-
+        This endpoint retrieves a paginated list of the receipt rules configured for your company.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: includeInactive
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiptPolicyResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /transaction/policy/receipt/{uuid}:
+    get:
+      tags:
+        - 'Receipt Policy'
+      summary: Get a Receipt Rule
+      description: |-
+        This endpoint retrieves the full details of a single receipt rule.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the receipt rule.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionReceiptPolicyDetails'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Receipt Policy'
+      summary: Delete a Receipt Rule
+      description: |-
+        This endpoint permanently deletes a receipt rule.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the receipt rule.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /transaction/policy/receipt/{uuid}/status:
+    patch:
+      tags:
+        - 'Receipt Policy'
+      summary: Suspend or Reactivate a Receipt Rule
+      description: |-
+        This endpoint enables or disables (suspends) a single receipt rule by setting `active` to
+        `true` or `false`. A suspended rule stops being evaluated against new transactions, without
+        deleting its configuration.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the receipt rule.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionReceiptPolicyStatusRequest'
+      responses:
+        '200':
+          description: OK
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '400':
@@ -6561,6 +6714,112 @@ components:
         reason:
           type: string
           description: The reason recorded for the most recent update of the dynamic field.
+    TransactionReceiptPolicyDetails:
+      type: object
+      properties:
+        uuid:
+          type: string
+        name:
+          type: string
+          description: Name of the receipt rule.
+        type:
+          type: string
+          description: The type of receipt requirement this rule enforces.
+          example: 'RECEIPT_REQUIRED'
+        active:
+          type: boolean
+        currency:
+          type: string
+        transactionAmount:
+          type: number
+          format: decimal
+          description: The transaction amount threshold above which a receipt is required.
+        channels:
+          type: array
+          items:
+            type: string
+            enum:
+              - ATM
+              - POS
+        merchantNames:
+          type: array
+          items:
+            type: string
+        categories:
+          type: array
+          items:
+            type: string
+        isMerchantInclusive:
+          type: boolean
+          description: |-
+            When `true` (default), `merchantNames` is an allow-list; when `false`, it is a deny-list.
+        isCategoryInclusive:
+          type: boolean
+          description: |-
+            When `true` (default), `categories` is an allow-list; when `false`, it is a deny-list.
+        excludedCardUuids:
+          type: array
+          items:
+            type: string
+        autoBlockEnabled:
+          type: boolean
+          description: Whether a card is automatically blocked once the compliance threshold is breached.
+        reminderThreshold:
+          type: integer
+          description: Number of days after the transaction before a receipt reminder is sent.
+        complianceDaysThreshold:
+          type: integer
+          description: Number of days a receipt may remain outstanding before the transaction is out of compliance.
+        manualUnblockAllowed:
+          type: boolean
+          description: Whether a card auto-blocked by this rule can be manually unblocked.
+        autoReminderEnabled:
+          type: boolean
+        reminderIntervalHours:
+          type: integer
+          enum:
+            - 24
+            - 48
+            - 72
+            - 168
+        autoReminderLimit:
+          type: integer
+          description: Maximum number of automatic reminders to send.
+      required:
+        - name
+        - type
+        - currency
+    TransactionReceiptPolicyRequest:
+      allOf:
+        - $ref: '#/components/schemas/TransactionReceiptPolicyDetails'
+      description: |-
+        Supply `uuid` to update an existing receipt rule, or omit it to create a new one.
+    TransactionReceiptPolicyResponse:
+      allOf:
+        - $ref: '#/components/schemas/TransactionReceiptPolicyDetails'
+        - type: object
+          properties:
+            creationDate:
+              type: string
+              format: date-time
+    ReceiptPolicyResponse:
+      type: object
+      properties:
+        policies:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionReceiptPolicyResponse'
+        totalElements:
+          type: integer
+          format: int64
+    TransactionReceiptPolicyStatusRequest:
+      type: object
+      properties:
+        active:
+          type: boolean
+          description: Set to `false` to suspend the rule, or `true` to reactivate it.
+      required:
+        - active
 
 security:
   - bearerAuth: []
