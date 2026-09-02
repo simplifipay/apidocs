@@ -2403,6 +2403,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: includeBudget
+          in: query
+          description: |-
+            When `true`, the response includes the `utilizedBudget` computed for the current period.
+          schema:
+            type: boolean
       responses:
         '200':
           description: OK
@@ -2544,6 +2550,20 @@ paths:
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
+        - name: name
+          in: query
+          description: |-
+            Filter Teams by name (partial match).
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+        - name: sortDir
+          in: query
+          schema:
+            type: string
         - name: page
           in: query
           schema:
@@ -2612,8 +2632,8 @@ paths:
             schema:
               $ref: '#/components/schemas/TeamModel'
       responses:
-        '200':
-          description: OK
+        '202':
+          description: Accepted
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '400':
@@ -2635,8 +2655,8 @@ paths:
           schema:
             type: string
       responses:
-        '200':
-          description: OK
+        '202':
+          description: Accepted
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '400':
@@ -2647,7 +2667,8 @@ paths:
         - 'Team'
       summary: Add Team Members
       description: |-
-        This endpoint adds one or more users to a Team.
+        This endpoint adds one or more users to a Team. The request and response are the full
+        Team object, not a bare member list.
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
@@ -2663,22 +2684,25 @@ paths:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/TeamMemberModel'
+              $ref: '#/components/schemas/TeamModel'
       responses:
         '202':
           description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamModel'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '400':
           $ref: '#/components/responses/EntityNotFoundError'
-    put:
+    patch:
       tags:
         - 'Team'
-      summary: Replace Team Members
+      summary: Update Team Members
       description: |-
-        This endpoint replaces the full membership list of a Team.
+        This endpoint replaces the full membership list of a Team. The request and response are
+        the full Team object, not a bare member list.
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
@@ -2694,12 +2718,14 @@ paths:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/TeamMemberModel'
+              $ref: '#/components/schemas/TeamModel'
       responses:
-        '200':
-          description: OK
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamModel'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '400':
@@ -2709,7 +2735,8 @@ paths:
         - 'Team'
       summary: Remove Team Members
       description: |-
-        This endpoint removes one or more users from a Team.
+        This endpoint removes one or more users from a Team. The request and response are the
+        full Team object, not a bare member list.
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
@@ -2725,12 +2752,14 @@ paths:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/TeamMemberModel'
+              $ref: '#/components/schemas/TeamModel'
       responses:
-        '200':
-          description: OK
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamModel'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '400':
@@ -7356,7 +7385,10 @@ components:
         frequency:
           type: string
           description: How often the budget resets.
-          example: 'MONTHLY'
+          enum:
+            - MONTHLY
+            - QUARTERLY
+            - ANNUALLY
         currency:
           type: string
           example: 'AED'
@@ -7365,6 +7397,7 @@ components:
         - entityUuid
         - name
         - budget
+        - frequency
         - currency
     BudgetResponse:
       type: object
