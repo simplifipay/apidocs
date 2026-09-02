@@ -75,6 +75,24 @@ tags:
       The Transactions API Group is designed to allow you to have control over the listing of transactions
       that have been processed on a card. These endpoints enable you to get insights of different
       transactions being carried upon certain cards.
+  - name: 'Receipt Policy'
+    description: |-
+      The Receipt Policy API Group is designed to let you configure the conditions under which a receipt
+      is required for a transaction (e.g. by amount, channel, merchant or category), and manage the
+      lifecycle of those rules.
+  - name: 'Budget'
+    description: |-
+      The Budget API Group is designed to let you set spending limits for a card program, a card group,
+      or a Team, in a given currency, and track how much of that budget has been utilized.
+  - name: 'Team'
+    description: |-
+      The Team API Group is designed to let you group users into Teams so that budgets and other
+      controls can be applied collectively rather than per individual user.
+  - name: 'Approval'
+    description: |-
+      The Approval API Group is designed as a generic checker/maker workflow. Certain sensitive actions,
+      such as loading balance onto a card or issuing a physical card, are raised as a pending task that
+      a second user must review and either approve or reject before the action is carried out.
   - name: 'Webhook'
     description: |-
       All the asynchronous API calls that are made using the endpoints published by the SimpliFi platform,
@@ -1730,6 +1748,1057 @@ paths:
                   - $ref: '#/components/schemas/Error60009'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+
+  /v1/card/{uuid}/autoload:
+    get:
+      tags:
+        - 'Card'
+      summary: Get Autoload Configuration on Card
+      description: |-
+        This endpoint retrieves the autoload configuration set up on a Card, including the
+        system-computed `nextLoadAt` occurrence of the schedule.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardAutoloadResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    post:
+      tags:
+        - 'Card'
+      summary: Create Autoload on Card
+      description: |-
+        This endpoint creates a new autoload schedule on a Card. An autoload schedule automatically
+        loads a fixed `amount` onto a card on a recurring `scheduleType` (`MONTHLY`, `WEEKLY` or `DAILY`)
+        basis, so that the card owner does not need to be manually loaded every cycle.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardAutoloadRequestModel'
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    put:
+      tags:
+        - 'Card'
+      summary: Update Autoload on Card
+      description: |-
+        This endpoint updates the existing autoload schedule on a Card.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardAutoloadRequestModel'
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Card'
+      summary: Suspend Autoload on Card
+      description: |-
+        This endpoint suspends (removes) the autoload schedule on a Card. There is no separate
+        pause/resume state — deleting the schedule is how autoload is switched off, and a new
+        schedule must be created to switch it back on.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/card/autoload:
+    get:
+      tags:
+        - 'Card'
+      summary: List All Autoload Configurations
+      description: |-
+        This endpoint retrieves a paginated list of all the autoload configurations set up across
+        cards under your company.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+        - name: sortDir
+          in: query
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardAutoloadResponseList'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /v1/transaction/{uuid}/tag:
+    get:
+      tags:
+        - 'Transaction'
+      summary: Get Transaction Tags
+      description: |-
+        This endpoint retrieves all the tags currently attached to a transaction.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This field contains a unique identifier of the transaction.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionTagsResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    post:
+      tags:
+        - 'Transaction'
+      summary: Add Transaction Tags
+      description: |-
+        This endpoint adds one or more tags to a transaction, in addition to any tags it already has.
+        Tags are free-form text (e.g. `medical`, `grocery`) - there is no fixed allow-list, so any
+        tag name can be created dynamically as long as it meets the length and character constraints.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This field contains a unique identifier of the transaction.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionTagsRequestModel'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    put:
+      tags:
+        - 'Transaction'
+      summary: Replace Transaction Tags
+      description: |-
+        This endpoint replaces the full set of tags on a transaction. Any existing tag that is not
+        included in the request is removed, and any new tag included in the request is created.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This field contains a unique identifier of the transaction.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionTagsRequestModel'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Transaction'
+      summary: Delete Transaction Tags
+      description: |-
+        This endpoint removes one or more tags from a transaction. Each tag in the request must be
+        identified by its `uuid` (rather than its `tag` name).
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This field contains a unique identifier of the transaction.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionTagsRequestModel'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/transaction/tags:
+    get:
+      tags:
+        - 'Transaction'
+      summary: Search Transaction Tags
+      description: |-
+        This endpoint retrieves the distinct set of tag names that have been used across your
+        company's transactions, optionally filtered by tag name, user or card.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: tag
+          in: query
+          schema:
+            type: string
+        - name: userUuid
+          in: query
+          schema:
+            type: string
+        - name: cardUuid
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionTagsResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /v1/transaction/{uuid}/dynamic-field:
+    get:
+      tags:
+        - 'Transaction'
+      summary: Get Transaction Dynamic Fields
+      description: |-
+        This endpoint retrieves the values of one or more dynamic fields set on a transaction, such as
+        the `classification_type` field used to mark a transaction as Business or Personal.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This field contains a unique identifier of the transaction.
+          required: true
+          schema:
+            type: string
+        - name: fieldKeys
+          in: query
+          description: |-
+            A comma-separated list of dynamic field keys to retrieve.
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionDynamicFieldResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    put:
+      tags:
+        - 'Transaction'
+      summary: Set Transaction Dynamic Fields
+      description: |-
+        This endpoint sets or updates one or more dynamic field values on a transaction. This is the
+        endpoint used to classify a transaction, by setting the `classification_type` field to a value
+        such as `PERSONAL` or `BUSINESS`. The set of available field keys and their validation rules
+        (e.g. allowed values) are configured separately per company via the Dynamic Field Definition
+        endpoints.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This field contains a unique identifier of the transaction.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TransactionDynamicFieldRequest'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+
+  /transaction/policy/receipt:
+    put:
+      tags:
+        - 'Receipt Policy'
+      summary: Create or Update a Receipt Rule
+      description: |-
+        This endpoint creates a new receipt rule, or updates an existing one when `uuid` is supplied
+        in the request body. A receipt rule defines the conditions (currency, amount threshold,
+        channel, merchant or category) under which a receipt must be uploaded for a transaction, and
+        the compliance/reminder behavior around it.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionReceiptPolicyRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionReceiptPolicyResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    get:
+      tags:
+        - 'Receipt Policy'
+      summary: List Receipt Rules
+      description: |-
+        This endpoint retrieves a paginated list of the receipt rules configured for your company.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: includeInactive
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiptPolicyResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /transaction/policy/receipt/{uuid}:
+    get:
+      tags:
+        - 'Receipt Policy'
+      summary: Get a Receipt Rule
+      description: |-
+        This endpoint retrieves the full details of a single receipt rule.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the receipt rule.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionReceiptPolicyDetails'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Receipt Policy'
+      summary: Delete a Receipt Rule
+      description: |-
+        This endpoint permanently deletes a receipt rule.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the receipt rule.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /transaction/policy/receipt/{uuid}/status:
+    patch:
+      tags:
+        - 'Receipt Policy'
+      summary: Suspend or Reactivate a Receipt Rule
+      description: |-
+        This endpoint enables or disables (suspends) a single receipt rule by setting `active` to
+        `true` or `false`. A suspended rule stops being evaluated against new transactions, without
+        deleting its configuration.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the receipt rule.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionReceiptPolicyStatusRequest'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+
+  /v1/budget:
+    post:
+      tags:
+        - 'Budget'
+      summary: Create a Budget
+      description: |-
+        This endpoint creates a budget for a card program, a card group, or a Team, in a given
+        currency. Only one active budget can apply to a given entity/currency combination at a time.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BudgetRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    get:
+      tags:
+        - 'Budget'
+      summary: List Budgets
+      description: |-
+        This endpoint retrieves a paginated list of budgets, optionally filtered by `entityType`
+        (`CARD_PROGRAM`, `TEAM` or `CARD_GROUP`).
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: entityType
+          in: query
+          schema:
+            type: string
+            enum:
+              - CARD_PROGRAM
+              - TEAM
+              - CARD_GROUP
+        - name: includeBudget
+          in: query
+          description: |-
+            When `true`, the response includes the `utilizedBudget` computed for each entry.
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetListing'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /v1/budget/{uuid}:
+    get:
+      tags:
+        - 'Budget'
+      summary: Get a Budget
+      description: |-
+        This endpoint retrieves the details of a single budget.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the budget.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    patch:
+      tags:
+        - 'Budget'
+      summary: Update a Budget
+      description: |-
+        This endpoint updates the amount, frequency or currency of an existing budget.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the budget.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BudgetRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Budget'
+      summary: Suspend a Budget
+      description: |-
+        This endpoint suspends a budget, setting its status to `INACTIVE`. Suspending a budget does
+        not delete its configuration, but it stops being applied to new card loads.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the budget.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/budget/of:
+    get:
+      tags:
+        - 'Budget'
+      summary: Resolve the Active Budget for an Entity and Currency
+      description: |-
+        This endpoint resolves the active budget that applies to a given entity (card program, card
+        group, or Team) in a given currency, and optionally returns how much of it has been utilized
+        in the current period. This is the endpoint used to check whether a card load would be within
+        budget before applying it.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: entityUuid
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: currency
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: includeBudget
+          in: query
+          description: |-
+            When `true`, the response includes the `utilizedBudget` computed for the current period.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+
+  /v1/team:
+    post:
+      tags:
+        - 'Team'
+      summary: Create a Team
+      description: |-
+        This endpoint creates a new Team that users can be added to as members.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamModel'
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    get:
+      tags:
+        - 'Team'
+      summary: List Teams
+      description: |-
+        This endpoint retrieves a paginated list of Teams under your company.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamListModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /v1/team/{uuid}:
+    get:
+      tags:
+        - 'Team'
+      summary: Get a Team
+      description: |-
+        This endpoint retrieves the details of a single Team, including its members.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the Team.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    patch:
+      tags:
+        - 'Team'
+      summary: Update a Team
+      description: |-
+        This endpoint updates the name of an existing Team.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the Team.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamModel'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Team'
+      summary: Delete a Team
+      description: |-
+        This endpoint permanently deletes a Team.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the Team.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/team/{uuid}/members:
+    post:
+      tags:
+        - 'Team'
+      summary: Add Team Members
+      description: |-
+        This endpoint adds one or more users to a Team.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the Team.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TeamMemberModel'
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    put:
+      tags:
+        - 'Team'
+      summary: Replace Team Members
+      description: |-
+        This endpoint replaces the full membership list of a Team.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the Team.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TeamMemberModel'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Team'
+      summary: Remove Team Members
+      description: |-
+        This endpoint removes one or more users from a Team.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the Team.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TeamMemberModel'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+
+  /checker/task:
+    get:
+      tags:
+        - 'Approval'
+      summary: List Pending Approval Tasks
+      description: |-
+        This endpoint retrieves the tasks that are pending review, optionally filtered by `eventName`
+        (e.g. `LOAD_BALANCE` for a card load request, `ISSUE_CARD` for a physical card issuance
+        request).
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: eventName
+          in: query
+          schema:
+            $ref: '#/components/schemas/EventKey'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    put:
+      tags:
+        - 'Approval'
+      summary: Approve or Reject a Task
+      description: |-
+        This endpoint records a decision on one or more pending tasks. Set `taskStatus` to `APPROVED`
+        to allow the underlying action to proceed (e.g. the card load is applied, or the physical
+        card is issued), or to `REJECTED` to block it. This same endpoint is used for both a
+        card load request (`eventName=LOAD_BALANCE`) and a physical card issuance request
+        (`eventName=ISSUE_CARD`) - the request type is determined by the task's `eventName`, not by
+        a separate endpoint.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TaskRequestModel'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /checker/task/entity/{entityUuid}:
+    get:
+      tags:
+        - 'Approval'
+      summary: Get Approval Task by Entity
+      description: |-
+        This endpoint retrieves the approval task raised for a specific entity (e.g. the card
+        UUID of a physical card issuance request), optionally filtered by `eventName`.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: entityUuid
+          in: path
+          description: |-
+            This is a unique identifier of the entity the task was raised for.
+          required: true
+          schema:
+            type: string
+        - name: eventName
+          in: query
+          schema:
+            $ref: '#/components/schemas/EventKey'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
 
 webhooks:
   cardActivation:
@@ -5935,6 +7004,518 @@ components:
       required:
         - errorCode
         - errorMessage
+
+    CardAutoloadRequestModel:
+      type: object
+      properties:
+        scheduleType:
+          type: string
+          description: The recurrence basis of the autoload schedule.
+          enum:
+            - MONTHLY
+            - WEEKLY
+            - DAILY
+        dayOfTheMonth:
+          type: integer
+          description: The day of the month the autoload runs on. Required, and only applicable, when `scheduleType` is `MONTHLY`.
+          example: 1
+        dayOfWeek:
+          type: string
+          description: The day of the week the autoload runs on. Required, and only applicable, when `scheduleType` is `WEEKLY`.
+          enum:
+            - MONDAY
+            - TUESDAY
+            - WEDNESDAY
+            - THURSDAY
+            - FRIDAY
+            - SATURDAY
+            - SUNDAY
+        includedDaysOfWeek:
+          type: array
+          description: The days of the week the autoload runs on. Only applicable when `scheduleType` is `DAILY`.
+          items:
+            type: string
+            enum:
+              - MONDAY
+              - TUESDAY
+              - WEDNESDAY
+              - THURSDAY
+              - FRIDAY
+              - SATURDAY
+              - SUNDAY
+        scheduleTime:
+          type: string
+          description: |-
+            The time of day (whole hour, in `scheduleTimezone`) the autoload runs at, formatted as `HH:00`.
+          example: '09:00'
+        scheduleTimezone:
+          type: string
+          description: The IANA timezone identifier that `scheduleTime` is evaluated in.
+          example: 'Asia/Dubai'
+        skipIfBalanceAtLeast:
+          type: number
+          format: decimal
+          description: When set, the autoload is skipped for a cycle if the card balance is already at or above this amount.
+        amount:
+          type: number
+          format: decimal
+          description: The amount to load onto the card each time the autoload schedule runs.
+          example: '100.00'
+      required:
+        - scheduleType
+        - scheduleTime
+        - scheduleTimezone
+        - amount
+    CardAutoloadResponseModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: This is a system-generated unique identifier for the autoload configuration.
+        cardUuid:
+          type: string
+          description: This field contains a unique identifier of the card the autoload is set up on.
+        scheduleType:
+          type: string
+          enum:
+            - MONTHLY
+            - WEEKLY
+            - DAILY
+        dayOfTheMonth:
+          type: integer
+        dayOfWeek:
+          type: string
+        includedDaysOfWeek:
+          type: array
+          items:
+            type: string
+        scheduleTime:
+          type: string
+        scheduleTimezone:
+          type: string
+        skipIfBalanceAtLeast:
+          type: number
+          format: decimal
+        amount:
+          type: number
+          format: decimal
+        nextLoadAt:
+          type: string
+          format: date-time
+          description: |-
+            The next server-computed occurrence at which this schedule will run. This is `null` for
+            incomplete schedules.
+      required:
+        - uuid
+        - cardUuid
+        - scheduleType
+        - amount
+    CardAutoloadResponseList:
+      type: object
+      properties:
+        autoLoadConfig:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardAutoloadResponseModel'
+        totalElements:
+          type: integer
+          format: int64
+
+    TransactionTagModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: |-
+            This is a system-generated unique identifier for the tag. Required when deleting a tag.
+        tag:
+          type: string
+          description: |-
+            The name of the tag. This is free-form text (max 100 characters) and must not contain the
+            `|` character.
+          example: 'grocery'
+        status:
+          type: string
+          example: 'ACTIVE'
+      required:
+        - tag
+    TransactionTagsRequestModel:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionTagModel'
+      required:
+        - tags
+    TransactionTagsResponseModel:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionTagModel'
+    TransactionTagsResponse:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+          description: The distinct tag names matching the search criteria.
+        total:
+          type: integer
+          format: int64
+
+    TransactionDynamicFieldRequest:
+      type: object
+      properties:
+        fieldKey:
+          type: string
+          description: |-
+            The key of the dynamic field to set, e.g. `classification_type` to classify the
+            transaction as Business or Personal.
+          example: 'classification_type'
+        value:
+          type: string
+          description: |-
+            The value to set for this field. Allowed values are defined per-company via the Dynamic
+            Field Definition configuration.
+          example: 'PERSONAL'
+        reason:
+          type: string
+          description: An optional note explaining why the field was set.
+      required:
+        - fieldKey
+        - value
+    TransactionDynamicFieldResponse:
+      type: object
+      properties:
+        fieldKey:
+          type: string
+          example: 'classification_type'
+        value:
+          type: string
+          example: 'PERSONAL'
+
+    TransactionReceiptPolicyDetails:
+      type: object
+      properties:
+        uuid:
+          type: string
+        name:
+          type: string
+          description: Name of the receipt rule.
+        type:
+          type: string
+          description: The type of receipt requirement this rule enforces.
+          example: 'RECEIPT_REQUIRED'
+        active:
+          type: boolean
+        currency:
+          type: string
+        transactionAmount:
+          type: number
+          format: decimal
+          description: The transaction amount threshold above which a receipt is required.
+        channels:
+          type: array
+          items:
+            type: string
+            enum:
+              - ATM
+              - POS
+        merchantNames:
+          type: array
+          items:
+            type: string
+        categories:
+          type: array
+          items:
+            type: string
+        isMerchantInclusive:
+          type: boolean
+          description: |-
+            When `true` (default), `merchantNames` is an allow-list; when `false`, it is a deny-list.
+        isCategoryInclusive:
+          type: boolean
+          description: |-
+            When `true` (default), `categories` is an allow-list; when `false`, it is a deny-list.
+        excludedCardUuids:
+          type: array
+          items:
+            type: string
+        autoBlockEnabled:
+          type: boolean
+          description: Whether a card is automatically blocked once the compliance threshold is breached.
+        reminderThreshold:
+          type: integer
+          description: Number of days after the transaction before a receipt reminder is sent.
+        complianceDaysThreshold:
+          type: integer
+          description: Number of days a receipt may remain outstanding before the transaction is out of compliance.
+        manualUnblockAllowed:
+          type: boolean
+          description: Whether a card auto-blocked by this rule can be manually unblocked.
+        autoReminderEnabled:
+          type: boolean
+        reminderIntervalHours:
+          type: integer
+          enum:
+            - 24
+            - 48
+            - 72
+            - 168
+        autoReminderLimit:
+          type: integer
+          description: Maximum number of automatic reminders to send.
+      required:
+        - name
+        - type
+        - currency
+    TransactionReceiptPolicyRequest:
+      allOf:
+        - $ref: '#/components/schemas/TransactionReceiptPolicyDetails'
+      description: |-
+        Supply `uuid` to update an existing receipt rule, or omit it to create a new one.
+    TransactionReceiptPolicyResponse:
+      allOf:
+        - $ref: '#/components/schemas/TransactionReceiptPolicyDetails'
+        - type: object
+          properties:
+            creationDate:
+              type: string
+              format: date-time
+    ReceiptPolicyResponse:
+      type: object
+      properties:
+        policies:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionReceiptPolicyResponse'
+        totalElements:
+          type: integer
+          format: int64
+    TransactionReceiptPolicyStatusRequest:
+      type: object
+      properties:
+        active:
+          type: boolean
+          description: Set to `false` to suspend the rule, or `true` to reactivate it.
+      required:
+        - active
+
+    BudgetRequest:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Supply to update an existing budget; leave blank to have one generated when creating a budget.
+        entityType:
+          type: string
+          description: The type of entity this budget applies to.
+          enum:
+            - CARD_PROGRAM
+            - TEAM
+            - CARD_GROUP
+        entityUuid:
+          type: string
+          description: This is a unique identifier of the card program, Team, or card group this budget applies to.
+        name:
+          type: string
+          example: 'Marketing Budget'
+        budget:
+          type: number
+          format: decimal
+          description: The budget amount, in `currency`.
+        frequency:
+          type: string
+          description: How often the budget resets.
+          example: 'MONTHLY'
+        currency:
+          type: string
+          example: 'AED'
+      required:
+        - entityType
+        - entityUuid
+        - name
+        - budget
+        - currency
+    BudgetResponse:
+      type: object
+      properties:
+        uuid:
+          type: string
+        name:
+          type: string
+        entityType:
+          type: string
+          enum:
+            - CARD_PROGRAM
+            - TEAM
+            - CARD_GROUP
+        entityUuid:
+          type: string
+        budget:
+          type: number
+          format: decimal
+        frequency:
+          type: string
+        currency:
+          type: string
+        utilizedBudget:
+          type: number
+          format: decimal
+          description: |-
+            The amount of the budget already utilized in the current period. Only populated when
+            `includeBudget=true` was passed on the request.
+        status:
+          type: string
+          example: 'ACTIVE'
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        creationDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
+    BudgetListing:
+      type: object
+      properties:
+        budgets:
+          type: array
+          items:
+            $ref: '#/components/schemas/BudgetResponse'
+        total:
+          type: integer
+          format: int64
+
+    TeamMemberModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: This is a system-generated unique identifier for the team-membership record.
+        user_uuid:
+          type: string
+          description: This is a unique identifier of the user being added to the Team.
+        position:
+          type: string
+          enum:
+            - TEAM_LEAD
+            - MEMBER
+        name:
+          type: string
+        username:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+      required:
+        - user_uuid
+        - position
+    TeamModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+        name:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMemberModel'
+      required:
+        - name
+    TeamListModel:
+      type: object
+      properties:
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamModel'
+        total:
+          type: integer
+          format: int64
+
+    EventKey:
+      type: string
+      description: |-
+        The type of action that raised the approval task.
+      enum:
+        - CREATE_USER
+        - INITIATE_KYC
+        - ISSUE_CARD
+        - ACTIVATE_CARD
+        - LOAD_BALANCE
+        - UNLOAD_BALANCE
+        - CARD_TRANSITION
+        - RENEW_CARD
+        - CARD_CONTROLS
+    TaskStatus:
+      type: string
+      enum:
+        - PENDING
+        - APPROVED
+        - REJECTED
+    TaskRequestModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: This is a unique identifier of the task being decided on.
+        taskStatus:
+          $ref: '#/components/schemas/TaskStatus'
+        reason:
+          type: string
+          description: An optional note explaining the decision.
+        modifiedPayload:
+          type: string
+          description: An optional replacement for the original request payload, if the approver amends it before approving.
+        checkerComment:
+          type: string
+      required:
+        - uuid
+        - taskStatus
+    TaskResponseModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+        eventName:
+          $ref: '#/components/schemas/EventKey'
+        entityUuid:
+          type: string
+          readOnly: true
+          description: This is a unique identifier of the entity the task was raised for (e.g. the card UUID for a card load or physical card request).
+        entityName:
+          type: string
+          readOnly: true
+        submittedBy:
+          type: string
+          readOnly: true
+        approvedBy:
+          type: string
+          readOnly: true
+        taskStatus:
+          $ref: '#/components/schemas/TaskStatus'
+        creationDate:
+          type: string
+        lastModified:
+          type: string
+        detailPayload:
+          type: string
+          description: The original request payload that is pending review.
 
 
 security:
