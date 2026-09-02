@@ -2064,6 +2064,7 @@ paths:
             type: string
         - name: fieldKeys
           in: query
+          required: true
           description: |-
             A comma-separated list of dynamic field keys to retrieve.
           schema:
@@ -2112,8 +2113,45 @@ paths:
               items:
                 $ref: '#/components/schemas/TransactionDynamicFieldRequest'
       responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/transaction/{uuid}/comment:
+    get:
+      tags:
+        - 'Transaction'
+      summary: Get the Reason for Dynamic Field Change
+      description: |-
+        This endpoint retrieves the audit reason recorded for the most recent change to a specific
+        dynamic field on a transaction (for example, why a transaction was reclassified from
+        `PERSONAL` to `BUSINESS`).
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This field contains a unique identifier of the transaction.
+          required: true
+          schema:
+            type: string
+        - name: fieldKey
+          in: query
+          required: true
+          description: |-
+            The dynamic field key to retrieve the change reason for.
+          schema:
+            type: string
+      responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DynamicFieldReasonResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '400':
@@ -6516,6 +6554,13 @@ components:
         value:
           type: string
           example: 'PERSONAL'
+
+    DynamicFieldReasonResponse:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: The reason recorded for the most recent update of the dynamic field.
 
 security:
   - bearerAuth: []
