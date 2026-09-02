@@ -2044,6 +2044,81 @@ paths:
                 $ref: '#/components/schemas/TransactionTagsResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  /v1/transaction/{uuid}/dynamic-field:
+    get:
+      tags:
+        - 'Transaction'
+      summary: Get Transaction Dynamic Fields
+      description: |-
+        This endpoint retrieves the values of one or more dynamic fields set on a transaction, such as
+        the `classification_type` field used to mark a transaction as Business or Personal.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This field contains a unique identifier of the transaction.
+          required: true
+          schema:
+            type: string
+        - name: fieldKeys
+          in: query
+          description: |-
+            A comma-separated list of dynamic field keys to retrieve.
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionDynamicFieldResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    put:
+      tags:
+        - 'Transaction'
+      summary: Set Transaction Dynamic Fields
+      description: |-
+        This endpoint sets or updates one or more dynamic field values on a transaction. This is the
+        endpoint used to classify a transaction, by setting the `classification_type` field to a value
+        such as `PERSONAL` or `BUSINESS`. The set of available field keys and their validation rules
+        (e.g. allowed values) are configured separately per company via the Dynamic Field Definition
+        endpoints.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This field contains a unique identifier of the transaction.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TransactionDynamicFieldRequest'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+
 webhooks:
   cardActivation:
     post:
@@ -6410,6 +6485,37 @@ components:
         total:
           type: integer
           format: int64
+
+    TransactionDynamicFieldRequest:
+      type: object
+      properties:
+        fieldKey:
+          type: string
+          description: |-
+            The key of the dynamic field to set, e.g. `classification_type` to classify the
+            transaction as Business or Personal.
+          example: 'classification_type'
+        value:
+          type: string
+          description: |-
+            The value to set for this field. Allowed values are defined per-company via the Dynamic
+            Field Definition configuration.
+          example: 'PERSONAL'
+        reason:
+          type: string
+          description: An optional note explaining why the field was set.
+      required:
+        - fieldKey
+        - value
+    TransactionDynamicFieldResponse:
+      type: object
+      properties:
+        fieldKey:
+          type: string
+          example: 'classification_type'
+        value:
+          type: string
+          example: 'PERSONAL'
 
 security:
   - bearerAuth: []
