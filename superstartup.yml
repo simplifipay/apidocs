@@ -21,10 +21,14 @@ tags:
       This group has the Login endpoint that allows you to enter into our system. Moreover,
       the endpoint’s response provides you with the access token, which would be used in
       making further API calls.
-  - name: 'Document'
+  - name: 'Funding Source'
     description: |-
-      The Document API Group is designed to allow users to handle documents of the
-      SimpliFi system which are simply referred to as `Documents`.
+      The Funding Source API Group is designed to add and manage the funding sources
+      under a Company. Funding source is the equivalent of an unique account where all
+      the funds related to this funding source are pooled. Funds from the funding
+      source is used to load cards issued. A Funding source will have funds
+      in one currency only and to hold funds in multiple currencies multiple funding
+      sources would have to be created and assigned to a Company.
   - name: 'User'
     description: |-
       The User API Group is designed to manage the users. It is mandatory
@@ -130,44 +134,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponseModel'
-
-  /v1/document/upload:
-    post:
-      tags:
-        - 'Document'
-      summary: Raise Funding Document Upload
-      description: |-
-        This API should be called before calling Raise Funding API to attach `Proof of funds / Confirmation of
-        funds transfer from the Bank` document (PNG, JPEG, PDF are allowed formats) and the string value returned
-        in the `documentUploadUuid` field of the response should be used in Raise Funding API's document parameter.
-
-        Note: After the funds are transferred from the whitelisted Bank account to the Issuer/Processor Bank
-        account, the confirmation of transfer of funds screenshot/image/PDF should be used as an attachment.
-      parameters:
-        - $ref: '#/components/parameters/jwtTokenParam'
-        - $ref: '#/components/parameters/requestUuidParam'
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/RaiseFundingDocumentModel'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FileUploadModel'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/Error30003'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
 
   /v1/user:
     get:
@@ -445,6 +411,89 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '400':
           $ref: '#/components/responses/EntityNotFoundError'
+
+  /v1/document/upload:
+    post:
+      tags:
+        - 'Funding Source'
+      summary: Raise Funding Document Upload
+      description: |-
+        This API should be called before calling Raise Funding API to attach `Proof of funds / Confirmation of
+        funds transfer from the Bank` document (PNG, JPEG, PDF are allowed formats) and the string value returned
+        in the `documentUploadUuid` field of the response should be used in Raise Funding API's document parameter.
+
+        Note: After the funds are transferred from the whitelisted Bank account to the Issuer/Processor Bank
+        account, the confirmation of transfer of funds screenshot/image/PDF should be used as an attachment.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RaiseFundingDocumentModel'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileUploadModel'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error30003'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /v1/card-program/raise-funding:
+    post:
+      tags:
+        - 'Funding Source'
+      summary: Raise Funding
+      description: |-
+        The Raise Funding endpoint helps in adding or removing funds from a funding source. This API doesn't
+        actually move the money between accounts but should be used so that the proof of funds is shared with
+        the Issuer/Processor Bank. After the proof of funds attachment is verified by the Issuer/Processor
+        funds would reflect in the respective funding source. Following are the properties of this endpoint.
+        
+        <Accordion title="Webhook Success" defaultOpen={false} icon="material-two-tone-webhook">
+          <DataSchema id="17636695" />
+        </Accordion>
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RaiseFundingRequestModel'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RaiseFundingResponseModel'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error40113'
+                  - $ref: '#/components/schemas/Error40067'
+                  - $ref: '#/components/schemas/Error40069'
+                  - $ref: '#/components/schemas/Error30003'
+                  - $ref: '#/components/schemas/Error30022'
+                  - $ref: '#/components/schemas/Error40080'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
 
   /v1/card:
     get:
@@ -1337,6 +1386,75 @@ components:
             an authorization header. Accepted value is `bearer`.
       required:
         - access_token
+
+    RaiseFundingRequestModel:
+      type: object
+      properties:
+        processorMappingUuid:
+          type: string
+          description: |-
+            This field contains the system generated unique identifier for the
+            processor mapping.
+          example: 'c83d26ed-f093-4e43-b81b-35884f068d4b'
+        amount:
+          type: number
+          format: decimal
+          description: This field contains the amount that has been requested for fund transfer.
+          example: '10000.00'
+        transactionType:
+          type: string
+          description: This field contains the type of the transaction either `CREDIT` or `DEBIT`.
+          example: 'CREDIT'
+          enum:
+            - CREDIT
+            - DEBIT
+        documentUploadUuid:
+          type: string
+          description: |-
+            This field contains the system generated unique identifier for the document
+            that was uploaded
+          example: 'e95a7a97-5889-4001-8c40-ed79a8ab6ae9'
+      required:
+        - processorMappingUuid
+        - amount
+        - transactionType
+        - documentUploadUuid
+    RaiseFundingResponseModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: |-
+            This field contains the system generated unique identifier for the
+            raise funding that was created using the API.
+          example: 'c83d26ed-f093-4e43-b81b-35884f068d4b'
+        amount:
+          type: number
+          format: decimal
+          description: This field contains the amount that has been requested for fund transfer.
+          example: '10000.00'
+        transactionType:
+          type: string
+          description: This field contains the type of the transaction either `CREDIT` or `DEBIT`.
+          example: 'CREDIT'
+          enum:
+            - CREDIT
+            - DEBIT
+        status:
+          type: string
+          description: This field contains the status of the Raise Funding
+          example: 'PENDING'
+          enum:
+            - PENDING
+            - ACKNOWLEDGED
+            - APPROVED
+            - NOT_APPROVED
+            - REJECTED
+      required:
+        - uuid
+        - amount
+        - transactionType
+        - status
 
     RaiseFundingDocumentModel:
       type: object
@@ -2625,8 +2743,8 @@ components:
         errorMessage:
           type: string
           description: |-
-            Card program used for issuing the card is not found.
-            Please enter a valid card program and try again.
+            Processor mapping used for issuing the card is not found.
+            Please enter a valid processor mapping and try again.
       required:
         - errorCode
         - errorMessage
@@ -2771,7 +2889,7 @@ components:
         errorMessage:
           type: string
           description: |-
-            Either card program uuid or processor mapping uuid is mandatory.
+            Processor mapping uuid is mandatory.
             Both cannot be null
       required:
         - errorCode
