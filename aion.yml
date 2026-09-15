@@ -1885,6 +1885,165 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
+  /v1/transaction/{uuid}/tag:
+    get:
+      tags:
+        - 'Transaction'
+      summary: Get Transaction Tags
+      description: |-
+        This endpoint retrieves all the tags currently attached to a transaction.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This field contains a unique identifier of the transaction.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionTagsResponseModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    post:
+      tags:
+        - 'Transaction'
+      summary: Add Transaction Tags
+      description: |-
+        This endpoint adds one or more tags to a transaction, in addition to any tags it already has.
+        Tags are free-form text (e.g. `medical`, `grocery`) - there is no fixed allow-list, so any
+        tag name can be created dynamically as long as it meets the length and character constraints.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This field contains a unique identifier of the transaction.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionTagsRequestModel'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    put:
+      tags:
+        - 'Transaction'
+      summary: Replace Transaction Tags
+      description: |-
+        This endpoint replaces the full set of tags on a transaction. Any existing tag that is not
+        included in the request is removed, and any new tag included in the request is created.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This field contains a unique identifier of the transaction.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionTagsRequestModel'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Transaction'
+      summary: Delete Transaction Tags
+      description: |-
+        This endpoint removes one or more tags from a transaction. Each tag in the request must be
+        identified by its `uuid` (rather than its `tag` name).
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This field contains a unique identifier of the transaction.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionTagsRequestModel'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/transaction/tags:
+    get:
+      tags:
+        - 'Transaction'
+      summary: Search Transaction Tags
+      description: |-
+        This endpoint retrieves the distinct set of tag names that have been used across your
+        company's transactions, optionally filtered by tag name, user or card.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: tag
+          in: query
+          schema:
+            type: string
+        - name: userUuid
+          in: query
+          schema:
+            type: string
+        - name: cardUuid
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionTagsResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
 webhooks:
   cardActivation:
     post:
@@ -6204,6 +6363,51 @@ components:
           items:
             $ref: '#/components/schemas/CardAutoloadResponseModel'
         totalElements:
+          type: integer
+          format: int64
+
+    TransactionTagModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: |-
+            This is a system-generated unique identifier for the tag. Required when deleting a tag.
+        tag:
+          type: string
+          description: |-
+            The name of the tag. This is free-form text (max 100 characters) and must not contain the
+            `|` character. Required when creating/setting a tag; not required (and ignored) when
+            deleting a tag by `uuid`.
+          example: 'grocery'
+        status:
+          type: string
+          example: 'ACTIVE'
+    TransactionTagsRequestModel:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionTagModel'
+      required:
+        - tags
+    TransactionTagsResponseModel:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionTagModel'
+    TransactionTagsResponse:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+          description: The distinct tag names matching the search criteria.
+        total:
           type: integer
           format: int64
 
