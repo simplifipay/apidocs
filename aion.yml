@@ -80,6 +80,14 @@ tags:
       The Receipt Policy API Group is designed to let you configure the conditions under which a receipt
       is required for a transaction (e.g. by amount, channel, merchant or category), and manage the
       lifecycle of those rules.
+  - name: 'Budget'
+    description: |-
+      The Budget API Group is designed to let you set spending limits for a card program, a card group,
+      or a Team, in a given currency, and track how much of that budget has been utilized.
+  - name: 'Team'
+    description: |-
+      The Team API Group is designed to let you group users into Teams so that budgets and other
+      controls can be applied collectively rather than per individual user.
   - name: 'Webhook'
     description: |-
       All the asynchronous API calls that are made using the endpoints published by the SimpliFi platform,
@@ -2304,6 +2312,454 @@ paths:
       responses:
         '200':
           description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+
+  /v1/budget:
+    post:
+      tags:
+        - 'Budget'
+      summary: Create a Budget
+      description: |-
+        This endpoint creates a budget for a card program, a card group, or a Team, in a given
+        currency. Only one active budget can apply to a given entity/currency combination at a time.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BudgetRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    get:
+      tags:
+        - 'Budget'
+      summary: List Budgets
+      description: |-
+        This endpoint retrieves a paginated list of budgets, optionally filtered by `entityType`
+        (`CARD_PROGRAM`, `TEAM` or `CARD_GROUP`).
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: entityType
+          in: query
+          schema:
+            type: string
+            enum:
+              - CARD_PROGRAM
+              - TEAM
+              - CARD_GROUP
+        - name: includeBudget
+          in: query
+          description: |-
+            When `true`, the response includes the `utilizedBudget` computed for each entry.
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetListing'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /v1/budget/{uuid}:
+    get:
+      tags:
+        - 'Budget'
+      summary: Get a Budget
+      description: |-
+        This endpoint retrieves the details of a single budget.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the budget.
+          required: true
+          schema:
+            type: string
+        - name: includeBudget
+          in: query
+          description: |-
+            When `true`, the response includes the `utilizedBudget` computed for the current period.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    patch:
+      tags:
+        - 'Budget'
+      summary: Update a Budget
+      description: |-
+        This endpoint updates the amount, frequency or currency of an existing budget.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the budget.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BudgetRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Budget'
+      summary: Suspend a Budget
+      description: |-
+        This endpoint suspends a budget, setting its status to `INACTIVE`. Suspending a budget does
+        not delete its configuration, but it stops being applied to new card loads.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the budget.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/budget/of:
+    get:
+      tags:
+        - 'Budget'
+      summary: Resolve the Active Budget for an Entity and Currency
+      description: |-
+        This endpoint resolves the active budget that applies to a given entity (card program, card
+        group, or Team) in a given currency, and optionally returns how much of it has been utilized
+        in the current period. This is the endpoint used to check whether a card load would be within
+        budget before applying it.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: entityUuid
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: currency
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: includeBudget
+          in: query
+          description: |-
+            When `true`, the response includes the `utilizedBudget` computed for the current period.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+
+  /v1/team:
+    post:
+      tags:
+        - 'Team'
+      summary: Create a Team
+      description: |-
+        This endpoint creates a new Team that users can be added to as members.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamModel'
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    get:
+      tags:
+        - 'Team'
+      summary: List Teams
+      description: |-
+        This endpoint retrieves a paginated list of Teams under your company.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: name
+          in: query
+          description: |-
+            Filter Teams by name (partial match).
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+        - name: sortDir
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamListModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /v1/team/{uuid}:
+    get:
+      tags:
+        - 'Team'
+      summary: Get a Team
+      description: |-
+        This endpoint retrieves the details of a single Team, including its members.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the Team.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    patch:
+      tags:
+        - 'Team'
+      summary: Update a Team
+      description: |-
+        This endpoint updates the name of an existing Team.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the Team.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamModel'
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Team'
+      summary: Delete a Team
+      description: |-
+        This endpoint permanently deletes a Team.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the Team.
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+  /v1/team/{uuid}/members:
+    post:
+      tags:
+        - 'Team'
+      summary: Add Team Members
+      description: |-
+        This endpoint adds one or more users to a Team. The request and response are the full
+        Team object, not a bare member list.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the Team.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamModel'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    patch:
+      tags:
+        - 'Team'
+      summary: Update Team Members
+      description: |-
+        This endpoint replaces the full membership list of a Team. The request and response are
+        the full Team object, not a bare member list.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the Team.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamModel'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamModel'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+    delete:
+      tags:
+        - 'Team'
+      summary: Remove Team Members
+      description: |-
+        This endpoint removes one or more users from a Team. The request and response are the
+        full Team object, not a bare member list.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          description: |-
+            This is a unique identifier for the Team.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamModel'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamModel'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '400':
@@ -6902,6 +7358,151 @@ components:
           description: Set to `false` to suspend the rule, or `true` to reactivate it.
       required:
         - active
+
+    BudgetRequest:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Supply to update an existing budget; leave blank to have one generated when creating a budget.
+        entityType:
+          type: string
+          description: The type of entity this budget applies to.
+          enum:
+            - CARD_PROGRAM
+            - TEAM
+            - CARD_GROUP
+        entityUuid:
+          type: string
+          description: This is a unique identifier of the card program, Team, or card group this budget applies to.
+        name:
+          type: string
+          example: 'Marketing Budget'
+        budget:
+          type: number
+          format: decimal
+          description: The budget amount, in `currency`.
+        frequency:
+          type: string
+          description: How often the budget resets.
+          enum:
+            - MONTHLY
+            - QUARTERLY
+            - ANNUALLY
+        currency:
+          type: string
+          example: 'AED'
+      required:
+        - entityType
+        - entityUuid
+        - name
+        - budget
+        - frequency
+        - currency
+    BudgetResponse:
+      type: object
+      properties:
+        uuid:
+          type: string
+        name:
+          type: string
+        entityType:
+          type: string
+          enum:
+            - CARD_PROGRAM
+            - TEAM
+            - CARD_GROUP
+        entityUuid:
+          type: string
+        budget:
+          type: number
+          format: decimal
+        frequency:
+          type: string
+        currency:
+          type: string
+        utilizedBudget:
+          type: number
+          format: decimal
+          description: |-
+            The amount of the budget already utilized in the current period. Only populated when
+            `includeBudget=true` was passed on the request.
+        status:
+          type: string
+          example: 'ACTIVE'
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        creationDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
+    BudgetListing:
+      type: object
+      properties:
+        budgets:
+          type: array
+          items:
+            $ref: '#/components/schemas/BudgetResponse'
+        total:
+          type: integer
+          format: int64
+
+    TeamMemberModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: This is a system-generated unique identifier for the team-membership record.
+        user_uuid:
+          type: string
+          description: This is a unique identifier of the user being added to the Team.
+        position:
+          type: string
+          enum:
+            - TEAM_LEAD
+            - MEMBER
+        name:
+          type: string
+        username:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+      required:
+        - user_uuid
+        - position
+    TeamModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+        name:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMemberModel'
+      required:
+        - name
+    TeamListModel:
+      type: object
+      properties:
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamModel'
+        total:
+          type: integer
+          format: int64
 
 security:
   - bearerAuth: []
