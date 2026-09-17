@@ -1786,6 +1786,10 @@ paths:
         This endpoint creates a new autoload schedule on a Card. An autoload schedule automatically
         loads a fixed `amount` onto a card on a recurring `scheduleType` (`MONTHLY`, `WEEKLY` or `DAILY`)
         basis, so that the card owner does not need to be manually loaded every cycle.
+
+        :::caution[Processor Dependency]
+        This API is dependent on processors' capabilities
+        :::
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
@@ -1815,6 +1819,10 @@ paths:
       summary: Update Autoload on Card
       description: |-
         This endpoint updates the existing autoload schedule on a Card.
+
+        :::caution[Processor Dependency]
+        This API is dependent on processors' capabilities
+        :::
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
