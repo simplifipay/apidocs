@@ -414,7 +414,7 @@ paths:
         The Request Account Opening endpoint requests that an underlying account be opened for a
         KYC-approved user. This is an asynchronous call - the endpoint validates the request and
         accepts it for processing; the final result of the account opening is delivered via the
-        Account Provisioned webhook.
+        `CONSUMER_ACCOUNT_PROVISIONED` webhook.
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
@@ -1009,6 +1009,24 @@ webhooks:
         '200':
           $ref: '#/components/responses/WebhookSuccessResponse'
 
+  accountProvisioned:
+    post:
+      tags:
+        - 'Webhook'
+      security: []
+      summary: Account Provisioned webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsumerAccountProvisionedWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1549,6 +1567,7 @@ components:
       type: string
       enum: [
         PROCESSOR_MAPPING_CREATION,
+        CONSUMER_ACCOUNT_PROVISIONED,
 
         CARD_ACTIVATION,
         CARD_ISSUANCE,
@@ -2065,6 +2084,56 @@ components:
                 - amount
                 - transactionType
                 - fundingStatus
+          required:
+            - eventType
+            - eventPayload
+
+    ConsumerAccountProvisionedWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CONSUMER_ACCOUNT_PROVISIONED'
+              example: 'CONSUMER_ACCOUNT_PROVISIONED'
+            eventPayload:
+              type: object
+              description: |-
+                Confirms account provisioning is complete. Published once the full internal
+                hierarchy required for the account (issuer registration, processor registration,
+                processor mapping, funding source, default card program) has been found or created.
+              properties:
+                accountId:
+                  type: string
+                  description: This field contains the unique identifier of the provisioned account.
+                  example: '1e6f2e35-8f1f-4c9d-9f2b-7c2b4a0e6d11'
+                companyUuid:
+                  $ref: '#/components/schemas/CompanyUuidParameter'
+                userUuid:
+                  $ref: '#/components/schemas/UserUuidParameter'
+                currency:
+                  type: string
+                  description: This field contains the currency of the provisioned account.
+                  example: 'AED'
+                processorMappingUuid:
+                  $ref: '#/components/schemas/ProcessorMappingUuidParameter'
+                defaultCardProgramUuid:
+                  type: string
+                  description: This field contains the unique identifier of the default card program assigned to the account.
+                  example: 'c1a2e3f4-5b6c-47d8-9e0f-1a2b3c4d5e6f'
+                status:
+                  type: string
+                  description: This field contains the status of the account provisioning request.
+                  example: 'SUCCESS'
+                failureCode:
+                  type: string
+                  description: This field contains the failure code when provisioning did not succeed.
+              required:
+                - accountId
+                - companyUuid
+                - userUuid
+                - status
           required:
             - eventType
             - eventPayload
