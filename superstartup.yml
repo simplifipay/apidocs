@@ -2106,8 +2106,8 @@ components:
               properties:
                 accountId:
                   type: string
-                  description: This field contains the unique identifier of the provisioned account.
-                  example: '1e6f2e35-8f1f-4c9d-9f2b-7c2b4a0e6d11'
+                  description: This field contains the IBAN of the provisioned account.
+                  example: 'AE070331234567890123456'
                 companyUuid:
                   $ref: '#/components/schemas/CompanyUuidParameter'
                 userUuid:
