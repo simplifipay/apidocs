@@ -404,6 +404,40 @@ paths:
         '400':
           $ref: '#/components/responses/EntityNotFoundError'
 
+  /v1/accounts/{userUuid}:
+    post:
+      tags:
+        - 'User'
+      summary: Request account opening
+      operationId: openAccount
+      description: |-
+        The Request Account Opening endpoint requests that an underlying account be opened for a
+        KYC-approved user. This is an asynchronous call - the endpoint validates the request and
+        accepts it for processing; the final result of the account opening is delivered via the
+        Account Provisioned webhook.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: userUuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This is a system-generated unique identifier of the user
+            that was created using the Create User API.
+          required: true
+      responses:
+        '202':
+          description: Accepted - the account opening request has been accepted for processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountOpeningResponseModel'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
   /v1/card:
     get:
       tags:
@@ -1452,6 +1486,17 @@ components:
         - maskedPan
         - cardMode
         - currency
+    AccountOpeningResponseModel:
+      type: object
+      properties:
+        requestUuid:
+          type: string
+          description: A unique identifier for this account opening request.
+          example: '00d366f2-a6e9-4714-b172-02c4e58c29d8'
+        status:
+          type: string
+          description: This field contains the status of the account opening request. `ACCEPTED` means the request was accepted for asynchronous processing.
+          example: 'ACCEPTED'
     InstrumentType:
       type: string
       description: This field specifies the type of card that is being issued.
