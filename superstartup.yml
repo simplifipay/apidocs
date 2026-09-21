@@ -1566,7 +1566,6 @@ components:
     WebhookEventType:
       type: string
       enum: [
-        PROCESSOR_MAPPING_CREATION,
         CONSUMER_ACCOUNT_PROVISIONED,
 
         CARD_ACTIVATION,
