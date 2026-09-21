@@ -2125,10 +2125,17 @@ components:
                 status:
                   type: string
                   description: This field contains the status of the account provisioning request.
-                  example: 'SUCCESS'
+                  example: 'COMPLETED'
+                  enum:
+                    - COMPLETED
+                    - FAILED
                 failureCode:
                   type: string
-                  description: This field contains the failure code when provisioning did not succeed.
+                  description: |-
+                    This field is only present when `status` is `FAILED`. It contains the name of the
+                    internal exception that caused the failure (e.g. `EntityNotFoundException`,
+                    `ValidationException`) and is not a fixed set of codes.
+                  example: 'EntityNotFoundException'
               required:
                 - accountId
                 - companyUuid
