@@ -404,6 +404,40 @@ paths:
         '400':
           $ref: '#/components/responses/EntityNotFoundError'
 
+  /v1/accounts/{userUuid}:
+    post:
+      tags:
+        - 'User'
+      summary: Request account opening
+      operationId: openAccount
+      description: |-
+        The Request Account Opening endpoint requests that an underlying account be opened for a
+        KYC-approved user. This is an asynchronous call - the endpoint validates the request and
+        accepts it for processing; the final result of the account opening is delivered via the
+        `CONSUMER_ACCOUNT_PROVISIONED` webhook.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: userUuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This is a system-generated unique identifier of the user
+            that was created using the Create User API.
+          required: true
+      responses:
+        '202':
+          description: Accepted - the account opening request has been accepted for processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountOpeningResponseModel'
+        '400':
+          $ref: '#/components/responses/EntityNotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
   /v1/card:
     get:
       tags:
@@ -975,6 +1009,24 @@ webhooks:
         '200':
           $ref: '#/components/responses/WebhookSuccessResponse'
 
+  accountProvisioned:
+    post:
+      tags:
+        - 'Webhook'
+      security: []
+      summary: Account Provisioned webhook
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsumerAccountProvisionedWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1452,6 +1504,17 @@ components:
         - maskedPan
         - cardMode
         - currency
+    AccountOpeningResponseModel:
+      type: object
+      properties:
+        requestUuid:
+          type: string
+          description: A unique identifier for this account opening request.
+          example: '00d366f2-a6e9-4714-b172-02c4e58c29d8'
+        status:
+          type: string
+          description: This field contains the status of the account opening request. `ACCEPTED` means the request was accepted for asynchronous processing.
+          example: 'ACCEPTED'
     InstrumentType:
       type: string
       description: This field specifies the type of card that is being issued.
@@ -1504,6 +1567,7 @@ components:
       type: string
       enum: [
         PROCESSOR_MAPPING_CREATION,
+        CONSUMER_ACCOUNT_PROVISIONED,
 
         CARD_ACTIVATION,
         CARD_ISSUANCE,
@@ -2020,6 +2084,63 @@ components:
                 - amount
                 - transactionType
                 - fundingStatus
+          required:
+            - eventType
+            - eventPayload
+
+    ConsumerAccountProvisionedWebhook:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CONSUMER_ACCOUNT_PROVISIONED'
+              example: 'CONSUMER_ACCOUNT_PROVISIONED'
+            eventPayload:
+              type: object
+              description: |-
+                Confirms account provisioning is complete. Published once the full internal
+                hierarchy required for the account (issuer registration, processor registration,
+                processor mapping, funding source, default card program) has been found or created.
+              properties:
+                accountId:
+                  type: string
+                  description: This field contains the IBAN of the provisioned account.
+                  example: 'AE070331234567890123456'
+                companyUuid:
+                  $ref: '#/components/schemas/CompanyUuidParameter'
+                userUuid:
+                  $ref: '#/components/schemas/UserUuidParameter'
+                currency:
+                  type: string
+                  description: This field contains the currency of the provisioned account.
+                  example: 'AED'
+                processorMappingUuid:
+                  $ref: '#/components/schemas/ProcessorMappingUuidParameter'
+                defaultCardProgramUuid:
+                  type: string
+                  description: This field contains the unique identifier of the default card program assigned to the account.
+                  example: 'c1a2e3f4-5b6c-47d8-9e0f-1a2b3c4d5e6f'
+                status:
+                  type: string
+                  description: This field contains the status of the account provisioning request.
+                  example: 'COMPLETED'
+                  enum:
+                    - COMPLETED
+                    - FAILED
+                failureCode:
+                  type: string
+                  description: |-
+                    This field is only present when `status` is `FAILED`. It contains the name of the
+                    internal exception that caused the failure (e.g. `EntityNotFoundException`,
+                    `ValidationException`) and is not a fixed set of codes.
+                  example: 'EntityNotFoundException'
+              required:
+                - accountId
+                - companyUuid
+                - userUuid
+                - status
           required:
             - eventType
             - eventPayload
