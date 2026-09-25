@@ -36,7 +36,7 @@ Sent to the SDK after it signals readiness via `SIMPLIFI_SDK_READY`.
 | ------------------- | ----------- |
 | **initiate_kyc**    | Launch identity verification |
 
-**Admin-scoped JWT (default):** low blast radius, but expires in 5 minutes and isn't refreshed on retry — a retry after that window fails.
+**Admin-scoped JWT (default):** scoped to just this user's KYC flow, but expires in 5 minutes and isn't refreshed on retry — a retry after that window fails.
 
 **Customer's own token:** no 5-minute limit, but carries the customer's full account permissions, not just KYC.
 
