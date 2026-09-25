@@ -28,7 +28,7 @@ Sent to the SDK after it signals readiness via `SIMPLIFI_SDK_READY`.
 
 | Field         | Type   | Required | Description |
 |-------------- | ------ | -------- | ----------- |
-| **token**     | String | Yes      | Admin-scoped JWT for this specific user, minted server-side by **your backend** via the SimpliFi Auth API. This is not the customer's own session/login token — the customer never generates or sees it directly. |
+| **token**     | String | Yes      | Admin-scoped JWT for this specific user, minted server-side by **your backend** via the [Auth API](https://ss-docs.simplifipay.com/login-to-generate-sdk-admin-jwt-token-43566163e0). This is not the customer's own session/login token — the customer never generates or sees it directly. |
 | **userID**    | String | Yes      | The unique 36-character ID of the user to verify. |
 | **action**    | String | Yes      | Must be `initiate_kyc`. |
 
@@ -176,9 +176,9 @@ void _onMessage(JavaScriptMessage message) {
         break;
 
       case 'SIMPLIFI_SDK_CONFIG_ERROR':
-        // SDK rejected the config.
+        // SDK rejected the config payload sent in Step 5.
         // data['message']   → human-readable reason
-        // data['errorCode'] → machine-readable code
+        // data['errorCode'] → 'INVALID_SDK_CONFIG'
         // Show an error state to the user.
         break;
 
