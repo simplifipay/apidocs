@@ -20,15 +20,13 @@ The SDK accepts credentials via `postMessage`, delivered after the SDK has fully
 
 > **Important:** Never send credentials before receiving `SIMPLIFI_SDK_READY`. The SDK may not have mounted yet and the message will be lost.
 
-> **Important:** Send config **once**, at the very start. Do not resend it later in the flow.
-
 **Config Payload**
 
 Sent to the SDK after it signals readiness via `SIMPLIFI_SDK_READY`.
 
 | Field         | Type   | Required | Description |
 |-------------- | ------ | -------- | ----------- |
-| **token**     | String | Yes      | Admin-scoped JWT for this specific user, minted server-side by **your backend** via the [Auth API](https://ss-docs.simplifipay.com/login-to-generate-sdk-admin-jwt-token-43566163e0). This is not the customer's own session/login token — the customer never generates or sees it directly. |
+| **token**     | String | Yes      | Either an admin-scoped JWT for this specific user, minted server-side by **your backend** via the [Auth API](https://ss-docs.simplifipay.com/login-to-generate-sdk-admin-jwt-token-43566163e0), or the customer's own regular session/login token. |
 | **userID**    | String | Yes      | The unique 36-character ID of the user to verify. |
 | **action**    | String | Yes      | Must be `initiate_kyc`. |
 
