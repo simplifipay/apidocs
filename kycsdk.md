@@ -20,8 +20,6 @@ The SDK accepts credentials via `postMessage`, delivered after the SDK has fully
 
 > **Important:** Never send credentials before receiving `SIMPLIFI_SDK_READY`. The SDK may not have mounted yet and the message will be lost.
 
-> **Important:** Send config **once**, at the very start. Do not resend it later in the flow.
-
 **Config Payload**
 
 Sent to the SDK after it signals readiness via `SIMPLIFI_SDK_READY`.
@@ -38,10 +36,9 @@ Sent to the SDK after it signals readiness via `SIMPLIFI_SDK_READY`.
 | ------------------- | ----------- |
 | **initiate_kyc**    | Launch identity verification |
 
-**Choosing a token: admin-scoped vs. the customer's own**
+**Admin-scoped JWT (default):** low blast radius, but expires in 5 minutes and isn't refreshed on retry — a retry after that window fails.
 
-- **Admin-scoped JWT (recommended default):** narrowly scoped to just this one user's KYC flow, so a leak from inside the SDK/WebView context has low blast radius. It expires 5 minutes after minting, and the SDK does not currently refresh it mid-flow — if verification runs long (document capture, provider processing) or the user retries after a failure past that window, the retry will fail with an auth error rather than a clear "session expired" message. If your flow needs to reliably survive that, use the customer's own token instead for now.
-- **Customer's own session/login token:** doesn't have the 5-minute ceiling, so it avoids the retry-expiry issue above. The trade-off is that this token typically carries the customer's full account permissions (balance, transfers, etc.), not just KYC — so a compromise of the WebView/iframe context has a larger blast radius than with the admin-scoped token. Only use this if you understand and accept that trade-off.
+**Customer's own token:** no 5-minute limit, but carries the customer's full account permissions, not just KYC.
 
 ## Message Protocol
 
