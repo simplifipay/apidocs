@@ -176,10 +176,9 @@ void _onMessage(JavaScriptMessage message) {
         break;
 
       case 'SIMPLIFI_SDK_CONFIG_ERROR':
-        // SDK rejected the config - the payload itself was malformed
-        // (missing token/userId/action, or an unrecognized action).
+        // SDK rejected the config payload sent in Step 5.
         // data['message']   → human-readable reason
-        // data['errorCode'] → 'INVALID_SDK_CONFIG' (the only value today)
+        // data['errorCode'] → 'INVALID_SDK_CONFIG'
         // Show an error state to the user.
         break;
 
@@ -189,11 +188,10 @@ void _onMessage(JavaScriptMessage message) {
         // data['flow']    → 'INITIATE_KYC'
         // data['message'] → human-readable result
         //
-        // On FAILURE, check data['errorCode'] before treating it as generic:
-        //   50002 → user is already KYC-approved. Not really a failure - skip
-        //           straight to your own "you're verified" state instead of
-        //           showing an error.
-        //   anything else → treat as a generic failure, show data['message'].
+        // On FAILURE, check data['errorCode'] first:
+        //   50002 → the user is already verified. Show your own "verified"
+        //           state rather than an error message.
+        //   any other value → show data['message'] to the user.
         break;
     }
   } catch (_) {}
