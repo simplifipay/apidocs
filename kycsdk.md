@@ -187,11 +187,6 @@ void _onMessage(JavaScriptMessage message) {
         // data['status']  → 'SUCCESS' or 'FAILURE'
         // data['flow']    → 'INITIATE_KYC'
         // data['message'] → human-readable result
-        //
-        // On FAILURE, check data['errorCode'] first:
-        //   50002 → the user is already verified. Show your own "verified"
-        //           state rather than an error message.
-        //   any other value → show data['message'] to the user.
         break;
     }
   } catch (_) {}
