@@ -26,7 +26,7 @@ Sent to the SDK after it signals readiness via `SIMPLIFI_SDK_READY`.
 
 | Field         | Type   | Required | Description |
 |-------------- | ------ | -------- | ----------- |
-| **token**     | String | Yes      | Either an admin-scoped JWT for this specific user, minted server-side by **your backend** via the [Auth API](https://ss-docs.simplifipay.com/login-to-generate-sdk-admin-jwt-token-43566163e0), or the customer's own regular session/login token — see the note below on choosing between them. |
+| **token**     | String | Yes      | Either an admin-scoped JWT for this specific user, minted server-side by **your backend** via the [Auth API](https://ss-docs.simplifipay.com/login-to-generate-sdk-admin-jwt-token-43566163e0), or the customer's own regular session/login token. |
 | **userID**    | String | Yes      | The unique 36-character ID of the user to verify. |
 | **action**    | String | Yes      | Must be `initiate_kyc`. |
 
@@ -35,10 +35,6 @@ Sent to the SDK after it signals readiness via `SIMPLIFI_SDK_READY`.
 | Action              | Description |
 | ------------------- | ----------- |
 | **initiate_kyc**    | Launch identity verification |
-
-**Admin-scoped JWT (default):** scoped to just this user's KYC flow, but expires in 5 minutes and isn't refreshed on retry — a retry after that window fails.
-
-**Customer's own token:** no 5-minute limit, but carries the customer's full account permissions, not just KYC.
 
 ## Message Protocol
 
