@@ -28,7 +28,7 @@ Sent to the SDK after it signals readiness via `SIMPLIFI_SDK_READY`.
 
 | Field         | Type   | Required | Description |
 |-------------- | ------ | -------- | ----------- |
-| **token**     | String | Yes      | Admin-scoped JWT for this specific user, minted server-side by **your backend** via the [Auth API](https://ss-docs.simplifipay.com/login-to-generate-sdk-admin-jwt-token-43566163e0). This is not the customer's own session/login token — the customer never generates or sees it directly. |
+| **token**     | String | Yes      | Either an admin-scoped JWT for this specific user, minted server-side by **your backend** via the [Auth API](https://ss-docs.simplifipay.com/login-to-generate-sdk-admin-jwt-token-43566163e0), or the customer's own regular session/login token — see the note below on choosing between them. |
 | **userID**    | String | Yes      | The unique 36-character ID of the user to verify. |
 | **action**    | String | Yes      | Must be `initiate_kyc`. |
 
@@ -37,6 +37,11 @@ Sent to the SDK after it signals readiness via `SIMPLIFI_SDK_READY`.
 | Action              | Description |
 | ------------------- | ----------- |
 | **initiate_kyc**    | Launch identity verification |
+
+**Choosing a token: admin-scoped vs. the customer's own**
+
+- **Admin-scoped JWT (recommended default):** narrowly scoped to just this one user's KYC flow, so a leak from inside the SDK/WebView context has low blast radius. It expires 5 minutes after minting, and the SDK does not currently refresh it mid-flow — if verification runs long (document capture, provider processing) or the user retries after a failure past that window, the retry will fail with an auth error rather than a clear "session expired" message. If your flow needs to reliably survive that, use the customer's own token instead for now.
+- **Customer's own session/login token:** doesn't have the 5-minute ceiling, so it avoids the retry-expiry issue above. The trade-off is that this token typically carries the customer's full account permissions (balance, transfers, etc.), not just KYC — so a compromise of the WebView/iframe context has a larger blast radius than with the admin-scoped token. Only use this if you understand and accept that trade-off.
 
 ## Message Protocol
 
