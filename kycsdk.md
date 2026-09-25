@@ -28,7 +28,7 @@ Sent to the SDK after it signals readiness via `SIMPLIFI_SDK_READY`.
 
 | Field         | Type   | Required | Description |
 |-------------- | ------ | -------- | ----------- |
-| **token**     | String | Yes      | Admin-scoped JWT for this specific user, minted server-side by **your backend** via the SimpliFi Auth API. This is not the customer's own session/login token — the customer never generates or sees it directly. |
+| **token**     | String | Yes      | Admin-scoped JWT for this specific user, minted server-side by **your backend** via the [Auth API](https://bayzat-docs.simplifipay.com/login-to-generate-jwt-token-31439162e0). This is not the customer's own session/login token — the customer never generates or sees it directly. |
 | **userID**    | String | Yes      | The unique 36-character ID of the user to verify. |
 | **action**    | String | Yes      | Must be `initiate_kyc`. |
 
@@ -176,9 +176,10 @@ void _onMessage(JavaScriptMessage message) {
         break;
 
       case 'SIMPLIFI_SDK_CONFIG_ERROR':
-        // SDK rejected the config.
+        // SDK rejected the config - the payload itself was malformed
+        // (missing token/userId/action, or an unrecognized action).
         // data['message']   → human-readable reason
-        // data['errorCode'] → machine-readable code
+        // data['errorCode'] → 'INVALID_SDK_CONFIG' (the only value today)
         // Show an error state to the user.
         break;
 
@@ -187,6 +188,12 @@ void _onMessage(JavaScriptMessage message) {
         // data['status']  → 'SUCCESS' or 'FAILURE'
         // data['flow']    → 'INITIATE_KYC'
         // data['message'] → human-readable result
+        //
+        // On FAILURE, check data['errorCode'] before treating it as generic:
+        //   50002 → user is already KYC-approved. Not really a failure - skip
+        //           straight to your own "you're verified" state instead of
+        //           showing an error.
+        //   anything else → treat as a generic failure, show data['message'].
         break;
     }
   } catch (_) {}
