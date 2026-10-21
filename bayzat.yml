@@ -3356,6 +3356,21 @@ components:
                   type: string
                   description: This field contains the card's currency.
                   example: 'AED'
+                fees:
+                  type: number
+                  format: decimal
+                  description: This field contains the amount of any fees applied for the transaction in card's currency.
+                  example: '2.5'
+                markupFee:
+                  type: number
+                  format: decimal
+                  description: This field contains the amount of any markup fee applied for the transaction in card's currency.
+                  example: '0.8'
+                vatCharges:
+                  type: number
+                  format: decimal
+                  description: This field contains the amount of any VAT charges applied for the transaction in card's currency.
+                  example: '1.2'
                 transactionStatusCode:
                   type: string
                   description: One or Two digit status code of the transaction
