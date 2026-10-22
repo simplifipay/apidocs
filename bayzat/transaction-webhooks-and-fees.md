@@ -1,7 +1,6 @@
 # Transaction webhooks: types, fees, and reconciliation
 
-This page explains the transaction webhooks you will receive, how fees are
-reported on each, and what `transactionReferenceUuid` points to.
+This page explains the transaction webhooks you will receive, how fees are reported on each, and what `transactionReferenceUuid` points to.
 
 ---
 
@@ -21,8 +20,7 @@ reported on each, and what `transactionReferenceUuid` points to.
 
 ## 2. The lifecycle of one purchase
 
-One purchase is several webhooks sharing a lifecycle. They arrive in order, hours
-or days apart.
+One purchase is several webhooks sharing a lifecycle. They arrive in order, hours or days apart.
 
 ### A purchase that simply settles
 
@@ -31,8 +29,7 @@ or days apart.
 | 1     | `Auth`            | `545.99`     | —         | `null`                     |
 | 2     | `Settlement`      | `532.67`     | `13.32`   | the `Auth`'s `transactionUuid` |
 
-The authorisation is gross, the settlement is net, and the difference is the fee
-(`fees` + `markupFee` + `vatCharges`).
+The authorisation is gross, the settlement is net, and the difference is the fee (`fees` + `markupFee` + `vatCharges`).
 
 ### A purchase partly reversed before settling
 
@@ -68,13 +65,11 @@ total fee  =  fees  +  markupFee  +  vatCharges
 | `markupFee`  | FX / scheme markup        |
 | `vatCharges` | VAT charged on the above  |
 
-Always add the three together. Any of them can be zero, and often is, but none of
-them should be assumed zero.
+Always add the three together. Any of them can be zero, and often is, but none of them should be assumed zero.
 
 ### Checking it against the amounts
 
-For a purchase that authorised and settled once, the three fees together account
-for the difference between the two amounts:
+For a purchase that authorised and settled once, the three fees together account for the difference between the two amounts:
 
 | `transactionType` | `billAmount` | `fees` | `markupFee` | `vatCharges` |
 | ----------------- | ------------ | ------ | ----------- | ------------ |
@@ -83,9 +78,7 @@ for the difference between the two amounts:
 
 `545.99 − 532.67 = 13.32`, which is `0.00 + 13.32 + 0.00`.
 
-If the authorisation was partly reversed first, the reversal returned part of the
-fee and the settlement kept the rest. The two add up to what was charged at
-authorisation:
+If the authorisation was partly reversed first, the reversal returned part of the fee and the settlement kept the rest. The two add up to what was charged at authorisation:
 
 | `transactionType` | `billAmount` | `fees` | `markupFee` | `vatCharges` |            |
 | ----------------- | ------------ | ------ | ----------- | ------------ | ---------- |
@@ -95,8 +88,7 @@ authorisation:
 
 `0.27 + 0.03 = 0.30` was the fee at authorisation. The customer paid `0.03`.
 
-On a full reversal the whole fee comes back, nothing settles, and nothing is
-charged:
+On a full reversal the whole fee comes back, nothing settles, and nothing is charged:
 
 | `transactionType` | `billAmount` | `fees` | `markupFee` | `vatCharges` |
 | ----------------- | ------------ | ------ | ----------- | ------------ |
@@ -105,9 +97,7 @@ charged:
 
 ### Small differences are the conversion rate
 
-When a purchase is made in another currency, the authorisation and the settlement
-are converted to the billing currency on different days, at different rates. The
-settled amount can differ from the authorised amount by a few fils as a result.
+When a purchase is made in another currency, the authorisation and the settlement are converted to the billing currency on different days, at different rates. The settled amount can differ from the authorised amount by a few fils as a result.
 
 A `25.00 USD` purchase authorised on 12 October:
 
@@ -125,9 +115,7 @@ Settling on 14 October, two outcomes are both normal:
 | `91.81 AED`       | `0.00`     | Same rate on both days.               |
 | `91.85 AED`       | `0.04`     | The conversion rate moved in between. |
 
-A small difference like this is the exchange rate, not a fee and not an error. The
-fee is the three fee fields, and it does not change between authorisation and
-settlement.
+A small difference like this is the exchange rate, not a fee and not an error. The fee is the three fee fields, and it does not change between authorisation and settlement.
 
 ---
 
@@ -149,8 +137,7 @@ authorisation that started the lifecycle.
 
 ### Legs with no parent
 
-Some transactions are not part of an authorisation's lifecycle and carry
-`transactionReferenceUuid` as `null`:
+Some transactions are not part of an authorisation's lifecycle and carry `transactionReferenceUuid` as `null`:
 
 | Case                                                   | Type               |
 | ------------------------------------------------------ | ------------------ |
@@ -158,5 +145,4 @@ Some transactions are not part of an authorisation's lifecycle and carry
 | A refund with no matching purchase, in rare cases       | `Refund`           |
 | A surcharge whose authorisation cannot be identified    | `Debit Surcharge`  |
 
-These are complete transactions in their own right. Include them in the balance
-as single-leg lifecycles.
+These are complete transactions in their own right. Include them in the balance as single-leg lifecycles.
