@@ -2270,6 +2270,21 @@ components:
           format: decimal
           description: This field contains the FX fee amount.
           example: '0.31'
+        fees:
+          type: number
+          format: decimal
+          description: This field contains the total fee amount charged on the transaction.
+          example: '1.25'
+        markupFee:
+          type: number
+          format: decimal
+          description: This field contains the markup fee amount charged on the transaction.
+          example: '0.75'
+        vatCharges:
+          type: number
+          format: decimal
+          description: This field contains the VAT charged on the transaction fees.
+          example: '0.5'
         feeOperationType:
           type: string
           description: This field specifies the Fee Operation Type
