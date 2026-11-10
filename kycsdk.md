@@ -2,7 +2,11 @@
 
 # Overview
 
-The SimpliFi KYC SDK lets you launch identity verification (via the Mawarid provider) from inside your app without building any verification UI yourself. The host loads a secure SimpliFi page (iframe/popup on web, WebView on native), sends it a config over `postMessage`, and receives a single `SDK_FLOW_RESULT` once verification succeeds or fails. The intro, document review, provider handoff, and polling screens are all handled by the SDK.
+The SimpliFi KYC SDK lets you launch identity verification (via the Mawarid provider) from inside your app without building any verification UI yourself. The host loads a secure SimpliFi page (iframe/popup on web, WebView on native), sends it a config over `postMessage`, and receives an `SDK_FLOW_RESULT` when verification succeeds or fails. The details review, provider handoff, processing, and result screens are all handled by the SDK.
+
+**Flow:** Review details → Provider (ID scan + selfie) → Processing → Identity verified → OTP → Set MPIN. The MPIN step is optional (**Skip for now**), and users who already have an MPIN finish after Processing.
+
+**Prerequisites:** the user's `kycStatus` is `READY_FOR_KYC` or `RESUBMIT` (an already-approved user gets a `FAILURE` result with error code `50002`), and the provider's callback URL is registered to the SDK origin.
 
 **Base URL:** `https://{env}-virtualcard.simplifipay.com/simplifi-sdk/`
 
@@ -26,9 +30,10 @@ Sent to the SDK after it signals readiness via `SIMPLIFI_SDK_READY`.
 
 | Field         | Type   | Required | Description |
 |-------------- | ------ | -------- | ----------- |
-| **token**     | String | Yes      | Either an admin-scoped JWT for this specific user, minted server-side by **your backend** via the [Auth API](https://ss-docs.simplifipay.com/login-to-generate-sdk-admin-jwt-token-43566163e0), or the customer's own regular session/login token. |
-| **userID**    | String | Yes      | The unique 36-character ID of the user to verify. |
+| **token**     | String | Yes      | Either an admin-scoped JWT for this specific user, minted server-side by **your backend** via the [Auth API](https://ss-docs.simplifipay.com/login-to-generate-sdk-admin-jwt-token-43566163e0), or the customer's own regular session/login token. The admin-scoped JWT is valid for **5 minutes**, so you must also handle [token refresh](#token-refresh). A customer token must belong to the same user as `userId`. |
+| **userId**    | String | Yes      | The unique 36-character ID of the user to verify. |
 | **action**    | String | Yes      | Must be `initiate_kyc`. |
+| **primaryColor**, **accentColor**, **backgroundColor**, **textColor**, **borderRadius** | String | No | Optional theme (hex colours, CSS radius such as `12px`). Defaults to the SimpliFi theme. |
 
 **Available Actions**
 
@@ -47,13 +52,15 @@ The SDK and host communicate via `postMessage`. All messages are JSON objects.
 | `SIMPLIFI_SDK_READY`        | `simplifi-sdk`    | SDK loaded and waiting for config |
 | `SIMPLIFI_SDK_CONFIG_ACK`   | `simplifi-sdk`    | Config accepted, SDK initialising |
 | `SIMPLIFI_SDK_CONFIG_ERROR` | `simplifi-sdk`    | Config rejected — check `errorCode` and `message` |
-| `SDK_FLOW_RESULT`           | `simplifi-sdk`    | Flow completed — check `status` (`SUCCESS`/`FAILURE`) and `flow` |
+| `SDK_FLOW_RESULT`           | `simplifi-sdk`    | Verification result — check `status` (`SUCCESS`/`FAILURE`) and `flow` |
+| `SDK_REQUEST_FRESH_TOKEN`   | `simplifi-sdk`    | The token expired — reply with `SDK_FRESH_TOKEN_RESULT` (see [Token refresh](#token-refresh)) |
 
 ### Host → SDK
 
 | eventName             | source            | Description |
 | --------------------- | ----------------- | ----------- |
 | `SIMPLIFI_SDK_CONFIG` | `simplifi-parent` | Send config payload to SDK |
+| `SDK_FRESH_TOKEN_RESULT` | `simplifi-parent` | Reply to `SDK_REQUEST_FRESH_TOKEN` with a fresh token |
 
 **Config message**
 ```json
@@ -77,13 +84,25 @@ The SDK and host communicate via `postMessage`. All messages are JSON objects.
   "status": "SUCCESS",
   "action": "initiate_kyc",
   "userID": "YOUR_USER_UUID",
-  "message": "Your identity verification was submitted successfully.",
+  "message": "Your identity has been verified.",
   "timestamp": "2026-09-17T12:00:00.000Z"
 }
 ```
 On failure, `status` is `"FAILURE"` and `errorCode`/`httpStatus` may be present alongside `message`.
 
-Keep the SDK's iframe/WebView mounted and listening for messages until `SDK_FLOW_RESULT` arrives.
+`SUCCESS` means the identity is verified, and it is sent before the optional MPIN step. **Don't close the iframe/WebView on `SUCCESS`**: let the user dismiss it from the final screen.
+
+### Token refresh
+
+The admin-scoped token lasts 5 minutes, less than a typical verification. When it expires the SDK sends `SDK_REQUEST_FRESH_TOKEN`. Mint a new token server-side for the **same user** and reply within 15 seconds, or the user sees "Couldn't refresh your session" after returning from the provider.
+
+```json
+// SDK → host
+{ "source": "simplifi-sdk", "eventName": "SDK_REQUEST_FRESH_TOKEN", "requestId": "…" }
+
+// host → SDK (send "error" instead of "token" if you cannot mint one)
+{ "source": "simplifi-parent", "eventName": "SDK_FRESH_TOKEN_RESULT", "requestId": "…", "token": "NEW_TOKEN" }
+```
 
 ## Flutter Integration
 
@@ -141,6 +160,10 @@ controller = WebViewController()
 
 > **Note:** Don't clear cookies, `sessionStorage`, or local storage for this WebView between navigations — doing so mid-flow will strand the user.
 
+**Android:** the provider scans the ID with the camera, so declare the `CAMERA` and `INTERNET` permissions, grant the WebView's runtime camera request, and support the file chooser (for example `AndroidWebViewController.setOnShowFileSelector`), or the upload buttons do nothing.
+
+**Provider redirect:** in a WebView the SDK redirects the whole page to the provider and back to the SDK's `/kyc-callback` (same origin as the SDK) instead of opening a popup. Don't intercept those navigations.
+
 ### Step 3 — Load the SDK
 
 Always append `?platform=webview` to the URL. This tells the SDK it is running inside a WebView and to use `SimplifiSDKChannel` instead of `window.parent`/`window.open`. Without this param, KYC's provider handoff will not work in a WebView and no events will be sent.
@@ -180,11 +203,17 @@ void _onMessage(JavaScriptMessage message) {
         // Show an error state to the user.
         break;
 
+      case 'SDK_REQUEST_FRESH_TOKEN':
+        // Token expired. Mint a new one server-side for the same user
+        // and reply with _sendFreshToken(data['requestId']).
+        break;
+
       case 'SDK_FLOW_RESULT':
-        // The KYC flow completed.
+        // The verification finished.
         // data['status']  → 'SUCCESS' or 'FAILURE'
         // data['flow']    → 'INITIATE_KYC'
         // data['message'] → human-readable result
+        // On SUCCESS keep the WebView open: the user may still set an MPIN.
         break;
     }
   } catch (_) {}
@@ -216,7 +245,22 @@ Future<void> _sendConfig() async {
 }
 ```
 
-### Step 6 — Timeout handling (Optional)
+### Step 6 — Reply to token refresh requests
+
+```dart
+Future<void> _sendFreshToken(String requestId) async {
+  final freshToken = await mintAdminToken(userId); // your backend call
+  final msg = jsonEncode({
+    'source':    'simplifi-parent',
+    'eventName': 'SDK_FRESH_TOKEN_RESULT',
+    'requestId': requestId,
+    'token':     freshToken,
+  });
+  await controller.runJavaScript('window.postMessage($msg, "$sdkOrigin");');
+}
+```
+
+### Step 7 — Timeout handling (Optional)
 
 The SDK should signal `SIMPLIFI_SDK_READY` within a few seconds of the initial load. Because KYC involves multiple redirects afterward, don't apply this same short timeout to the whole flow — only to the initial readiness handshake.
 
@@ -273,6 +317,16 @@ window.addEventListener('message', (e) => {
       }), sdkOrigin);
     }
 
+    if (data.eventName === 'SDK_REQUEST_FRESH_TOKEN') {
+      // mint a new admin-scoped token for the same user on your backend, then:
+      iframe.contentWindow.postMessage(JSON.stringify({
+        source:    'simplifi-parent',
+        eventName: 'SDK_FRESH_TOKEN_RESULT',
+        requestId: data.requestId,
+        token:     'NEW_TOKEN',
+      }), sdkOrigin);
+    }
+
     if (data.eventName === 'SDK_FLOW_RESULT') {
       console.log(data.flow, data.status);
     }
@@ -280,7 +334,7 @@ window.addEventListener('message', (e) => {
 });
 ```
 
-> **If the popup is blocked:** the flow still completes, but the user ends up on a SimpliFi-hosted success screen ("You can close this window") instead of returning to your site directly.
+> **If the popup is blocked:** the SDK redirects the whole frame to the provider instead, and returns to the SDK.
 
 ## Security Notes
 
