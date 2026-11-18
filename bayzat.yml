@@ -788,32 +788,21 @@ paths:
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
-        - name: cardStatus
+        - name: startDate
           in: query
           schema:
             type: string
-            example: 'ACTIVATED,ISSUED,PENDING,LOCKED'
+            example: '2025-02-01 00:00:00'
           description: |-
-            This field contains comma separated list of card status to filter the request upon.
-            List of Active Cards are 'ACTIVATED,ISSUED,PENDING,LOCKED' and a list of Inactive
-            Cards are 'REJECTED,DISABLED,REPLACED,EXPIRED'
-        - name: page
-          in: query
-          schema:
-            type: string
-            format: integer
-            example: 0
-          description: |-
-            This field contains the page number currently being displayed for cards.
+            Optional. Returns cards created on or after this date and time, in the format `yyyy-MM-dd HH:mm:ss`.
           required: false
-        - name: size
+        - name: endDate
           in: query
           schema:
             type: string
-            format: integer
-            example: 10
+            example: '2025-02-28 23:59:59'
           description: |-
-            This field contains the number of the card records to be displayed on this page.
+            Optional. Returns cards created on or before this date and time, in the format `yyyy-MM-dd HH:mm:ss`.
           required: false
       responses:
         '200':
@@ -1195,7 +1184,7 @@ paths:
                   - $ref: '#/components/schemas/Error60012'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  /webhook/{uuid}:
+  /v1/webhook/{uuid}:
     put:
       tags:
         - 'Webhook'
@@ -1265,7 +1254,7 @@ paths:
                   - $ref: '#/components/schemas/Error60009'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  /webhook/{uuid}/status:
+  /v1/webhook/{uuid}/status:
     put:
       tags:
         - 'Webhook'
@@ -1755,9 +1744,10 @@ components:
             same session. It is to be sent as an authorization header along with the
             system-generated token type.
         expires_in:
-          type: string
+          type: integer
+          format: int64
           description: |-
-            This is the expiry date/time that defines the validity of the access token.
+            This is the number of seconds for which the access token is valid.
             Note (one needs to re-login before this expiration time).
         token_type:
           type: string
@@ -1948,6 +1938,12 @@ components:
     RaiseFundingResponseModel:
       type: object
       properties:
+        uuid:
+          type: string
+          description: |-
+            This field contains the system generated unique identifier for the funding request.
+            The Raise Funding webhook returns it as `fundingRequestUuid`.
+          example: '77881333-75cd-43dc-a8ef-4f2699d963de'
         cardProgramUuid:
           type: string
           description: |-
@@ -1977,6 +1973,7 @@ components:
             - NOT_APPROVED
             - REJECTED
       required:
+        - uuid
         - cardProgramUuid
         - amount
         - transactionType
@@ -2171,14 +2168,14 @@ components:
             possessing sub-fields explained in the rows below.
           items:
             $ref: '#/components/schemas/TransactionResponseDetails'
-        totalElement:
+        totalElements:
           type: integer
           format: int64
           description: |-
             This field contains the total number of elements against the criteria.
       required:
         - transactions
-        - totalElement
+        - totalElements
     TransactionResponseDetails:
       type: object
       properties:
@@ -2467,7 +2464,6 @@ components:
         - userStatus
         - createdAt
         - userDetail
-        - address
         - contacts
 
     InstrumentType:
@@ -2654,9 +2650,6 @@ components:
         CARD_STATUS_CHANGE,
         CARD_TYPE_CHANGE,
 
-        CARD_RULE_GROUP_CREATION,
-        CARD_RULE_GROUP_DELETION,
-
         CARD_LOAD,
         CARD_UNLOAD,
         CARD_TO_CARD_TRANSFER,
@@ -2666,9 +2659,8 @@ components:
         CARD_HOLDER_DELETION,
 
         CARD_PROGRAM_CREATION,
-
-        WALLET_RULE_GROUP_CREATION,
-        WALLET_RULE_GROUP_DELETION,
+        CARD_PROGRAM_UPDATION,
+        CARD_PROGRAM_STATUS_CHANGE,
 
         FUNDS_TRANSFER,
         RAISE_FUNDING_SOURCE,
@@ -2993,7 +2985,13 @@ components:
           type: string
           description: |-
             This is the currency for the program that was created using the Create Card Program API.
+            Not sent when the event is triggered by linking a funding source to the program.
           example: 'AED'
+        fundingSourceLinked:
+          type: string
+          description: |-
+            Sent only with `CARD_PROGRAM_STATUS_CHANGE` when a funding source is linked to the program.
+            This field contains the public token of the linked funding source.
         cardProgramStatus:
           type: string
           description: |-
@@ -3017,7 +3015,6 @@ components:
       required:
         - cardProgramUuid
         - cardProgramName
-        - currency
         - companyUuid
         - requestUuid
     CardProgramCreationSuccessWebhook:
@@ -3041,7 +3038,7 @@ components:
           properties:
             eventType:
               type: string
-              description: 'CARD_PROGRAM_UPDATION`'
+              description: 'CARD_PROGRAM_UPDATION'
               example: 'CARD_PROGRAM_UPDATION'
             eventPayload:
               $ref: '#/components/schemas/CardProgramSuccessWebhook'
@@ -3055,7 +3052,7 @@ components:
           properties:
             eventType:
               type: string
-              description: 'CARD_PROGRAM_STATUS_CHANGE`'
+              description: 'CARD_PROGRAM_STATUS_CHANGE'
               example: 'CARD_PROGRAM_STATUS_CHANGE'
             eventPayload:
               $ref: '#/components/schemas/CardProgramSuccessWebhook'
@@ -3085,16 +3082,17 @@ components:
                     This is a unique identifier for the program that was created using the Create Card Program API.
                   example: '57846713-07cf-4632-97c7-608cda4a1773'
                 amount:
-                  type: number
-                  format: decimal
-                  description: The amount which has been `LOAD` or `UNLOAD` in this raise funding
-                  example: 10000.45
+                  type: string
+                  description: The amount which has been `LOAD` or `UNLOAD` in this raise funding, as a decimal string
+                  example: '10000.45'
                 transactionType:
                   type: string
-                  description: This field tells if the transaction is of `LOAD` or `UNLOAD`
+                  description: |-
+                    This field tells if the transaction is of `LOAD` or `UNLOAD`.
+                    `LOAD` corresponds to a `CREDIT` raise funding request and `UNLOAD` to a `DEBIT` request.
                   example: LOAD
                   enum:
-                    - CREDIT
+                    - LOAD
                     - UNLOAD
                 fundingStatus:
                   type: string
@@ -3109,6 +3107,10 @@ components:
                   type: string
                   description: This field contains any comments related to raise funding
                   example: 'NA'
+                receiptDateTime:
+                  type: string
+                  description: This field contains the date and time of the funding receipt, in the format `yyyy-MM-dd HH:mm:ss`
+                  example: '2025-02-28 13:45:00'
               required:
                 - fundingRequestUuid
                 - cardProgramUuid
@@ -3354,42 +3356,47 @@ components:
                     - Credit Surcharge
                     - Fees
                 transactionAmount:
-                  type: number
-                  format: decimal
-                  description: This field contains the total amount that was transacted.
+                  type: string
+                  description: This field contains the total amount that was transacted, as a decimal string.
                   example: '100.54'
                 transactionCurrency:
                   type: string
                   description: This field contains the currency in which the amount was transacted.
                   example: 'AED'
                 billAmount:
-                  type: number
-                  format: decimal
-                  description: This field contains the total amount that was transacted in card's currency.
+                  type: string
+                  description: This field contains the total amount that was transacted in card's currency, as a decimal string.
                   example: '100.54'
                 billCurrency:
                   type: string
                   description: This field contains the card's currency.
                   example: 'AED'
                 fees:
-                  type: number
-                  format: decimal
-                  description: This field contains the amount of any fees applied for the transaction in card's currency.
+                  type: string
+                  description: This field contains the amount of any fees applied for the transaction in card's currency, as a decimal string.
                   example: '2.5'
                 markupFee:
-                  type: number
-                  format: decimal
-                  description: This field contains the amount of any markup fee applied for the transaction in card's currency.
+                  type: string
+                  description: This field contains the amount of any markup fee applied for the transaction in card's currency, as a decimal string.
                   example: '0.8'
                 vatCharges:
-                  type: number
-                  format: decimal
-                  description: This field contains the amount of any VAT charges applied for the transaction in card's currency.
+                  type: string
+                  description: This field contains the amount of any VAT charges applied for the transaction in card's currency, as a decimal string.
                   example: '1.2'
                 transactionStatusCode:
                   type: string
                   description: One or Two digit status code of the transaction
                   example: '00'
+                transactionStatus:
+                  type: string
+                  description: |-
+                    This field tells whether the transaction went through: `Approve` or `Success` when it did,
+                    `Decline` when it was declined. A declined transaction does not move the card balance.
+                  example: 'Approve'
+                transactionStatusDescription:
+                  type: string
+                  description: This field contains the description of the transaction status code
+                  example: 'Auth Approved'
                 mccCode:
                   type: string
                   description: This field contains the Merchant Category Code
