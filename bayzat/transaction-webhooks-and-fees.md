@@ -186,20 +186,3 @@ Settling on 14 October, two outcomes are both normal:
 | `91.85 AED`       | `0.04`     | The conversion rate moved in between. |
 
 The fee is the three fee fields, and it does not change between authorisation and settlement.
-
----
-
-## 5. Reconciling
-
-**Card balance movement** for any period is the sum of every webhook except `Settlement`:
-
-```
-movement  =  Σ Auth − Σ Reversal
-          +  Σ Debit Adjustment − Σ Credit Adjustment
-          +  Σ Debit Surcharge  − Σ Credit Surcharge
-          −  Σ Refund
-```
-
-**Pending** is the part of that movement still waiting for a `Settlement`: each unsettled `Auth` minus its `Reversal`s. An `Auth` stays pending, however old, until it settles or is fully reversed.
-
-**Checking a settled purchase:** for one `Auth`, the `Auth` amount, minus its `Reversal`s, plus or minus its surcharges, equals the `Settlement` `billAmount` plus the total fee.
