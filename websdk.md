@@ -24,9 +24,9 @@ Sent to the SDK after it signals readiness via `SIMPLIFI_SDK_READY`.
 
 | Field        | Type   | Required | Description |
 |------------- | ------ | -------- | ----------- |
-| **token**    | String | Yes      | Bearer token obtained from the [Auth API](https://bayzat-docs.simplifipay.com/login-to-generate-sdk-admin-jwt-token-35554986e0). |
-| **cardId**   | String | Yes      | The unique 36-character ID of the card to display. |
-| **userId**   | String | Yes      | The unique 36-character ID of the cardholder. |
+| **token**    | String | Yes      | Bearer token obtained from the [Auth API](https://bayzat-docs.simplifipay.com/login-to-generate-jwt-token-31439162e0). |
+| **cardID**   | String | Yes      | The unique 36-character ID of the card to display. |
+| **userID**   | String | Yes      | The unique 36-character ID of the cardholder. |
 | **action**   | String | Yes      | The operation to perform (see list below). |
 
 **Available Actions**
@@ -221,7 +221,7 @@ _readyTimeout?.cancel();
 ## Web Integration
 To integrate this into a website (React, Vue, or plain HTML), use a standard **HTML iFrame**.
 1. **Create Element:** Add an `<iframe>` tag to your page structure.
-1. **Styling:** Ensure the iframe has sufficient height (approx. 600px) and width (100%) to display the card visually properly. No additional headers or authentication logic is needed inside the browser code; the token sent in the `SIMPLIFI_SDK_CONFIG` message handles validation.
+1. **Styling:** Ensure the iframe has sufficient height (approx. 600px) and width (100%) to display the card visually properly. No additional headers or authentication logic is needed inside the browser code; the token in the URL handles validation.
 
 ```html
 <iframe id="simplifi-sdk-frame"

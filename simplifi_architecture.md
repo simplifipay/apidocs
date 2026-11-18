@@ -31,12 +31,12 @@ codes in case the request resulted in failure.
 - **Card**: These are payment cards which can be issued in virtual or physical form and can be used to conduct
   transactions. One user can have multiple cards.
 
-- **Wallet/Currency**: SimpliFi supports multi currency environment. The SimpliFi platform
-  supports multiple currencies. If the card requires more than one currency on the card, a dedicated wallet would be
+- **Wallet/Currency**: SimpliFi supports multi currency environment. Currently the SimpliFi platform
+  supports 50+ currencies. If the card requires more than one currency on the card, a dedicated wallet would be
   created supporting each currency. Supported currencies are listed below.
 
-- **PCI DSS Compliant SDK**: A web SDK that can be embedded in the client's mobile app (WebView) or website (iframe)
-  to let cardholders access their card details.
+- **PCI DSS Compliant SDK**: Both iOS and Android SDKs which can be wrapped under client App to enable
+  cardholders access their card details on the app.
 
 - **Transactions**: Transactions on SimpliFi platform could be accessed using two mechanisms:
     - **API**: The API can be called to see all the transactions at Card, User or Card Program level. However
