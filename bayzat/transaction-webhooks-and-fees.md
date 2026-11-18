@@ -202,4 +202,4 @@ movement  =  Σ Auth − Σ Reversal
 
 **Pending** is the part of that movement still waiting for a `Settlement`: each unsettled `Auth` minus its `Reversal`s. An `Auth` stays pending, however old, until it settles or is fully reversed.
 
-**Checking a settled purchase:** for one `Auth`, the `Auth` amount, minus its `Reversal`s, plus or minus its surcharges, equals the `Settlement` `billAmount` plus the total fee. Until a surcharge arrives, a gap of a few fils is expected.
+**Checking a settled purchase:** for one `Auth`, the `Auth` amount, minus its `Reversal`s, plus or minus its surcharges, equals the `Settlement` `billAmount` plus the total fee.
