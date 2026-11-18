@@ -2213,6 +2213,10 @@ components:
             - Reversal
             - Settlement
             - Refund
+            - Debit Adjustment
+            - Credit Adjustment
+            - Debit Surcharge
+            - Credit Surcharge
             - Load
             - Unload
             - Fees
@@ -2810,6 +2814,10 @@ components:
         `Reversal` - for Reversed transactions
         `Settlement` - for Settled transactions
         `Refund` - for Refund transactions
+        `Debit Adjustment` - for corrections that debit the card, including settlements with no authorisation
+        `Credit Adjustment` - for corrections that credit the card
+        `Debit Surcharge` - for amounts debited after settlement by the processor's operations team
+        `Credit Surcharge` - for amounts credited after settlement by the processor's operations team
         `Load` - for Card Load transactions
         `Unload` - for Card Unload transactions
         `Fees` - for Fee transactions
@@ -2820,6 +2828,10 @@ components:
           - Reversal
           - Settlement
           - Refund
+          - Debit Adjustment
+          - Credit Adjustment
+          - Debit Surcharge
+          - Credit Surcharge
           - Load
           - Unload
           - Fees
