@@ -42,15 +42,7 @@ Refunds, adjustments and surcharges are already settled when you receive them. N
 
 ---
 
-## 2. How to process each webhook
-
-1. **De-duplicate on `transactionUuid`.** The same webhook can be delivered more than once. Process each `transactionUuid` once.
-2. **Skip declines.** If `transactionStatus` is `Decline`, the transaction did not go through. Do not apply it to the card balance.
-3. **Every type except `Settlement`:** apply `billAmount` to the card balance as a debit or credit, as shown in section 1.
-4. **`Auth`** stays pending until a `Settlement` references it, or until `Reversal`s release its full amount.
-5. **`Settlement`:** mark the referenced `Auth` as settled and record the fee. Do not apply its `billAmount` to the balance; the `Auth` already did.
-6. **Link, don't block.** If `transactionReferenceUuid` is set, attach the transaction to that purchase. If it is `null`, or you do not hold the referenced transaction (it can be months old), process it on its own.
-7. **Do not assume order or timing.** Refunds, adjustments and surcharges can arrive after the `Settlement`, sometimes weeks after the purchase. Some transactions arrive a day after the event, once the processor's daily file is processed. Surcharges are posted by the processor's operations team and can arrive days after the `Settlement`. A small number arrive later still, after review.
+## 2. Transactions without an authorisation
 
 ### Settlements with no authorisation arrive as `Debit Adjustment`
 
