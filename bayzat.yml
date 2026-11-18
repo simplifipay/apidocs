@@ -795,6 +795,7 @@ paths:
             example: '2025-02-01 00:00:00'
           description: |-
             Optional. Returns cards created on or after this date and time, in the format `yyyy-MM-dd HH:mm:ss`.
+            Must be sent together with `endDate`; if either is missing, all cards are returned.
           required: false
         - name: endDate
           in: query
@@ -803,6 +804,7 @@ paths:
             example: '2025-02-28 23:59:59'
           description: |-
             Optional. Returns cards created on or before this date and time, in the format `yyyy-MM-dd HH:mm:ss`.
+            Must be sent together with `startDate`; if either is missing, all cards are returned.
           required: false
       responses:
         '200':
