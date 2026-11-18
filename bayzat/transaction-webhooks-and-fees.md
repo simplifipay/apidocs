@@ -21,6 +21,21 @@ The card balance is debited when a purchase is authorised. Every webhook except 
 
 Every webhook has its own `transactionUuid`. `transactionReferenceUuid` holds the `transactionUuid` of the transaction it belongs to.
 
+### What `billAmount` and the fee fields hold
+
+| `transactionType`   | `billAmount`                               | What the fee fields hold                                  |
+| ------------------- | ------------------------------------------ | --------------------------------------------------------- |
+| `Auth`              | Includes the fee                           | Empty. Fee information is shared at settlement.           |
+| `Reversal`          | Includes the fee                           | The share of the released amount that was fee, returned.  |
+| `Settlement`        | **Fee already deducted**                   | The fee actually charged for the purchase.                |
+| `Refund`            | Includes the fee, if the fee was refunded  | The fee amount returned, as reported against the refund.  |
+| `Debit Adjustment`  | Includes the fee                           | The fee on the correction, if any.                        |
+| `Credit Adjustment` | Includes the fee                           | The fee returned with the correction, if any.             |
+| `Debit Surcharge`   | Includes the fee                           | The fee on the surcharge, if any.                         |
+| `Credit Surcharge`  | Includes the fee                           | The fee returned with the surcharge, if any.              |
+
+The fee is always `fees + markupFee + vatCharges` (section 4).
+
 Refunds, adjustments and surcharges are already settled when you receive them. No `Settlement` will follow them; only an `Auth` is followed by a `Settlement`.
 
 **Adjustments and surcharges can arrive after a purchase has settled.** A purchase you have already marked as settled can still receive a `Debit Adjustment`, `Credit Adjustment`, `Debit Surcharge` or `Credit Surcharge` that references its `Auth`, sometimes days or weeks later. Apply it to the card balance when it arrives. Do not reopen the purchase or wait for another `Settlement`.
@@ -149,15 +164,6 @@ total fee  =  fees  +  markupFee  +  vatCharges
 | `vatCharges` | VAT charged on the above |
 
 Always add the three together. Any of them can be zero, and often is, but none of them should be assumed zero.
-
-### Where the fee sits on each type
-
-| `transactionType` | `billAmount`         | Fee fields                                       |
-| ----------------- | -------------------- | ------------------------------------------------ |
-| `Auth`            | Includes the fee     | Empty. The fee is reported on the `Settlement`.  |
-| `Reversal`        | Includes the fee     | The part of the released amount that was fee     |
-| `Settlement`      | **Excludes the fee** | The fee charged for the purchase                 |
-| All other types   | Includes the fee     | The fee on that transaction, if any              |
 
 ### Small differences are the conversion rate
 
