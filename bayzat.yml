@@ -2208,16 +2208,6 @@ components:
           type: string
           description: This is a transaction type
           example: 'Auth'
-          enum:
-            - Auth
-            - Reversal
-            - Settlement
-            - Refund
-            - Debit Adjustment
-            - Credit Adjustment
-            - Debit Surcharge
-            - Credit Surcharge
-            - Fees
         statusCode:
           type: string
           description: This field contains the status code of the transaction code received from processor.
