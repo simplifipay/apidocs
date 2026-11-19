@@ -6,16 +6,16 @@ This page explains the transaction webhooks you will receive, what each type mea
 
 ## 1. The transaction types you will receive
 
-| `transactionType`   | What it means                                                                                                    | `transactionReferenceUuid`                  |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| `Auth`              | Purchase authorised at the merchant. Pending until it settles.                                                   | `null`                                      |
-| `Reversal`          | An authorisation released, fully or partly                                                                       | the `Auth`                                  |
-| `Settlement`        | Confirms the final amount of the `Auth`, usually 1–2 days after it. Carries the fee.                             | the `Auth`                                  |
-| `Refund`            | Merchant returns money                                                                                           | the `Auth` or `Debit Adjustment`, or `null` |
-| `Debit Adjustment`  | A debit correction. Also used for a settlement that has no authorisation (section 2).                            | the `Auth`, or `null`                       |
-| `Credit Adjustment` | A credit correction                                                                                              | the `Auth`, or `null`                       |
-| `Debit Surcharge`   | A debit posted by the processor's operations team, most often because the purchase settled higher than authorised | the `Auth`, or `null`                       |
-| `Credit Surcharge`  | A credit posted by the processor's operations team, for example because the purchase settled lower than authorised | the `Auth`, or `null`                       |
+| `transactionType`   | What it means                                                                                                    | Net impact    | `transactionReferenceUuid`                  |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------- |
+| `Auth`              | Purchase authorised at the merchant. Pending until it settles.                                                   | Debit         | `null`                                      |
+| `Reversal`          | An authorisation released, fully or partly                                                                       | Credit        | the `Auth`                                  |
+| `Settlement`        | Confirms the final amount of the `Auth`, usually 1–2 days after it. Carries the fee.                             | **No change** | the `Auth`                                  |
+| `Refund`            | Merchant returns money                                                                                           | Credit        | the `Auth` or `Debit Adjustment`, or `null` |
+| `Debit Adjustment`  | A debit correction. Also used for a settlement that has no authorisation (section 2).                            | Debit         | the `Auth`, or `null`                       |
+| `Credit Adjustment` | A credit correction                                                                                              | Credit        | the `Auth`, or `null`                       |
+| `Debit Surcharge`   | A debit posted by the processor's operations team, most often because the purchase settled higher than authorised | Debit         | the `Auth`, or `null`                       |
+| `Credit Surcharge`  | A credit posted by the processor's operations team, for example because the purchase settled lower than authorised | Credit        | the `Auth`, or `null`                       |
 
 Every webhook has its own `transactionUuid`. `transactionReferenceUuid` holds the `transactionUuid` of the transaction it belongs to.
 
@@ -83,29 +83,29 @@ A `Credit Surcharge` works the same way when a purchase settles lower than autho
 
 ### A purchase that settles
 
-| Order | `transactionType` | `billAmount` | `fees` | `markupFee` | `vatCharges` |
-| ----- | ----------------- | ------------ | ------ | ----------- | ------------ |
-| 1     | `Auth`            | `545.99`     | —      | —           | —            |
-| 2     | `Settlement`      | `532.67`     | `0.00` | `13.32`     | `0.00`       |
+| Order | `transactionType` | `billAmount` | `fees` | `markupFee` | `vatCharges` | Net impact |
+| ----- | ----------------- | ------------ | ------ | ----------- | ------------ | ---------- |
+| 1     | `Auth`            | `545.99`     | —      | —           | —            | `−545.99`  |
+| 2     | `Settlement`      | `532.67`     | `0.00` | `13.32`     | `0.00`       | no change  |
 
 The authorisation is gross, the settlement is net, and the difference is the fee: `545.99 − 532.67 = 13.32`, which is `0.00 + 13.32 + 0.00`.
 
 ### A purchase partly reversed before settling
 
-| Order | `transactionType` | `billAmount` | `fees` | `markupFee` | `vatCharges` |
-| ----- | ----------------- | ------------ | ------ | ----------- | ------------ |
-| 1     | `Auth`            | `12.13`      | —      | —           | —            |
-| 2     | `Reversal`        | `11.27`      | `0.00` | `0.27`      | `0.00`       |
-| 3     | `Settlement`      | `0.83`       | `0.00` | `0.03`      | `0.00`       |
+| Order | `transactionType` | `billAmount` | `fees` | `markupFee` | `vatCharges` | Net impact |
+| ----- | ----------------- | ------------ | ------ | ----------- | ------------ | ---------- |
+| 1     | `Auth`            | `12.13`      | —      | —           | —            | `−12.13`   |
+| 2     | `Reversal`        | `11.27`      | `0.00` | `0.27`      | `0.00`       | `+11.27`   |
+| 3     | `Settlement`      | `0.83`       | `0.00` | `0.03`      | `0.00`       | no change  |
 
 The reversal returned part of the fee and the settlement kept the rest. `0.27 + 0.03 = 0.30` was the fee at authorisation; the customer paid `0.03`. Net amount charged `12.13 − 11.27 = 0.86`, which equals `0.83 + 0.03`.
 
 ### A purchase fully reversed
 
-| Order | `transactionType` | `billAmount` | `fees` | `markupFee` | `vatCharges` |
-| ----- | ----------------- | ------------ | ------ | ----------- | ------------ |
-| 1     | `Auth`            | `376.49`     | —      | —           | —            |
-| 2     | `Reversal`        | `376.49`     | `0.00` | `9.18`      | `0.00`       |
+| Order | `transactionType` | `billAmount` | `fees` | `markupFee` | `vatCharges` | Net impact |
+| ----- | ----------------- | ------------ | ------ | ----------- | ------------ | ---------- |
+| 1     | `Auth`            | `376.49`     | —      | —           | —            | `−376.49`  |
+| 2     | `Reversal`        | `376.49`     | `0.00` | `9.18`      | `0.00`       | `+376.49`  |
 
 The whole fee comes back, nothing settles, and nothing is charged.
 
@@ -113,20 +113,20 @@ The whole fee comes back, nothing settles, and nothing is charged.
 
 _Illustrative amounts._
 
-| Order | `transactionType` | `billAmount`         |
-| ----- | ----------------- | -------------------- |
-| 1     | `Auth`            | `100.00`             |
-| 2     | `Settlement`      | `98.00` (fee `2.00`) |
-| 3     | `Refund`          | `100.00`             |
+| Order | `transactionType` | `billAmount`         | Net impact |
+| ----- | ----------------- | -------------------- | ---------- |
+| 1     | `Auth`            | `100.00`             | `−100.00`  |
+| 2     | `Settlement`      | `98.00` (fee `2.00`) | no change  |
+| 3     | `Refund`          | `100.00`             | `+100.00`  |
 
 ### A settlement with no authorisation
 
 _Illustrative amounts._
 
-| Order           | `transactionType`  | `billAmount` | `transactionReferenceUuid` |
-| --------------- | ------------------ | ------------ | -------------------------- |
-| 1               | `Debit Adjustment` | `58.40`      | `null`                     |
-| 2 (if refunded) | `Refund`           | `58.40`      | the `Debit Adjustment`     |
+| Order           | `transactionType`  | `billAmount` | `transactionReferenceUuid` | Net impact |
+| --------------- | ------------------ | ------------ | -------------------------- | ---------- |
+| 1               | `Debit Adjustment` | `58.40`      | `null`                     | `−58.40`   |
+| 2 (if refunded) | `Refund`           | `58.40`      | the `Debit Adjustment`     | `+58.40`   |
 
 ### Purchases that do not complete
 
