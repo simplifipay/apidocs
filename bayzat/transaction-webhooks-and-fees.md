@@ -6,7 +6,7 @@ This page explains the transaction webhooks you will receive, how each one affec
 
 ## 1. The transaction types you will receive
 
-The card balance is debited when a purchase is authorised. Every webhook except `Settlement` moves the card balance by its `billAmount`. A `Settlement` confirms the final amount of an `Auth` and reports its fee; it does not move the balance again.
+The card balance is debited when a purchase is authorised. Every webhook except `Settlement` moves the card balance by its `billAmount`, unless its `transactionStatus` is `Decline`. A `Settlement` confirms the final amount of an `Auth` and reports its fee; it does not move the balance again.
 
 | `transactionType`   | What it means                                                                                                           | Card balance   | `transactionReferenceUuid`                     |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------- | ---------------------------------------------- |
@@ -42,14 +42,7 @@ Refunds, adjustments and surcharges are already settled when you receive them. N
 
 ---
 
-## 2. How to process each webhook
-
-1. **De-duplicate on `transactionUuid`.** The same webhook can be delivered more than once. Process each `transactionUuid` once.
-2. **Every type except `Settlement`:** apply `billAmount` to the card balance as a debit or credit, as shown in section 1.
-3. **`Auth`** stays pending until a `Settlement` references it, or until `Reversal`s release its full amount.
-4. **`Settlement`:** mark the referenced `Auth` as settled and record the fee. Do not apply its `billAmount` to the balance; the `Auth` already did.
-5. **Link, don't block.** If `transactionReferenceUuid` is set, attach the transaction to that purchase. If it is `null`, or you do not hold the referenced transaction (it can be months old), process it on its own.
-6. **Do not assume order or timing.** Refunds, adjustments and surcharges can arrive after the `Settlement`, sometimes weeks after the purchase. Some transactions arrive a day after the event, once the processor's daily file is processed. Surcharges are posted by the processor's operations team and can arrive days after the `Settlement`. A small number arrive later still, after review.
+## 2. Transactions without an authorisation
 
 ### Settlements with no authorisation arrive as `Debit Adjustment`
 
@@ -74,7 +67,7 @@ These are complete transactions in their own right. Include them in the balance 
 
 ### A purchase that settles much higher, corrected by surcharges after settlement
 
-A `0.10 SGD` purchase was authorised, but the merchant settled it at `3.10 SGD`. All five webhooks reference the same `Auth`.
+A `0.10 SGD` purchase was authorised, but the merchant settled it at `3.10 SGD`. The four webhooks after the `Auth` all reference it.
 
 | Date   | `transactionType`  | Transaction amount | `billAmount` (AED) | Total fee | Card balance | Running total |
 | ------ | ------------------ | ------------------ | ------------------ | --------- | ------------ | ------------- |
@@ -143,7 +136,7 @@ _Illustrative amounts._
 | ------------------------------- | --------------------------------------------- | ----------------------------- |
 | Settlement has not arrived yet  | `Auth` only                                   | Pending. Do not reconcile yet. |
 | Authorisation fully released    | `Auth` + `Reversal` of the same `billAmount`  | Closed. Nothing was charged.  |
-| Authorisation declined          | No money movement                             | Exclude from balances.        |
+| Authorisation declined          | `Auth` with `transactionStatus` `Decline`     | Exclude from balances.        |
 
 ---
 
@@ -185,4 +178,4 @@ Settling on 14 October, two outcomes are both normal:
 | `91.81 AED`       | `0.00`     | Same rate on both days.               |
 | `91.85 AED`       | `0.04`     | The conversion rate moved in between. |
 
-The fee is the three fee fields, and it does not change between authorisation and settlement.
+The fee is the three fee fields. For the same amount, it does not change between authorisation and settlement.
