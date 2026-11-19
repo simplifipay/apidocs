@@ -67,13 +67,13 @@ These are complete transactions in their own right.
 
 A `0.10 SGD` purchase was authorised, but the merchant settled it at `3.10 SGD`. The four webhooks after the `Auth` all reference it.
 
-| Date   | `transactionType`  | Transaction amount | `billAmount` (AED) | Total fee |
-| ------ | ------------------ | ------------------ | ------------------ | --------- |
-| 08 Oct | `Auth`             | `0.10 SGD`         | `0.30`             | —         |
-| 15 Oct | `Settlement`       | `3.10 SGD`         | `8.90`             | `0.01`    |
-| 21 Oct | `Debit Surcharge`  | `86.10 AED`        | `86.10`            | —         |
-| 27 Oct | `Credit Surcharge` | `86.10 AED`        | `86.10`            | —         |
-| 27 Oct | `Debit Surcharge`  | `8.61 AED`         | `8.61`             | —         |
+| Date   | `transactionType`  | Transaction amount | `billAmount` (AED) | Total fee | Net impact | Running total |
+| ------ | ------------------ | ------------------ | ------------------ | --------- | ---------- | ------------- |
+| 08 Oct | `Auth`             | `0.10 SGD`         | `0.30`             | —         | `−0.30`    | `−0.30`       |
+| 15 Oct | `Settlement`       | `3.10 SGD`         | `8.90`             | `0.01`    | no change  | `−0.30`       |
+| 21 Oct | `Debit Surcharge`  | `86.10 AED`        | `86.10`            | —         | `−86.10`   | `−86.40`      |
+| 27 Oct | `Credit Surcharge` | `86.10 AED`        | `86.10`            | —         | `+86.10`   | `−0.30`       |
+| 27 Oct | `Debit Surcharge`  | `8.61 AED`         | `8.61`             | —         | `−8.61`    | `−8.91`       |
 
 - The settled cost is `8.90 + 0.01 = 8.91`. Only `0.30` was taken at `Auth`, so `8.61` was still owed.
 - The processor's operations team first posted a `Debit Surcharge` of `86.10` in error, reversed it with a `Credit Surcharge` of `86.10`, then posted the correct `Debit Surcharge` of `8.61`.
