@@ -139,7 +139,7 @@ total fee  =  fees  +  markupFee  +  vatCharges
 | `markupFee`  | FX / scheme markup       |
 | `vatCharges` | VAT charged on the above |
 
-Always add the three together. Any of them can be zero, and often is, but none of them should be assumed zero.
+Always add the three together. Any of them can be zero.
 
 ### Small differences are the conversion rate
 
