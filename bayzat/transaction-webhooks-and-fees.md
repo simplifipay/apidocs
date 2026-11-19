@@ -17,6 +17,8 @@ This page explains the transaction webhooks you will receive, what each type mea
 | `Debit Surcharge`   | A debit posted by the processor's operations team, most often because the purchase settled higher than authorised | Debit         | the `Auth`, or `null`                       |
 | `Credit Surcharge`  | A credit posted by the processor's operations team, for example because the purchase settled lower than authorised | Credit        | the `Auth`, or `null`                       |
 
+A declined `Auth` (`transactionStatus` `Decline`) has no net impact.
+
 Every webhook has its own `transactionUuid`. `transactionReferenceUuid` holds the `transactionUuid` of the transaction it belongs to.
 
 ### What `billAmount` and the fee fields hold
@@ -34,9 +36,7 @@ Every webhook has its own `transactionUuid`. `transactionReferenceUuid` holds th
 
 The fee is always `fees + markupFee + vatCharges` (section 4).
 
-Refunds, adjustments and surcharges are already settled when you receive them. No `Settlement` will follow them; only an `Auth` is followed by a `Settlement`.
-
-**Adjustments and surcharges can arrive after a purchase has settled.** A purchase you have already marked as settled can still receive a `Debit Adjustment`, `Credit Adjustment`, `Debit Surcharge` or `Credit Surcharge` that references its `Auth`, sometimes days or weeks later. No further `Settlement` follows it.
+Refunds, adjustments and surcharges are already final when you receive them; only an `Auth` is followed by a `Settlement`. Adjustments and surcharges can still arrive days or weeks after a purchase has settled, referencing its `Auth`.
 
 ---
 
