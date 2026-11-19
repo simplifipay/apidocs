@@ -113,14 +113,6 @@ _Illustrative amounts._
 | 1               | `Debit Adjustment` | `58.40`      | `null`                     | `−58.40`   |
 | 2 (if refunded) | `Refund`           | `58.40`      | the `Debit Adjustment`     | `+58.40`   |
 
-### Purchases that do not complete
-
-| Situation                       | What you see                                  | Treat as                      |
-| ------------------------------- | --------------------------------------------- | ----------------------------- |
-| Settlement has not arrived yet  | `Auth` only                                   | Pending. Do not reconcile yet. |
-| Authorisation fully released    | `Auth` + `Reversal` of the same `billAmount`  | Closed. Nothing was charged.  |
-| Authorisation declined          | `Auth` with `transactionStatus` `Decline`     | Nothing was charged.          |
-
 ---
 
 ## 4. The fee
