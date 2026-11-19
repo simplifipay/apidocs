@@ -1,23 +1,25 @@
 # Transaction webhooks: types, fees, and reconciliation
 
-This page explains the transaction webhooks you will receive, how each one affects the card balance, and how fees are reported.
+This page explains the transaction webhooks you will receive, how each one affects the wallet balance, and how fees are reported.
 
 ---
 
 ## 1. The transaction types you will receive
 
-The card balance is debited when a purchase is authorised. Every webhook except `Settlement` moves the card balance by its `billAmount`, unless its `transactionStatus` is `Decline`. A `Settlement` confirms the final amount of an `Auth` and reports its fee; it does not move the balance again.
+Cards are funded just in time and hold no balance of their own. Every transaction is applied to the wallet balance.
 
-| `transactionType`   | What it means                                                                                                           | Card balance   | `transactionReferenceUuid`                     |
+The wallet is debited when a purchase is authorised (`Auth`). The `Settlement` later confirms the final amount of that `Auth` and reports its fee. The money already moved at `Auth`, so the `Settlement` does not move the wallet balance again. Every other webhook moves the wallet balance by its `billAmount`, unless its `transactionStatus` is `Decline`.
+
+| `transactionType`   | What it means                                                                                                           | Wallet balance | `transactionReferenceUuid`                     |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------- | ---------------------------------------------- |
 | `Auth`              | Purchase authorised at the merchant. Pending until it settles.                                                          | Debit          | `null`                                         |
 | `Reversal`          | An authorisation released, fully or partly                                                                              | Credit         | the `Auth`                                     |
 | `Settlement`        | The authorised purchase is final, usually 1–2 days after the `Auth`. Carries the fee.                                   | **No change**  | the `Auth`                                     |
 | `Refund`            | Merchant returns money                                                                                                  | Credit         | the `Auth` or `Debit Adjustment`, or `null`    |
-| `Debit Adjustment`  | A correction that debits the card. Also used for a settlement that has no authorisation (section 2).                    | Debit          | the `Auth`, or `null`                          |
-| `Credit Adjustment` | A correction that credits the card                                                                                      | Credit         | the `Auth`, or `null`                          |
-| `Debit Surcharge`   | Posted by the processor's operations team to debit the card, most often because the purchase settled higher than authorised | Debit      | the `Auth`, or `null`                          |
-| `Credit Surcharge`  | Posted by the processor's operations team to credit the card, for example because the purchase settled lower than authorised | Credit    | the `Auth`, or `null`                          |
+| `Debit Adjustment`  | A correction that debits the wallet. Also used for a settlement that has no authorisation (section 2).                    | Debit          | the `Auth`, or `null`                          |
+| `Credit Adjustment` | A correction that credits the wallet                                                                                    | Credit         | the `Auth`, or `null`                          |
+| `Debit Surcharge`   | Posted by the processor's operations team to debit the wallet, most often because the purchase settled higher than authorised | Debit      | the `Auth`, or `null`                          |
+| `Credit Surcharge`  | Posted by the processor's operations team to credit the wallet, for example because the purchase settled lower than authorised | Credit    | the `Auth`, or `null`                          |
 
 Every webhook has its own `transactionUuid`. `transactionReferenceUuid` holds the `transactionUuid` of the transaction it belongs to.
 
@@ -38,7 +40,7 @@ The fee is always `fees + markupFee + vatCharges` (section 4).
 
 Refunds, adjustments and surcharges are already settled when you receive them. No `Settlement` will follow them; only an `Auth` is followed by a `Settlement`.
 
-**Adjustments and surcharges can arrive after a purchase has settled.** A purchase you have already marked as settled can still receive a `Debit Adjustment`, `Credit Adjustment`, `Debit Surcharge` or `Credit Surcharge` that references its `Auth`, sometimes days or weeks later. Apply it to the card balance when it arrives. Do not reopen the purchase or wait for another `Settlement`.
+**Adjustments and surcharges can arrive after a purchase has settled.** A purchase you have already marked as settled can still receive a `Debit Adjustment`, `Credit Adjustment`, `Debit Surcharge` or `Credit Surcharge` that references its `Auth`, sometimes days or weeks later. Apply it to the wallet balance when it arrives. Do not reopen the purchase or wait for another `Settlement`.
 
 ---
 
@@ -46,7 +48,7 @@ Refunds, adjustments and surcharges are already settled when you receive them. N
 
 ### Settlements with no authorisation arrive as `Debit Adjustment`
 
-Sometimes the card network sends a settlement with no matching authorisation (a "No Auth" settlement). The card was never debited by an `Auth`, so it is posted as a `Debit Adjustment` with `transactionReferenceUuid` set to `null`. It debits the card and is final. If the merchant later refunds it, the `Refund` references this `Debit Adjustment`.
+Sometimes the card network sends a settlement with no matching authorisation (a "No Auth" settlement). The wallet was never debited by an `Auth`, so it is posted as a `Debit Adjustment` with `transactionReferenceUuid` set to `null`. It debits the wallet and is final. If the merchant later refunds it, the `Refund` references this `Debit Adjustment`.
 
 ### Transactions with no parent
 
@@ -69,7 +71,7 @@ These are complete transactions in their own right. Include them in the balance 
 
 A `0.10 SGD` purchase was authorised, but the merchant settled it at `3.10 SGD`. The four webhooks after the `Auth` all reference it.
 
-| Date   | `transactionType`  | Transaction amount | `billAmount` (AED) | Total fee | Card balance | Running total |
+| Date   | `transactionType`  | Transaction amount | `billAmount` (AED) | Total fee | Wallet balance | Running total |
 | ------ | ------------------ | ------------------ | ------------------ | --------- | ------------ | ------------- |
 | 08 Oct | `Auth`             | `0.10 SGD`         | `0.30`             | —         | `−0.30`      | `−0.30`       |
 | 15 Oct | `Settlement`       | `3.10 SGD`         | `8.90`             | `0.01`    | no change    | `−0.30`       |
@@ -77,15 +79,15 @@ A `0.10 SGD` purchase was authorised, but the merchant settled it at `3.10 SGD`.
 | 27 Oct | `Credit Surcharge` | `86.10 AED`        | `86.10`            | —         | `+86.10`     | `−0.30`       |
 | 27 Oct | `Debit Surcharge`  | `8.61 AED`         | `8.61`             | —         | `−8.61`      | `−8.91`       |
 
-- The settled cost is `8.90 + 0.01 = 8.91`. The card had been debited only `0.30` at `Auth`, so `8.61` was still owed.
+- The settled cost is `8.90 + 0.01 = 8.91`. The wallet had been debited only `0.30` at `Auth`, so `8.61` was still owed.
 - The processor's operations team first posted a `Debit Surcharge` of `86.10` in error, reversed it with a `Credit Surcharge` of `86.10`, then posted the correct `Debit Surcharge` of `8.61`.
-- All three surcharges arrived after the `Settlement`, up to 12 days later. Apply each one to the card balance as it arrives. The final card total, `8.91`, matches the settled cost.
+- All three surcharges arrived after the `Settlement`, up to 12 days later. Apply each one to the wallet balance as it arrives. The final total, `8.91`, matches the settled cost.
 
-A `Credit Surcharge` works the same way when a purchase settles lower than authorised: it returns the difference to the card.
+A `Credit Surcharge` works the same way when a purchase settles lower than authorised: it returns the difference to the wallet.
 
 ### A purchase that settles
 
-| Order | `transactionType` | `billAmount` | `fees` | `markupFee` | `vatCharges` | Card balance |
+| Order | `transactionType` | `billAmount` | `fees` | `markupFee` | `vatCharges` | Wallet balance |
 | ----- | ----------------- | ------------ | ------ | ----------- | ------------ | ------------ |
 | 1     | `Auth`            | `545.99`     | —      | —           | —            | `−545.99`    |
 | 2     | `Settlement`      | `532.67`     | `0.00` | `13.32`     | `0.00`       | no change    |
@@ -94,17 +96,17 @@ The authorisation is gross, the settlement is net, and the difference is the fee
 
 ### A purchase partly reversed before settling
 
-| Order | `transactionType` | `billAmount` | `fees` | `markupFee` | `vatCharges` | Card balance |
+| Order | `transactionType` | `billAmount` | `fees` | `markupFee` | `vatCharges` | Wallet balance |
 | ----- | ----------------- | ------------ | ------ | ----------- | ------------ | ------------ |
 | 1     | `Auth`            | `12.13`      | —      | —           | —            | `−12.13`     |
 | 2     | `Reversal`        | `11.27`      | `0.00` | `0.27`      | `0.00`       | `+11.27`     |
 | 3     | `Settlement`      | `0.83`       | `0.00` | `0.03`      | `0.00`       | no change    |
 
-The reversal returned part of the fee and the settlement kept the rest. `0.27 + 0.03 = 0.30` was the fee at authorisation; the customer paid `0.03`. Net card debit `12.13 − 11.27 = 0.86`, which equals `0.83 + 0.03`.
+The reversal returned part of the fee and the settlement kept the rest. `0.27 + 0.03 = 0.30` was the fee at authorisation; the customer paid `0.03`. Net wallet debit `12.13 − 11.27 = 0.86`, which equals `0.83 + 0.03`.
 
 ### A purchase fully reversed
 
-| Order | `transactionType` | `billAmount` | `fees` | `markupFee` | `vatCharges` | Card balance |
+| Order | `transactionType` | `billAmount` | `fees` | `markupFee` | `vatCharges` | Wallet balance |
 | ----- | ----------------- | ------------ | ------ | ----------- | ------------ | ------------ |
 | 1     | `Auth`            | `376.49`     | —      | —           | —            | `−376.49`    |
 | 2     | `Reversal`        | `376.49`     | `0.00` | `9.18`      | `0.00`       | `+376.49`    |
@@ -115,7 +117,7 @@ The whole fee comes back, nothing settles, and nothing is charged.
 
 _Illustrative amounts._
 
-| Order | `transactionType` | `billAmount`             | Card balance |
+| Order | `transactionType` | `billAmount`             | Wallet balance |
 | ----- | ----------------- | ------------------------ | ------------ |
 | 1     | `Auth`            | `100.00`                 | `−100.00`    |
 | 2     | `Settlement`      | `98.00` (fee `2.00`)     | no change    |
@@ -125,7 +127,7 @@ _Illustrative amounts._
 
 _Illustrative amounts._
 
-| Order          | `transactionType`  | `billAmount` | `transactionReferenceUuid`  | Card balance |
+| Order          | `transactionType`  | `billAmount` | `transactionReferenceUuid`  | Wallet balance |
 | -------------- | ------------------ | ------------ | --------------------------- | ------------ |
 | 1              | `Debit Adjustment` | `58.40`      | `null`                      | `−58.40`     |
 | 2 (if refunded)| `Refund`           | `58.40`      | the `Debit Adjustment`      | `+58.40`     |
@@ -160,7 +162,7 @@ Always add the three together. Any of them can be zero, and often is, but none o
 
 ### Small differences are the conversion rate
 
-When a purchase is made in another currency, the authorisation and the settlement are converted to the billing currency on different days, at different rates. The settled amount can differ from the authorised amount by a few fils as a result. When the processor corrects the card for it, you receive a surcharge, even for a difference as small as `0.01`. Larger differences, for example when a merchant settles for more than it authorised, are corrected the same way (see the first example in section 3).
+When a purchase is made in another currency, the authorisation and the settlement are converted to the billing currency on different days, at different rates. The settled amount can differ from the authorised amount by a few fils as a result. When the processor corrects the wallet for it, you receive a surcharge, even for a difference as small as `0.01`. Larger differences, for example when a merchant settles for more than it authorised, are corrected the same way (see the first example in section 3).
 
 A `25.00 USD` purchase authorised on 12 October:
 
