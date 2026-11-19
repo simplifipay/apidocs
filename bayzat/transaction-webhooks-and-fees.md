@@ -40,24 +40,9 @@ Refunds, adjustments and surcharges are already settled when you receive them. N
 
 ---
 
-## 2. Transactions without an authorisation
-
-### Settlements with no authorisation arrive as `Debit Adjustment`
+## 2. Settlements with no authorisation
 
 Sometimes the card network sends a settlement with no matching authorisation (a "No Auth" settlement). It is posted as a `Debit Adjustment` with `transactionReferenceUuid` set to `null`, and is final. If the merchant later refunds it, the `Refund` references this `Debit Adjustment`.
-
-### Transactions with no parent
-
-Some transactions are not part of an authorisation's lifecycle and carry `transactionReferenceUuid` as `null`:
-
-| Case                                                    | Type                                  |
-| ------------------------------------------------------- | ------------------------------------- |
-| A settlement arrived with no authorisation              | `Debit Adjustment`                    |
-| A refund with no matching purchase, in rare cases       | `Refund`                              |
-| A surcharge whose authorisation cannot be identified    | `Debit Surcharge` or `Credit Surcharge` |
-| An adjustment that cannot be tied to one authorisation  | `Credit Adjustment`                   |
-
-These are complete transactions in their own right.
 
 ---
 
