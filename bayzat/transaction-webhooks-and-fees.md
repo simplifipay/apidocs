@@ -54,21 +54,18 @@ If the merchant later refunds it, the `Refund` references this `Debit Adjustment
 
 ## 3. Examples
 
-### A purchase that settles much higher, corrected by surcharges after settlement
+### A purchase that settles much higher, corrected by a surcharge after settlement
 
-A `0.10 SGD` purchase was authorised, but the merchant settled it at `3.10 SGD`. The four webhooks after the `Auth` all reference it.
+A `0.10 SGD` purchase was authorised, but the merchant settled it at `3.10 SGD`. The two webhooks after the `Auth` both reference it.
 
 | Date   | `transactionType`  | Transaction amount | `billAmount` (AED) | Total fee | Net impact | Running total |
 | ------ | ------------------ | ------------------ | ------------------ | --------- | ---------- | ------------- |
 | 08 Oct | `Auth`             | `0.10 SGD`         | `0.30`             | —         | `−0.30`    | `−0.30`       |
 | 15 Oct | `Settlement`       | `3.10 SGD`         | `8.90`             | `0.01`    | no change  | `−0.30`       |
-| 21 Oct | `Debit Surcharge`  | `86.10 AED`        | `86.10`            | —         | `−86.10`   | `−86.40`      |
-| 27 Oct | `Credit Surcharge` | `86.10 AED`        | `86.10`            | —         | `+86.10`   | `−0.30`       |
 | 27 Oct | `Debit Surcharge`  | `8.61 AED`         | `8.61`             | —         | `−8.61`    | `−8.91`       |
 
 - The settled cost is `8.90 + 0.01 = 8.91`. Only `0.30` was taken at `Auth`, so `8.61` was still owed.
-- The processor's operations team first posted a `Debit Surcharge` of `86.10` in error, reversed it with a `Credit Surcharge` of `86.10`, then posted the correct `Debit Surcharge` of `8.61`.
-- All three surcharges arrived after the `Settlement`, up to 12 days later. `0.30 + 8.61 = 8.91`, the settled cost.
+- The `Debit Surcharge` for `8.61` arrived after the `Settlement`. `0.30 + 8.61 = 8.91`, the settled cost.
 
 A `Credit Surcharge` works the same way when a purchase settles lower than authorised: it returns the difference.
 
