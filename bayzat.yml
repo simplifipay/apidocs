@@ -1213,6 +1213,10 @@ paths:
         The update is applied asynchronously. Use the Get Card Controls endpoint to confirm the
         controls applied on the card.
         Following are the properties of this endpoint.
+
+        <Accordion title="Webhook Success" defaultOpen={false} icon="material-two-tone-webhook">
+          <DataSchema id="19033336" />
+        </Accordion>
       parameters:
         - $ref: '#/components/parameters/jwtTokenParam'
         - $ref: '#/components/parameters/requestUuidParam'
