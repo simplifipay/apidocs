@@ -1131,6 +1131,126 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
+  /v1/card-program/card-control/{uuid}:
+    get:
+      tags:
+        - 'Card'
+      summary: Get Card Controls
+      description: |-
+        The Get Card Controls endpoint retrieves the controls currently applied on a card, i.e. the
+        channels (Point of Interest) on which the card can be used.
+
+        Card controls are applied automatically by SimpliFi, so there is no need to create them:
+        a virtual card gets its controls when it is issued, and a physical card gets them when it
+        is activated. By default all channels are enabled. Use the Update Card Controls endpoint
+        to change them.
+        Following are the properties of this endpoint.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card.
+          required: true
+        - name: cardProgramUuid
+          in: query
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card program under which the card
+            was issued.
+          required: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardControlResponseModel'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error40055'
+                  - $ref: '#/components/schemas/Error30003'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    put:
+      tags:
+        - 'Card'
+      summary: Update Card Controls
+      description: |-
+        The Update Card Controls endpoint changes the channels (Point of Interest) on which a card
+        can be used, such as online, ATM, POS, contactless and international transactions.
+
+        **Default values from the card program**
+
+        Any field in `cardControl.poi` that is omitted or sent as `null` takes the value defined on
+        the card program under which the card was issued. It does not keep the card's current value.
+        If the card program does not define a value for that field, the channel is disabled.
+        For example, if the card program has contactless disabled, a request that omits
+        `contactless` disables contactless on the card, even if it was enabled before.
+        To avoid unexpected changes, send all five fields on every request.
+
+        **How international works**
+
+        Each channel (`ecommerce`, `atm`, `pos`, `contactless`) is controlled for domestic and
+        international transactions together:
+        - The four channel fields decide which channels the card can be used on.
+        - `international: true` allows the same enabled channels for international transactions as well.
+        - `international: false` blocks all international transactions. Domestic transactions are not affected.
+
+        A channel cannot be enabled for international transactions only. For example, to allow
+        international online payments, both `ecommerce` and `international` must be `true`.
+        If all four channels are disabled, the card cannot be used anywhere and `international`
+        is returned as `false`.
+
+        The update is applied asynchronously. Use the Get Card Controls endpoint to confirm the
+        controls applied on the card.
+        Following are the properties of this endpoint.
+      parameters:
+        - $ref: '#/components/parameters/jwtTokenParam'
+        - $ref: '#/components/parameters/requestUuidParam'
+        - name: uuid
+          in: path
+          schema:
+            type: string
+          description: |-
+            This field contains a unique identifier of the card. It must be the same as
+            `cardUuid` in the request body.
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardControlRequestModel'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardControlRequestModel'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error30004'
+                  - $ref: '#/components/schemas/Error30003'
+                  - $ref: '#/components/schemas/Error40004'
+                  - $ref: '#/components/schemas/Error40006'
+                  - $ref: '#/components/schemas/Error40013'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
   /v1/webhook/events:
     get:
       tags:
@@ -2641,6 +2761,94 @@ components:
         - velocityDailyLimit
         - velocityMonthlyLimit
         - velocityYearlyLimit
+
+    CardControlRequestModel:
+      type: object
+      properties:
+        cardUuid:
+          type: string
+          description: This field contains a unique identifier of the card.
+          example: '8105fb1b-852c-4d93-88eb-2fb2361d4b45'
+        cardProgramUuid:
+          type: string
+          description: |-
+            This field contains a unique identifier of the card program under which the card
+            was issued.
+          example: 'dfb04381-3a10-4185-9ed3-5a97f43dd1a2'
+        cardControl:
+          $ref: '#/components/schemas/CardControlConfigModel'
+      required:
+        - cardUuid
+        - cardProgramUuid
+        - cardControl
+    CardControlResponseModel:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: This is a system-generated unique identifier of the card control.
+          example: '3f2c7a91-5d4e-4b8a-9c61-2e7f0b8d4a15'
+        cardUuid:
+          type: string
+          description: This field contains a unique identifier of the card.
+          example: '8105fb1b-852c-4d93-88eb-2fb2361d4b45'
+        cardProgramUuid:
+          type: string
+          description: |-
+            This field contains a unique identifier of the card program under which the card
+            was issued.
+          example: 'dfb04381-3a10-4185-9ed3-5a97f43dd1a2'
+        cardControl:
+          $ref: '#/components/schemas/CardControlConfigModel'
+    CardControlConfigModel:
+      type: object
+      description: This object contains the controls applied on the card.
+      properties:
+        poi:
+          $ref: '#/components/schemas/CardControlPoi'
+      required:
+        - poi
+    CardControlPoi:
+      type: object
+      description: |-
+        This object is a collection of Point of Interest fields showing where the card can be used.
+        On update, any field omitted or sent as `null` takes the card program's value, or is disabled
+        if the card program does not define it.
+      properties:
+        ecommerce:
+          type: boolean
+          description: |-
+            This field, if enabled, allows online transactions.
+            The allowed values are `true` and `false`.
+          example: true
+        atm:
+          type: boolean
+          description: |-
+            This field, if enabled, allows Automated Teller Machine (ATM) transactions.
+            The allowed values are `true` and `false`.
+          example: true
+        pos:
+          type: boolean
+          description: |-
+            This field, if enabled, allows Point of Sale (POS) transactions.
+            The allowed values are `true` and `false`.
+          example: true
+        contactless:
+          type: boolean
+          description: |-
+            This field, if enabled, allows contactless (tap to pay) transactions.
+            The allowed values are `true` and `false`.
+          example: true
+        international:
+          type: boolean
+          description: |-
+            This field, if enabled, allows international transactions on the same channels that are
+            enabled above (`ecommerce`, `atm`, `pos`, `contactless`). If disabled, all international
+            transactions are blocked and domestic transactions are not affected. A channel cannot be
+            enabled for international transactions only. It is returned as `false` when all other
+            channels are disabled.
+            The allowed values are `true` and `false`.
+          example: true
 
     WebhookEventType:
       type: string
@@ -4303,6 +4511,45 @@ components:
           type: string
           description: |-
             Card Not Found
+      required:
+        - errorCode
+        - errorMessage
+    Error40055:
+      type: object
+      properties:
+        errorCode:
+          type: integer
+          example: 40055
+        errorMessage:
+          type: string
+          description: |-
+            Card Control Not Found
+      required:
+        - errorCode
+        - errorMessage
+    Error40004:
+      type: object
+      properties:
+        errorCode:
+          type: integer
+          example: 40004
+        errorMessage:
+          type: string
+          description: |-
+            Card Control Missing
+      required:
+        - errorCode
+        - errorMessage
+    Error40013:
+      type: object
+      properties:
+        errorCode:
+          type: integer
+          example: 40013
+        errorMessage:
+          type: string
+          description: |-
+            Card UUID Missing
       required:
         - errorCode
         - errorMessage
