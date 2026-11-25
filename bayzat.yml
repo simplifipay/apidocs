@@ -1702,6 +1702,29 @@ webhooks:
         '200':
           $ref: '#/components/responses/WebhookSuccessResponse'
 
+  cardControlUpdationSuccess:
+    post:
+      tags:
+        - 'Webhook'
+      security: [ ]
+      summary: Card Control Update Success webhook
+      description: |-
+        When the controls on a card are applied successfully, `eventPayload` will have all the
+        required values. This is sent after an Update Card Controls request, and also when SimpliFi
+        applies the default controls automatically (when a virtual card is issued or a physical
+        card is activated).
+      parameters:
+        - $ref: '#/components/parameters/webhookTimestampParam'
+        - $ref: '#/components/parameters/webhookSignatureParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardControlUpdationSuccessWebhook'
+      responses:
+        '200':
+          $ref: '#/components/responses/WebhookSuccessResponse'
+
   transactionSuccess:
     post:
       tags:
@@ -2879,6 +2902,8 @@ components:
         RULE_GROUP_UPDATION,
         RULE_GROUP_DELETION,
 
+        CARD_CONTROL_UPDATION,
+
         TRANSACTION,
         TRANSACTION_ENRICHMENT,
         FEES_APPLY
@@ -3519,6 +3544,51 @@ components:
               example: 'RULE_GROUP_DELETION'
             eventPayload:
               $ref: '#/components/schemas/RuleGroupCreationWebhook'
+          required:
+            - eventType
+            - eventPayload
+
+    CardControlUpdationWebhook:
+      type: object
+      properties:
+        cardUuid:
+          type: string
+          description: This field contains a unique identifier of the card.
+          example: '8105fb1b-852c-4d93-88eb-2fb2361d4b45'
+        cardProgramUuid:
+          type: string
+          description: |-
+            This field contains a unique identifier of the card program under which the card
+            was issued. It is empty when the controls were applied automatically on physical
+            card activation.
+          example: 'dfb04381-3a10-4185-9ed3-5a97f43dd1a2'
+        requestUuid:
+          $ref: '#/components/schemas/RequestUuidParameter'
+        companyUuid:
+          $ref: '#/components/schemas/CompanyUuidParameter'
+        cardControlConfig:
+          type: string
+          description: |-
+            The controls now applied on the card, as a JSON string. Parse it to read the values.
+            `authorizationGroups` contains `atm`, `pos`, `online` (online/e-commerce),
+            `contactless` and `international`, each `true` or `false`.
+          example: '{"authorizationGroups":{"atm":true,"pos":true,"online":true,"contactless":true,"international":true}}'
+      required:
+        - cardUuid
+        - requestUuid
+        - companyUuid
+        - cardControlConfig
+    CardControlUpdationSuccessWebhook:
+      allOf:
+        - $ref: '#/components/schemas/WebhookSuccess'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              description: 'CARD_CONTROL_UPDATION'
+              example: 'CARD_CONTROL_UPDATION'
+            eventPayload:
+              $ref: '#/components/schemas/CardControlUpdationWebhook'
           required:
             - eventType
             - eventPayload
